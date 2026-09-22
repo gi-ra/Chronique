@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Gathering' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <h1>Gathering photos</h1>
+    <p class="muted">These are the photos shown in the grid on the Gathering page.</p>
+
+    <form method="POST" action="/admin/gathering" enctype="multipart/form-data" class="card">
+      <label for="newPhotos">Add photos</label>
+      <input type="file" id="newPhotos" name="newPhotos" accept="image/*" multiple>
+      <button type="submit" class="btn" style="margin-top:14px;">Upload</button>
+    </form>
+
+    <% if (!photos.length) { %>
+      <p class="empty">No photos yet.</p>
+    <% } else { %>
+    <div class="photo-grid">
+      <% photos.forEach((p, i) => { %>
+        <div class="item">
+          <img src="<%= p.url %>" alt="">
+          <div style="display:flex; gap:4px; justify-content:center; margin-top:4px;">
+            <form class="inline" method="POST" action="/admin/gathering/<%= p.id %>/move">
+              <input type="hidden" name="direction" value="up">
+              <button class="btn small secondary" <%= i===0 ? 'disabled' : '' %>>&uarr;</button>
+            </form>
+            <form class="inline" method="POST" action="/admin/gathering/<%= p.id %>/move">
+              <input type="hidden" name="direction" value="down">
+              <button class="btn small secondary" <%= i===photos.length-1 ? 'disabled' : '' %>>&darr;</button>
+            </form>
+            <form class="inline" method="POST" action="/admin/gathering/<%= p.id %>/delete" onsubmit="return confirm('Delete this photo?');">
+              <button class="btn small danger">&times;</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+</body>
+</html>

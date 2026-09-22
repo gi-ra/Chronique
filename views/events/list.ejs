@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Events' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>Events</h1>
+      <a class="btn" href="/admin/events/new">+ Add event</a>
+    </div>
+    <p class="muted">These show up on the client-facing Events page, split into upcoming and past automatically based on today's date.</p>
+
+    <% if (!events.length) { %>
+      <p class="empty">No events yet.</p>
+    <% } else { %>
+    <table>
+      <thead><tr><th></th><th>Title</th><th>Date</th><th>Location</th><th></th></tr></thead>
+      <tbody>
+        <% events.forEach((e) => { %>
+          <tr>
+            <td><img class="thumb" style="width:70px; height:88px;" src="<%= e.photo %>" alt=""></td>
+            <td><%= e.title %></td>
+            <td><%= e.event_date %><%= e.event_time ? ' · ' + e.event_time : '' %></td>
+            <td><%= e.location %></td>
+            <td style="white-space:nowrap;">
+              <a class="btn small secondary" href="/admin/events/<%= e.id %>/edit">Edit</a>
+              <form class="inline" method="POST" action="/admin/events/<%= e.id %>/delete" onsubmit="return confirm('Delete this event?');">
+                <button class="btn small danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</body>
+</html>

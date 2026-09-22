@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: product ? 'Edit product' : 'Add product' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <h1><%= product ? 'Edit product' : 'Add product' %></h1>
+
+    <form method="POST" action="<%= product ? '/admin/products/' + product.id : '/admin/products' %>" enctype="multipart/form-data">
+      <% if (!product) { %>
+        <label for="id">ID (used in the product's URL, no spaces — e.g. "essential-tee")</label>
+        <input type="text" id="id" name="id" required pattern="[a-z0-9\-]+" placeholder="essential-tee">
+      <% } %>
+
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required value="<%= product ? product.name : '' %>">
+
+      <label>Product type</label>
+      <div class="row" id="productTypeRow" style="gap:16px;">
+        <% const currentType = product ? (product.product_type || 'garment') : 'garment'; %>
+        <% [['garment','Garment'],['photo','Photo'],['accessory','Accessory']].forEach(([val,label]) => { %>
+          <label style="font-weight:400; display:inline-flex; align-items:center; gap:6px; width:auto;">
+            <input type="radio" name="productType" value="<%= val %>" style="width:auto;" <%= currentType===val ? 'checked' : '' %>>
+            <%= label %>
+          </label>
+        <% }) %>
+      </div>
+      <p class="muted" id="productTypeHint" style="margin-top:-8px;"></p>
+
+      <div class="row">
+        <div>
+          <label for="category">Category</label>
+          <input type="text" id="category" name="category" list="categoryList" required value="<%= product ? product.category : '' %>" placeholder="e.g. Tees & Sweats">
+          <datalist id="categoryList">
+            <% (categories || []).forEach(cat => { %>
+              <option value="<%= cat %>"></option>
+            <% }) %>
+          </datalist>
+        </div>
+        <div>
+          <label for="price">Price (AUD)</label>
+          <input type="number" id="price" name="price" step="0.01" required value="<%= product ? product.price : '' %>">
+        </div>
+      </div>
+
+      <label for="icon">Icon</label>
+      <select id="icon" name="icon">
+        <% ['icon-tee','icon-crewneck','icon-coat','icon-trouser','icon-cap','icon-tote','icon-card'].forEach(ic => { %>
+          <option value="<%= ic %>" <%= product && product.icon===ic ? 'selected' : '' %>><%= ic %></option>
+        <% }) %>
+      </select>
+
+      <% const currentColorList = product ? product.colors.split(',').map(c => c.trim()).filter(Boolean) : []; %>
+      <div id="colorsField">
+        <label for="colors">Colours (comma separated — must match: Ink, Ivory, Stone, Charcoal, Olive, Camel, Brown)</label>
+        <input type="text" id="colors" name="colors" value="<%= product ? product.colors : '' %>" placeholder="Ink, Ivory, Stone">
+      </div>
+
+      <div id="photoFormatField" style="display:none;">
+        <label>Available as</label>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <% (photoFormats || []).forEach(fmt => { %>
+            <label style="font-weight:400; display:inline-flex; align-items:center; gap:6px; width:auto;">
+              <input type="checkbox" class="photo-format-check" value="<%= fmt %>" style="width:auto;" <%= currentColorList.includes(fmt) ? 'checked' : '' %>>
+              <%= fmt %>
+            </label>
+          <% }) %>
+        </div>
+        <p class="muted" style="margin-top:6px;">Pick digital, one or more print materials, or both. Leave all unchecked to default to Digital only.</p>
+      </div>
+
+      <label for="sizes" id="sizesLabel">Sizes (comma separated — leave blank to use the default for this product type: XS–XL for garments, ONE SIZE otherwise)</label>
+      <input type="text" id="sizes" name="sizes" value="<%= product ? product.sizes : '' %>" placeholder="XS, S, M, L, XL">
+
+      <% if (!product) { %>
+        <label for="initialStock">Starting stock (applied to every size/colour combination this creates)</label>
+        <input type="number" id="initialStock" name="initialStock" min="0" step="1" value="10">
+      <% } %>
+
+      <label>
+        <input type="checkbox" name="isNew" value="1" <%= product && product.is_new ? 'checked' : '' %> style="width:auto; display:inline-block; margin-right:6px;">
+        Mark as "New"
+      </label>
+
+      <label for="description">Description</label>
+      <textarea id="description" name="description"><%= product ? product.description : '' %></textarea>
+
+      <% if (product && product.photos.length) { %>
+        <label>Existing photos (uncheck to remove)</label>
+        <div class="photo-grid">
+          <% product.photos.forEach(url => { %>
+            <div class="item">
+              <img src="<%= url %>" alt="">
+              <label style="margin:0; font-weight:400;">
+                <input type="checkbox" name="keepPhotos" value="<%= url %>" checked style="width:auto;"> keep
+              </label>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <label for="newPhotos">Add photos (first photo becomes the main image)</label>
+      <input type="file" id="newPhotos" name="newPhotos" accept="image/*" multiple>
+
+      <% if (product && variants && variants.length) { %>
+        <h2>Stock</h2>
+        <p class="muted">
+          One row per size/colour combination, worked out from the sizes and colours above
+          (or the category's default sizes if the sizes field is left blank).
+          Change the sizes, category or colours and save to add or remove rows — new rows
+          start at 0 until you set a number here and save again.
+        </p>
+        <table>
+          <thead><tr><th>Size</th><th>Colour</th><th>In stock</th></tr></thead>
+          <tbody>
+            <% variants.forEach(v => { %>
+              <tr>
+                <td><%= v.size %></td>
+                <td><%= v.color %></td>
+                <td style="max-width:110px;">
+                  <input type="number" name="stock[<%= v.id %>]" min="0" step="1" value="<%= v.stock %>">
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+
+      <div style="margin-top:26px;">
+        <button type="submit" class="btn">Save</button>
+        <a class="btn secondary" href="/admin/products">Cancel</a>
+      </div>
+    </form>
+  </div>
+  <script>
+    (function(){
+      const radios = document.querySelectorAll('input[name="productType"]');
+      const colorsField = document.getElementById('colorsField');
+      const photoFormatField = document.getElementById('photoFormatField');
+      const formatChecks = document.querySelectorAll('.photo-format-check');
+      const colorsInput = document.getElementById('colors');
+      const sizesInput = document.getElementById('sizes');
+      const hint = document.getElementById('productTypeHint');
+
+      const HINTS = {
+        garment: 'Standard apparel. Defaults to sizes XS–XL unless you set custom sizes above.',
+        photo: 'A print or photograph. No colour picker is shown to customers. Leave sizes blank for a one-of-a-kind piece, or list print sizes (e.g. A4, A3, A2).',
+        accessory: 'A one-off or ONE SIZE item by default. Leave sizes blank unless it comes in multiple sizes.'
+      };
+      const SIZE_PLACEHOLDERS = {
+        garment: 'XS, S, M, L, XL',
+        photo: 'A4, A3, A2 (leave blank for one-of-a-kind)',
+        accessory: 'leave blank for ONE SIZE'
+      };
+
+      function currentType(){
+        const checked = document.querySelector('input[name="productType"]:checked');
+        return checked ? checked.value : 'garment';
+      }
+
+      function syncFormatsToColorsInput(){
+        const checked = Array.from(formatChecks).filter(c => c.checked).map(c => c.value);
+        colorsInput.value = checked.join(', ');
+      }
+
+      const PHOTO_FORMATS = <%- JSON.stringify(photoFormats || []) %>;
+      let lastType = currentType();
+
+      function applyType(){
+        const type = currentType();
+        const isPhoto = type === 'photo';
+        colorsField.style.display = isPhoto ? 'none' : '';
+        photoFormatField.style.display = isPhoto ? '' : 'none';
+        sizesInput.placeholder = SIZE_PLACEHOLDERS[type] || '';
+        hint.textContent = HINTS[type] || '';
+        if (isPhoto) {
+          syncFormatsToColorsInput();
+        } else if (lastType === 'photo') {
+          // Leaving photo type: clear the auto-filled format list so it
+          // doesn't get saved as if it were a real colour list.
+          const parts = colorsInput.value.split(',').map(s => s.trim()).filter(Boolean);
+          if (parts.every(p => PHOTO_FORMATS.includes(p))) colorsInput.value = '';
+        }
+        lastType = type;
+      }
+
+      radios.forEach(r => r.addEventListener('change', applyType));
+      formatChecks.forEach(c => c.addEventListener('change', syncFormatsToColorsInput));
+      applyType();
+    })();
+  </script>
+</body>
+</html>

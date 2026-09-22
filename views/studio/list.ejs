@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Studio' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>Studio</h1>
+      <a class="btn" href="/admin/studio/new?type=<%= type %>">+ Add <%= type %> session</a>
+    </div>
+
+    <div class="tabs">
+      <a href="/admin/studio?type=sound" class="<%= type==='sound' ? 'active' : '' %>">Sound</a>
+      <a href="/admin/studio?type=screen" class="<%= type==='screen' ? 'active' : '' %>">Screen</a>
+    </div>
+
+    <% if (!sessions.length) { %>
+      <p class="empty">No <%= type %> sessions yet.</p>
+    <% } else { %>
+    <table>
+      <thead><tr><th></th><th>Artist</th><th>Location</th><th>Date</th><th>YouTube ID</th><th></th></tr></thead>
+      <tbody>
+        <% sessions.forEach((s, i) => { %>
+          <tr>
+            <td><img class="thumb" style="width:80px; height:45px;" src="<%= s.photo %>" alt=""></td>
+            <td><%= s.artist %></td>
+            <td><%= s.location %></td>
+            <td><%= s.date %></td>
+            <td class="muted"><%= s.video_id %></td>
+            <td style="white-space:nowrap;">
+              <form class="inline" method="POST" action="/admin/studio/<%= s.id %>/move">
+                <input type="hidden" name="direction" value="up">
+                <button class="btn small secondary" <%= i===0 ? 'disabled' : '' %>>&uarr;</button>
+              </form>
+              <form class="inline" method="POST" action="/admin/studio/<%= s.id %>/move">
+                <input type="hidden" name="direction" value="down">
+                <button class="btn small secondary" <%= i===sessions.length-1 ? 'disabled' : '' %>>&darr;</button>
+              </form>
+              <a class="btn small secondary" href="/admin/studio/<%= s.id %>/edit">Edit</a>
+              <form class="inline" method="POST" action="/admin/studio/<%= s.id %>/delete" onsubmit="return confirm('Delete this session?');">
+                <button class="btn small danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</body>
+</html>

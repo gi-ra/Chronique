@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Settings' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <h1>Site images</h1>
+    <p class="muted">Swap the big hero photos on the Home, About and Gathering pages, and the header photo used in customer emails.</p>
+
+    <form method="POST" action="/admin/settings" enctype="multipart/form-data">
+      <div class="card">
+        <label>Home page hero</label>
+        <p class="muted" style="margin-top:-4px;">Choose whether the top of the home page shows a photo or a video, then upload the file to use.</p>
+
+        <div style="display:flex; gap:18px; margin-bottom:14px;">
+          <label style="display:flex; align-items:center; gap:6px; font-weight:400; margin:0;">
+            <input type="radio" name="hero_media_type" value="photo" style="width:auto;"
+              <%= settings.hero_media_type !== 'video' ? 'checked' : '' %> onchange="toggleHeroMediaFields()">
+            Photo
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; font-weight:400; margin:0;">
+            <input type="radio" name="hero_media_type" value="video" style="width:auto;"
+              <%= settings.hero_media_type === 'video' ? 'checked' : '' %> onchange="toggleHeroMediaFields()">
+            Video
+          </label>
+        </div>
+
+        <div id="heroPhotoField" style="<%= settings.hero_media_type === 'video' ? 'display:none;' : '' %>">
+          <img src="<%= settings.hero_photo %>" style="width:220px; border-radius:8px; display:block; margin-bottom:10px;" alt="">
+          <input type="file" name="hero_photo" accept="image/*">
+        </div>
+
+        <div id="heroVideoField" style="<%= settings.hero_media_type === 'video' ? '' : 'display:none;' %>">
+          <% if (settings.hero_video) { %>
+            <video src="<%= settings.hero_video %>" style="width:220px; border-radius:8px; display:block; margin-bottom:10px;" muted loop autoplay playsinline></video>
+          <% } else { %>
+            <p class="muted" style="margin-top:0;">No video uploaded yet.</p>
+          <% } %>
+          <input type="file" name="hero_video" accept="video/*">
+          <p class="muted" style="margin-top:8px;">MP4 works best. Keep it under a couple of minutes and reasonably compressed — it plays muted and on a loop, so viewers never hear sound anyway.</p>
+        </div>
+
+        <label for="hero_heading">Heading (optional)</label>
+        <input type="text" id="hero_heading" name="hero_heading" value="<%= settings.hero_heading || '' %>" placeholder="e.g. The Autumn Gathering">
+
+        <label for="hero_copy">Copy (optional)</label>
+        <textarea id="hero_copy" name="hero_copy" placeholder="A line or two shown under the heading."><%= settings.hero_copy || '' %></textarea>
+        <p class="muted" style="margin-top:6px;">Both are shown over the photo or video, so you can feature a recent event with its own headline instead of always pointing at the shop. Leave blank to show just the photo or video with no text.</p>
+      </div>
+
+      <script>
+        function toggleHeroMediaFields(){
+          const isVideo = document.querySelector('input[name="hero_media_type"][value="video"]').checked;
+          document.getElementById('heroPhotoField').style.display = isVideo ? 'none' : '';
+          document.getElementById('heroVideoField').style.display = isVideo ? '' : 'none';
+        }
+      </script>
+
+      <div class="card">
+        <label>About page hero</label>
+        <img src="<%= settings.about_hero_photo %>" style="width:220px; border-radius:8px; display:block; margin-bottom:10px;" alt="">
+        <input type="file" name="about_hero_photo" accept="image/*">
+      </div>
+
+      <div class="card">
+        <label>Gathering page hero</label>
+        <img src="<%= settings.gathering_hero_photo %>" style="width:220px; border-radius:8px; display:block; margin-bottom:10px;" alt="">
+        <input type="file" name="gathering_hero_photo" accept="image/*">
+      </div>
+
+      <div class="card">
+        <label>Email header photo</label>
+        <p class="muted" style="margin-top:-4px;">Shown at the top of order confirmation and shipping update emails sent to customers. Defaults to the Chronique wordmark until you upload your own.</p>
+        <img src="<%= settings.email_header_photo %>" style="width:220px; border-radius:8px; display:block; margin-bottom:10px; background:#fff; padding:10px;" alt="">
+        <input type="file" name="email_header_photo" accept="image/*">
+      </div>
+
+      <button type="submit" class="btn">Save changes</button>
+    </form>
+
+    <h2>Shipping</h2>
+    <p class="muted">Standard shipping is a flat rate, waived once an order's subtotal reaches the threshold. Express is always charged (no free waiver) and is offered as a faster alternative at checkout.</p>
+    <form method="POST" action="/admin/settings/shipping">
+      <div class="row">
+        <div>
+          <label for="flatRate">Standard rate (AUD)</label>
+          <input type="number" id="flatRate" name="flatRate" min="0" step="0.01"
+            value="<%= (parseInt(settings.shipping_flat_rate_cents, 10) / 100).toFixed(2) %>">
+        </div>
+        <div>
+          <label for="freeThreshold">Free standard shipping over (AUD)</label>
+          <input type="number" id="freeThreshold" name="freeThreshold" min="0" step="0.01"
+            value="<%= (parseInt(settings.shipping_free_threshold_cents, 10) / 100).toFixed(2) %>">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="expressRate">Express rate (AUD)</label>
+          <input type="number" id="expressRate" name="expressRate" min="0" step="0.01"
+            value="<%= (parseInt(settings.shipping_express_rate_cents, 10) / 100).toFixed(2) %>">
+        </div>
+        <div>
+          <label for="lowStockThreshold">Low-stock warning threshold (units)</label>
+          <input type="number" id="lowStockThreshold" name="lowStockThreshold" min="0" step="1"
+            value="<%= settings.low_stock_threshold %>">
+        </div>
+      </div>
+      <div style="margin-top:20px;">
+        <button type="submit" class="btn">Save shipping</button>
+      </div>
+    </form>
+
+    <h2>Export</h2>
+    <p class="muted">Download your data as a spreadsheet-friendly CSV file.</p>
+    <a class="btn secondary" href="/admin/orders.csv">Export orders CSV</a>
+    <a class="btn secondary" href="/admin/products.csv">Export products &amp; stock CSV</a>
+  </div>
+</body>
+</html>

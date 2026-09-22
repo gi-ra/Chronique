@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Orders' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>Orders</h1>
+      <div>
+        <a class="btn secondary" href="/admin/orders.csv">Export CSV</a>
+        <a class="btn" href="/admin/orders/new">+ Record phone/in-person order</a>
+      </div>
+    </div>
+
+    <% if (!orders.length) { %>
+      <p class="empty">No orders yet.</p>
+    <% } else { %>
+    <div class="row" style="margin:18px 0;">
+      <div>
+        <input type="text" id="orderSearch" placeholder="Search by order #, customer or email…">
+      </div>
+      <div style="max-width:200px;">
+        <select id="statusFilter">
+          <option value="">All statuses</option>
+          <% [...new Set(orders.map(o => o.status))].forEach(s => { %>
+            <option value="<%= s %>"><%= s %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+    <p class="muted" id="orderCount"></p>
+    <table id="ordersTable">
+      <thead>
+        <tr><th>#</th><th>Date</th><th>Channel</th><th>Customer</th><th>Status</th><th>Total</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(o => { %>
+          <tr data-search="<%= (String(o.id) + ' ' + (o.customer_name||'') + ' ' + (o.customer_email||'')).toLowerCase() %>" data-status="<%= o.status %>">
+            <td>#<%= o.id %></td>
+            <td><%= o.created_at %></td>
+            <td><%= o.channel %></td>
+            <td><%= o.customer_name || o.customer_email || '—' %></td>
+            <td><%= o.status %></td>
+            <td>$<%= (o.total_cents / 100).toFixed(2) %></td>
+            <td><a class="btn small secondary" href="/admin/orders/<%= o.id %>">View</a></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+  <script>
+    (function(){
+      const search = document.getElementById('orderSearch');
+      const statusFilter = document.getElementById('statusFilter');
+      if(!search) return;
+      const rows = Array.from(document.querySelectorAll('#ordersTable tbody tr'));
+      const countEl = document.getElementById('orderCount');
+      function apply(){
+        const q = (search.value || '').trim().toLowerCase();
+        const status = statusFilter.value;
+        let shown = 0;
+        rows.forEach(row => {
+          const matchesText = !q || row.dataset.search.includes(q);
+          const matchesStatus = !status || row.dataset.status === status;
+          const visible = matchesText && matchesStatus;
+          row.style.display = visible ? '' : 'none';
+          if(visible) shown++;
+        });
+        countEl.textContent = shown === rows.length ? `${rows.length} orders` : `Showing ${shown} of ${rows.length} orders`;
+      }
+      search.addEventListener('input', apply);
+      statusFilter.addEventListener('change', apply);
+      apply();
+    })();
+  </script>
+</body>
+</html>

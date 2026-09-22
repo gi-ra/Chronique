@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Record order' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <h1>Record a phone / in-person order</h1>
+    <p class="muted">This creates a paid order directly and reduces stock — use it for a sale that didn't go through checkout on the site.</p>
+
+    <% if (!products.length) { %>
+      <p class="empty">No products currently have stock to sell.</p>
+    <% } else { %>
+    <form method="POST" action="/admin/orders/manual">
+      <div class="row">
+        <div>
+          <label for="customerName">Customer name</label>
+          <input type="text" id="customerName" name="customerName">
+        </div>
+        <div>
+          <label for="customerEmail">Customer email (for a receipt, optional)</label>
+          <input type="email" id="customerEmail" name="customerEmail">
+        </div>
+      </div>
+
+      <h2>Items</h2>
+      <div id="lines"></div>
+      <button type="button" class="btn small secondary" id="addLineBtn" style="margin-top:8px;">+ Add item</button>
+
+      <div class="row" style="margin-top:20px;">
+        <div>
+          <label for="shippingCents">Shipping charged (AUD, optional)</label>
+          <input type="number" id="shippingCents" name="shippingCents" min="0" step="0.01" value="0">
+        </div>
+        <div>
+          <label for="notes">Notes (optional)</label>
+          <input type="text" id="notes" name="notes" placeholder="e.g. paid cash at the pop-up">
+        </div>
+      </div>
+
+      <div style="margin-top:26px;">
+        <button type="submit" class="btn">Save order</button>
+        <a class="btn secondary" href="/admin/orders">Cancel</a>
+      </div>
+    </form>
+    <% } %>
+  </div>
+
+  <script>
+    const VARIANTS = <%- JSON.stringify(products.flatMap(p => p.variants.map(v => ({
+      id: v.id, label: `${p.name} — ${v.size !== 'ONE SIZE' ? v.size + ', ' : ''}${v.color} (${v.stock} in stock)`
+    })))) %>;
+    const linesEl = document.getElementById('lines');
+    function addLine(){
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.style.marginBottom = '10px';
+      const select = document.createElement('select');
+      select.name = 'variantId';
+      select.innerHTML = '<option value="">Choose an item…</option>' +
+        VARIANTS.map(v => `<option value="${v.id}">${v.label}</option>`).join('');
+      const qty = document.createElement('input');
+      qty.type = 'number'; qty.name = 'quantity'; qty.min = '1'; qty.step = '1'; qty.value = '1';
+      qty.style.maxWidth = '90px';
+      const wrapSelect = document.createElement('div'); wrapSelect.style.flex = '3'; wrapSelect.appendChild(select);
+      const wrapQty = document.createElement('div'); wrapQty.style.flex = '1'; wrapQty.appendChild(qty);
+      row.appendChild(wrapSelect);
+      row.appendChild(wrapQty);
+      linesEl.appendChild(row);
+    }
+    document.getElementById('addLineBtn') && document.getElementById('addLineBtn').addEventListener('click', addLine);
+    if (VARIANTS.length) addLine();
+  </script>
+</body>
+</html>

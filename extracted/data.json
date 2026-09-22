@@ -1,0 +1,380 @@
+{
+  "COLORS": {
+    "Ink": "#121110",
+    "Ivory": "#EFEBDE",
+    "Stone": "#C9C2B3",
+    "Charcoal": "#2B2A27",
+    "Olive": "#5B5B42",
+    "Camel": "#A9744F",
+    "Brown": "#7A4430"
+  },
+  "SIZE_GUIDES": {
+    "bottoms": {
+      "columns": [
+        "Waist (Relaxed)",
+        "Inseam Length",
+        "Front Rise",
+        "Leg Opening"
+      ],
+      "rows": {
+        "XS": [
+          27.5,
+          30.5,
+          12,
+          17.5
+        ],
+        "S": [
+          29.5,
+          30.5,
+          12.5,
+          18
+        ],
+        "M": [
+          31.5,
+          30.5,
+          13,
+          18.5
+        ],
+        "L": [
+          33.5,
+          30.5,
+          13.5,
+          19
+        ],
+        "XL": [
+          35.5,
+          31.5,
+          14,
+          19.5
+        ],
+        "XXL": [
+          37.5,
+          31.5,
+          14.5,
+          20
+        ]
+      },
+      "intl": {
+        "XS": 44,
+        "S": 46,
+        "M": 48,
+        "L": 50,
+        "XL": 52,
+        "XXL": 54
+      }
+    },
+    "tops": {
+      "columns": [
+        "Chest",
+        "Body Length",
+        "Sleeve Length"
+      ],
+      "rows": {
+        "XS": [
+          36,
+          26,
+          23
+        ],
+        "S": [
+          38,
+          27,
+          23.5
+        ],
+        "M": [
+          40,
+          28,
+          24
+        ],
+        "L": [
+          42,
+          29,
+          24.5
+        ],
+        "XL": [
+          44,
+          30,
+          25
+        ],
+        "XXL": [
+          46,
+          31,
+          25.5
+        ]
+      },
+      "intl": {
+        "XS": 44,
+        "S": 46,
+        "M": 48,
+        "L": 50,
+        "XL": 52,
+        "XXL": 54
+      }
+    }
+  },
+  "NEWS_POSTS": [
+    {
+      "slug": "the-aw26-edit",
+      "title": "The AW26 Edit",
+      "date": "September 16, 2026",
+      "photos": [
+        "model-1",
+        "model-3",
+        "model-2",
+        "model-5",
+        "model-4",
+        "model-1"
+      ],
+      "body": [
+        "Fourteen pieces, cut from a short list of fabrics we trust."
+      ]
+    },
+    {
+      "slug": "notes-on-restraint",
+      "title": "Notes on Restraint",
+      "date": "September 10, 2026",
+      "photos": [
+        "model-5",
+        "model-4",
+        "model-2",
+        "model-1"
+      ],
+      "body": [
+        "What a garment loses before it can be honest."
+      ]
+    },
+    {
+      "slug": "gathering-vol-1",
+      "title": "Gathering, Vol. 1",
+      "date": "August 28, 2026",
+      "photos": [
+        "model-3",
+        "model-1",
+        "model-5",
+        "model-2",
+        "model-4"
+      ],
+      "body": [
+        "The first sitting. Small room, good company, no agenda."
+      ]
+    },
+    {
+      "slug": "fabric-first",
+      "title": "Fabric, First",
+      "date": "August 12, 2026",
+      "photos": [
+        "model-2",
+        "model-4",
+        "model-3",
+        "model-5"
+      ],
+      "body": [
+        "Every piece starts on the cutting table, not the mood board."
+      ]
+    },
+    {
+      "slug": "leather-goods-considered",
+      "title": "Leather Goods, Considered",
+      "date": "July 30, 2026",
+      "photos": [
+        "model-4",
+        "model-2",
+        "model-3",
+        "model-1",
+        "model-5"
+      ],
+      "body": [
+        "A small first run. Vegetable-tanned, built to wear in, not out."
+      ]
+    },
+    {
+      "slug": "a-quiet-winter",
+      "title": "A Quiet Winter",
+      "date": "July 15, 2026",
+      "photos": [
+        "model-1",
+        "model-5",
+        "model-4",
+        "model-2",
+        "model-3",
+        "model-4"
+      ],
+      "body": [
+        "Layers, mostly. And the coats that made the rest of it easy."
+      ]
+    }
+  ],
+  "SOUND_SESSIONS": [
+    {
+      "artist": "Miles Kingston",
+      "location": "Logan, QLD",
+      "date": "September 12, 2026",
+      "photo": "model-3",
+      "videoId": "YOUTUBE_ID_1",
+      "desc": "Miles Kingston plays stripped-back sets from his forthcoming record, live at the studio."
+    },
+    {
+      "artist": "Nadia Reyes",
+      "location": "Brisbane, QLD",
+      "date": "August 20, 2026",
+      "photo": "model-5",
+      "videoId": "YOUTUBE_ID_2",
+      "desc": "Nadia Reyes brings a quiet, guitar-led set recorded straight to tape on a Sunday afternoon."
+    },
+    {
+      "artist": "The Southside Quartet",
+      "location": "Logan, QLD",
+      "date": "July 15, 2026",
+      "photo": "model-1",
+      "videoId": "YOUTUBE_ID_3",
+      "desc": "Four players, one room, no rehearsal \u2014 a loose, unhurried session on a winter evening."
+    },
+    {
+      "artist": "Jonah Vale",
+      "location": "Gold Coast, QLD",
+      "date": "June 2, 2026",
+      "photo": "model-2",
+      "videoId": "YOUTUBE_ID_4",
+      "desc": "Jonah Vale closes out the series with a short acoustic set ahead of his national run."
+    }
+  ],
+  "SCREEN_SESSIONS": [
+    {
+      "artist": "The Cutting Room",
+      "location": "Short film",
+      "date": "September 5, 2026",
+      "photo": "model-4",
+      "videoId": "YOUTUBE_ID_5",
+      "desc": "An early morning in the atelier, from bolt of cloth to finished coat."
+    },
+    {
+      "artist": "A Year in Logan",
+      "location": "Documentary",
+      "date": "August 1, 2026",
+      "photo": "model-2",
+      "videoId": "YOUTUBE_ID_6",
+      "desc": "Twelve months of the brand, told through the people who wear it."
+    },
+    {
+      "artist": "Fabric, First",
+      "location": "Short film",
+      "date": "June 22, 2026",
+      "photo": "model-3",
+      "videoId": "YOUTUBE_ID_7",
+      "desc": "A visit to the mill where our wool is woven, before it ever reaches Logan."
+    },
+    {
+      "artist": "Behind the Seams",
+      "location": "Short film",
+      "date": "May 10, 2026",
+      "photo": "model-5",
+      "videoId": "YOUTUBE_ID_8",
+      "desc": "A quiet look at the hands that make the pieces, in their own words."
+    }
+  ],
+  "PRODUCTS": [
+    {
+      "id": "afrique-mon-afrique-hoodie",
+      "name": "Afrique Mon Afrique Hoodie",
+      "category": "Outerwear",
+      "price": 145,
+      "icon": "icon-crewneck",
+      "photos": [
+        "afrique-hoodie-main",
+        "afrique-hoodie-front",
+        "afrique-hoodie-back"
+      ],
+      "colors": [
+        "Olive"
+      ],
+      "isNew": true,
+      "desc": "Heavyweight fleece hoodie with \"AFRIQUE MON AFRIQUE\" screen-printed across the chest and a hand-drawn grid of African nation flags printed across the back. Drawstring hood, kangaroo pocket, relaxed fit."
+    },
+    {
+      "id": "rugby-jumper",
+      "name": "Rugby Jumper",
+      "category": "Knitwear",
+      "price": 195,
+      "icon": "icon-crewneck",
+      "photos": [
+        "rugby-jumper-brown"
+      ],
+      "colors": [
+        "Brown"
+      ],
+      "isNew": true,
+      "desc": "Rugby-style knit jumper in a rust-brown tone with a contrast cream collar, two-button placket and the Chronique script embroidered at the chest."
+    },
+    {
+      "id": "ribbed-tank",
+      "name": "Ribbed Tank",
+      "category": "Tees & Sweats",
+      "price": 65,
+      "icon": "icon-tee",
+      "photos": [
+        "ribbed-tank-main",
+        "ribbed-tank-1",
+        "ribbed-tank-2"
+      ],
+      "colors": [
+        "Ivory"
+      ],
+      "isNew": true,
+      "desc": "Ribbed knit tank in a fitted, clean crew neck cut. A quiet layering piece built to sit under a jacket or stand alone."
+    },
+    {
+      "id": "essential-oversized-tee",
+      "name": "Essential Oversized Tee",
+      "category": "Tees & Sweats",
+      "price": 85,
+      "icon": "icon-tee",
+      "photos": [
+        "essential-oversized-tee-1",
+        "essential-oversized-tee-2"
+      ],
+      "colors": [
+        "Ink"
+      ],
+      "isNew": true,
+      "desc": "Our oversized fit tee with a dropped shoulder and a small tonal embroidered mark at the chest. No graphic, just the cut and the fabric."
+    },
+    {
+      "id": "form-kronik-tee",
+      "name": "Form Kronik Tee",
+      "category": "Tees & Sweats",
+      "price": 95,
+      "icon": "icon-tee",
+      "photos": [
+        "form-kronik-tee-front",
+        "form-kronik-tee-back"
+      ],
+      "colors": [
+        "Ink"
+      ],
+      "isNew": true,
+      "desc": "Oversized tee with the \"form / CHRONIQUE\" wordmark printed small at the left chest and \"adjectif KRONIK\" printed large across the back, finished with our signature red daisy mark."
+    },
+    {
+      "id": "long-sleeve-tee",
+      "name": "Long Sleeve Tee",
+      "category": "Tees & Sweats",
+      "price": 110,
+      "icon": "icon-tee",
+      "photos": [
+        "long-sleeve-tee-black",
+        "long-sleeve-tee-white"
+      ],
+      "colors": [
+        "Ink",
+        "Ivory"
+      ],
+      "isNew": true,
+      "desc": "Oversized long sleeve tee with a clean crew neck and a red daisy patch at the sleeve. Shown here in black and white."
+    }
+  ],
+  "CATEGORIES": [
+    "All",
+    "Outerwear",
+    "Knitwear",
+    "Tees & Sweats"
+  ]
+}

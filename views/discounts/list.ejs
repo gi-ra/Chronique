@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Discounts' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>Discount codes</h1>
+      <a class="btn" href="/admin/discounts/new">+ Add code</a>
+    </div>
+
+    <% if (!codes.length) { %>
+      <p class="empty">No discount codes yet.</p>
+    <% } else { %>
+    <table>
+      <thead>
+        <tr><th>Code</th><th>Discount</th><th>Minimum order</th><th>Uses</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% codes.forEach(c => { %>
+          <tr>
+            <td><strong><%= c.code %></strong></td>
+            <td><%= c.type === 'percent' ? c.value + '%' : '$' + (c.value / 100).toFixed(2) %></td>
+            <td><%= c.min_subtotal_cents ? '$' + (c.min_subtotal_cents / 100).toFixed(2) : '—' %></td>
+            <td><%= c.used_count %><%= c.max_uses ? ' / ' + c.max_uses : '' %></td>
+            <td><%= c.active ? 'Active' : 'Disabled' %></td>
+            <td style="white-space:nowrap;">
+              <form class="inline" method="POST" action="/admin/discounts/<%= c.id %>/toggle">
+                <button class="btn small secondary"><%= c.active ? 'Disable' : 'Enable' %></button>
+              </form>
+              <form class="inline" method="POST" action="/admin/discounts/<%= c.id %>/delete" onsubmit="return confirm('Delete this code?');">
+                <button class="btn small danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</body>
+</html>

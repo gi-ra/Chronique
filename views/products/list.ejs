@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Products' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>Products</h1>
+      <a class="btn" href="/admin/products/new">+ Add product</a>
+    </div>
+
+    <% if (!products.length) { %>
+      <p class="empty">No products yet.</p>
+    <% } else { %>
+    <div class="row" style="margin:18px 0;">
+      <div>
+        <input type="text" id="productSearch" placeholder="Search by name or category…">
+      </div>
+      <div style="max-width:200px;">
+        <select id="stockFilter">
+          <option value="">All stock levels</option>
+          <option value="out">Sold out</option>
+          <option value="low">Running low</option>
+          <option value="ok">In stock</option>
+        </select>
+      </div>
+    </div>
+    <p class="muted" id="productCount"></p>
+    <table id="productsTable">
+      <thead>
+        <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>New</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% products.forEach((p, i) => { %>
+          <tr data-name="<%= p.name.toLowerCase() %>" data-category="<%= p.category.toLowerCase() %>" data-stock="<%= p.stockState %>">
+            <td><img class="thumb" src="<%= p.photos[0] || '' %>" alt=""></td>
+            <td><%= p.name %></td>
+            <td><%= p.category %></td>
+            <td>$<%= p.price %></td>
+            <td>
+              <% if (p.stockState === 'out') { %>
+                <span class="stock-pill stock-out">Sold out</span>
+              <% } else if (p.stockState === 'low') { %>
+                <span class="stock-pill stock-low"><%= p.totalStock %> left</span>
+              <% } else { %>
+                <span class="stock-pill stock-ok"><%= p.totalStock %> in stock</span>
+              <% } %>
+            </td>
+            <td><%= p.is_new ? 'Yes' : '' %></td>
+            <td style="white-space:nowrap;">
+              <form class="inline" method="POST" action="/admin/products/<%= p.id %>/move">
+                <input type="hidden" name="direction" value="up">
+                <button class="btn small secondary" <%= i===0 ? 'disabled' : '' %>>&uarr;</button>
+              </form>
+              <form class="inline" method="POST" action="/admin/products/<%= p.id %>/move">
+                <input type="hidden" name="direction" value="down">
+                <button class="btn small secondary" <%= i===products.length-1 ? 'disabled' : '' %>>&darr;</button>
+              </form>
+              <a class="btn small secondary" href="/admin/products/<%= p.id %>/edit">Edit</a>
+              <form class="inline" method="POST" action="/admin/products/<%= p.id %>/duplicate">
+                <button class="btn small secondary">Duplicate</button>
+              </form>
+              <form class="inline" method="POST" action="/admin/products/<%= p.id %>/delete" onsubmit="return confirm('Delete this product?');">
+                <button class="btn small danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+  <style>
+    .stock-pill{ display:inline-block; padding:3px 10px; border-radius:100px; font-size:12px; white-space:nowrap; }
+    .stock-pill.stock-ok{ background:#EAF3EA; color:#2E6B33; }
+    .stock-pill.stock-low{ background:#FCF3E3; color:#9A6A15; }
+    .stock-pill.stock-out{ background:#FBEAE9; color:#B3261E; }
+  </style>
+  <script>
+    (function(){
+      const search = document.getElementById('productSearch');
+      const stockFilter = document.getElementById('stockFilter');
+      const rows = Array.from(document.querySelectorAll('#productsTable tbody tr'));
+      const countEl = document.getElementById('productCount');
+      function apply(){
+        const q = (search.value || '').trim().toLowerCase();
+        const stock = stockFilter.value;
+        let shown = 0;
+        rows.forEach(row => {
+          const matchesText = !q || row.dataset.name.includes(q) || row.dataset.category.includes(q);
+          const matchesStock = !stock || row.dataset.stock === stock;
+          const visible = matchesText && matchesStock;
+          row.style.display = visible ? '' : 'none';
+          if(visible) shown++;
+        });
+        countEl.textContent = shown === rows.length ? `${rows.length} products` : `Showing ${shown} of ${rows.length} products`;
+      }
+      search.addEventListener('input', apply);
+      stockFilter.addEventListener('change', apply);
+      apply();
+    })();
+  </script>
+</body>
+</html>

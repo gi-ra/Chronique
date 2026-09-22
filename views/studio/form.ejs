@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: session ? 'Edit session' : 'Add session' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <h1><%= session ? 'Edit session' : 'Add session' %></h1>
+
+    <form method="POST" action="<%= session ? '/admin/studio/' + session.id : '/admin/studio' %>" enctype="multipart/form-data">
+      <label for="type">Type</label>
+      <select id="type" name="type" <%= session ? 'disabled' : '' %>>
+        <option value="sound" <%= type==='sound' ? 'selected' : '' %>>Sound</option>
+        <option value="screen" <%= type==='screen' ? 'selected' : '' %>>Screen</option>
+      </select>
+      <% if (session) { %><input type="hidden" name="type" value="<%= type %>"><% } %>
+
+      <div class="row">
+        <div>
+          <label for="artist">Artist / creator</label>
+          <input type="text" id="artist" name="artist" required value="<%= session ? session.artist : '' %>">
+        </div>
+        <div>
+          <label for="location">Location</label>
+          <input type="text" id="location" name="location" required value="<%= session ? session.location : '' %>" placeholder="Logan, QLD">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="date">Date (shown as-is)</label>
+          <input type="text" id="date" name="date" required value="<%= session ? session.date : '' %>">
+        </div>
+        <div>
+          <label for="videoId">YouTube video ID or full link</label>
+          <input type="text" id="videoId" name="videoId" value="<%= session ? session.video_id : '' %>" placeholder="dQw4w9WgXcQ or full youtube.com URL">
+        </div>
+      </div>
+
+      <label for="description">Description</label>
+      <textarea id="description" name="description"><%= session ? session.description : '' %></textarea>
+
+      <% if (session && session.photo) { %>
+        <label>Current thumbnail</label>
+        <img src="<%= session.photo %>" style="width:180px; border-radius:8px; display:block;" alt="">
+      <% } %>
+      <label for="photo">Thumbnail photo <%= session ? '(leave blank to keep current)' : '' %></label>
+      <input type="file" id="photo" name="photo" accept="image/*">
+
+      <div style="margin-top:26px;">
+        <button type="submit" class="btn">Save</button>
+        <a class="btn secondary" href="/admin/studio?type=<%= type %>">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,897 @@
+const express = require('express');
+const multer = require('multer');
+const bcrypt = require('bcryptjs');
+const db = require('../db/database');
+const { UPLOADS_DIR } = require('../db/paths');
+const { requireAdmin } = require('../middleware/auth');
+const { syncVariants, PHOTO_FORMATS } = require('../lib/variants');
+const { getLowStockThreshold } = require('../lib/shipping');
+const { sendBackInStockEmail, sendShippingUpdateEmail } = require('../lib/mailer');
+const { getStripe } = require('../lib/stripe');
+
+const router = express.Router();
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+  filename: (req, file, cb) => {
+    const safe = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '');
+    cb(null, `${Date.now()}-${safe}`);
+  },
+});
+const upload = multer({ storage });
+// Home hero can be a video, so this upload instance allows larger files
+// (photos above use the default multer instance with no special limit).
+const heroUpload = multer({ storage, limits: { fileSize: 100 * 1024 * 1024 } });
+
+function toUrl(filename) {
+  return `/uploads/${filename}`;
+}
+
+/* ---------------- LOGIN / LOGOUT ---------------- */
+router.get('/login', (req, res) => {
+  res.render('login', { error: null });
+});
+
+router.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  const expectedUser = process.env.ADMIN_USERNAME || 'admin';
+  const expectedHash = process.env.ADMIN_PASSWORD_HASH || '';
+
+  if (!expectedHash) {
+    return res.render('login', {
+      error: 'No admin password is set up yet. Run "npm run hash-password" and add the result to your .env file.',
+    });
+  }
+
+  const ok = username === expectedUser && bcrypt.compareSync(password || '', expectedHash);
+  if (!ok) {
+    return res.render('login', { error: 'Wrong username or password.' });
+  }
+  req.session.isAdmin = true;
+  res.redirect('/admin');
+});
+
+router.post('/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/admin/login'));
+});
+
+// Everything below this line requires being logged in.
+router.use(requireAdmin);
+
+/* ---------------- DASHBOARD ---------------- */
+router.get('/', (req, res) => {
+  const counts = {
+    products: db.prepare('SELECT COUNT(*) AS n FROM products').get().n,
+    news: db.prepare('SELECT COUNT(*) AS n FROM news_posts').get().n,
+    sound: db.prepare("SELECT COUNT(*) AS n FROM studio_sessions WHERE type='sound'").get().n,
+    screen: db.prepare("SELECT COUNT(*) AS n FROM studio_sessions WHERE type='screen'").get().n,
+    gathering: db.prepare('SELECT COUNT(*) AS n FROM gathering_photos').get().n,
+    orders: db.prepare('SELECT COUNT(*) AS n FROM orders').get().n,
+    paidOrders: db.prepare("SELECT COUNT(*) AS n FROM orders WHERE status IN ('paid','shipped')").get().n,
+    leads: db.prepare('SELECT COUNT(*) AS n FROM newsletter_subscribers').get().n
+      + db.prepare('SELECT COUNT(*) AS n FROM stock_notifications').get().n,
+  };
+
+  const revenue = {
+    today: db
+      .prepare(
+        "SELECT COALESCE(SUM(total_cents),0) AS n FROM orders WHERE status IN ('paid','shipped') AND date(created_at) = date('now')"
+      )
+      .get().n,
+    week: db
+      .prepare(
+        "SELECT COALESCE(SUM(total_cents),0) AS n FROM orders WHERE status IN ('paid','shipped') AND created_at >= datetime('now', '-7 days')"
+      )
+      .get().n,
+    allTime: db
+      .prepare("SELECT COALESCE(SUM(total_cents),0) AS n FROM orders WHERE status IN ('paid','shipped')")
+      .get().n,
+  };
+
+  const bestSellers = db
+    .prepare(`
+      SELECT oi.product_name AS name, SUM(oi.quantity) AS units, SUM(oi.quantity * oi.unit_price_cents) AS revenueCents
+      FROM order_items oi
+      JOIN orders o ON o.id = oi.order_id
+      WHERE o.status IN ('paid','shipped')
+      GROUP BY oi.product_name
+      ORDER BY units DESC
+      LIMIT 5
+    `)
+    .all();
+
+  const lowStockThreshold = getLowStockThreshold();
+  const lowStock = db
+    .prepare(`
+      SELECT pv.*, p.name AS productName
+      FROM product_variants pv
+      JOIN products p ON p.id = pv.product_id
+      WHERE pv.stock > 0 AND pv.stock <= ?
+      ORDER BY pv.stock ASC
+      LIMIT 10
+    `)
+    .all(lowStockThreshold);
+  const outOfStock = db
+    .prepare(`
+      SELECT pv.*, p.name AS productName
+      FROM product_variants pv
+      JOIN products p ON p.id = pv.product_id
+      WHERE pv.stock = 0
+      LIMIT 10
+    `)
+    .all();
+
+  res.render('dashboard', { counts, revenue, bestSellers, lowStock, outOfStock });
+});
+
+/* ================= PRODUCTS ================= */
+// Distinct category names already in use, so the admin form can offer them
+// as suggestions — this is also exactly the list that becomes the shop's
+// category menu (see GET /api/categories), so picking from it (or typing a
+// new one) is literally editing that menu.
+function existingCategories() {
+  return db
+    .prepare('SELECT DISTINCT category FROM products ORDER BY sort_order ASC')
+    .all()
+    .map((r) => r.category);
+}
+
+router.get('/products', (req, res) => {
+  const products = db.prepare('SELECT * FROM products ORDER BY sort_order ASC').all();
+  const threshold = getLowStockThreshold();
+  const stockRow = db.prepare(
+    'SELECT COALESCE(SUM(stock),0) AS total, COALESCE(MIN(stock),0) AS lowest FROM product_variants WHERE product_id = ?'
+  );
+  res.render('products/list', {
+    products: products.map((p) => {
+      const s = stockRow.get(p.id);
+      let stockState = 'ok';
+      if (s.total === 0) stockState = 'out';
+      else if (s.lowest <= threshold) stockState = 'low';
+      return { ...p, photos: JSON.parse(p.photos || '[]'), totalStock: s.total, stockState };
+    }),
+  });
+});
+
+router.post('/products/:id/duplicate', (req, res) => {
+  const original = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  if (!original) return res.status(404).send('Product not found');
+
+  let newId = `${original.id}-copy`;
+  let n = 2;
+  while (db.prepare('SELECT 1 FROM products WHERE id = ?').get(newId)) {
+    newId = `${original.id}-copy-${n}`;
+    n += 1;
+  }
+  const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM products').get().m;
+
+  db.prepare(`
+    INSERT INTO products (id, name, category, price, icon, colors, is_new, description, photos, sort_order, product_type)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    newId,
+    `${original.name} (copy)`,
+    original.category,
+    original.price,
+    original.icon,
+    original.colors,
+    0,
+    original.description,
+    original.photos,
+    maxOrder + 1,
+    original.product_type
+  );
+
+  const colorList = JSON.parse(original.colors || '[]');
+  const variants = db.prepare('SELECT * FROM product_variants WHERE product_id = ?').all(original.id);
+  const sizeList = [...new Set(variants.map((v) => v.size))];
+  syncVariants(db, newId, original.product_type, original.category, colorList, 0, sizeList);
+
+  res.redirect(`/admin/products/${newId}/edit`);
+});
+
+router.get('/products/new', (req, res) => {
+  res.render('products/form', { product: null, categories: existingCategories(), photoFormats: PHOTO_FORMATS });
+});
+
+router.post('/products', upload.array('newPhotos', 8), (req, res) => {
+  const { id, name, category, price, icon, colors, sizes, description } = req.body;
+  const productType = ['garment', 'photo', 'accessory'].includes(req.body.productType)
+    ? req.body.productType
+    : 'garment';
+  const isNew = req.body.isNew ? 1 : 0;
+  const photos = (req.files || []).map((f) => toUrl(f.filename));
+  const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM products').get().m;
+  const colorList = (colors || '').split(',').map((c) => c.trim()).filter(Boolean);
+  const sizeList = (sizes || '').split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
+  const cleanId = id.trim();
+  const initialStock = Math.max(0, parseInt(req.body.initialStock, 10) || 0);
+
+  db.prepare(`
+    INSERT INTO products (id, name, category, price, icon, colors, is_new, description, photos, sort_order, product_type)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    cleanId,
+    name,
+    category,
+    parseFloat(price) || 0,
+    icon,
+    JSON.stringify(colorList),
+    isNew,
+    description || '',
+    JSON.stringify(photos),
+    maxOrder + 1,
+    productType
+  );
+  syncVariants(db, cleanId, productType, category, colorList, initialStock, sizeList);
+  res.redirect(`/admin/products/${cleanId}/edit`);
+});
+
+router.get('/products/:id/edit', (req, res) => {
+  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  if (!product) return res.status(404).send('Product not found');
+  const variants = db
+    .prepare('SELECT * FROM product_variants WHERE product_id = ? ORDER BY color ASC, size ASC')
+    .all(product.id);
+  const currentSizes = [...new Set(variants.map((v) => v.size))];
+  res.render('products/form', {
+    product: {
+      ...product,
+      colors: JSON.parse(product.colors || '[]').join(', '),
+      sizes: currentSizes.join(', '),
+      photos: JSON.parse(product.photos || '[]'),
+    },
+    variants,
+    categories: existingCategories(),
+    photoFormats: PHOTO_FORMATS,
+  });
+});
+
+router.post('/products/:id', upload.array('newPhotos', 8), (req, res) => {
+  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).send('Product not found');
+
+  const { name, category, price, icon, colors, sizes, description } = req.body;
+  const productType = ['garment', 'photo', 'accessory'].includes(req.body.productType)
+    ? req.body.productType
+    : 'garment';
+  const isNew = req.body.isNew ? 1 : 0;
+  const colorList = (colors || '').split(',').map((c) => c.trim()).filter(Boolean);
+  const sizeList = (sizes || '').split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
+
+  let photos = JSON.parse(existing.photos || '[]');
+  const keep = [].concat(req.body.keepPhotos || []); // checkboxes for photos to keep
+  photos = photos.filter((url) => keep.includes(url));
+  const newPhotos = (req.files || []).map((f) => toUrl(f.filename));
+  photos = photos.concat(newPhotos);
+
+  db.prepare(`
+    UPDATE products SET name=?, category=?, price=?, icon=?, colors=?, is_new=?, description=?, photos=?, product_type=?
+    WHERE id=?
+  `).run(
+    name,
+    category,
+    parseFloat(price) || 0,
+    icon,
+    JSON.stringify(colorList),
+    isNew,
+    description || '',
+    JSON.stringify(photos),
+    productType,
+    req.params.id
+  );
+
+  // Add/remove variant rows to match the (possibly just-changed) type,
+  // category and colour list, then apply any stock numbers submitted from
+  // the existing variant rows shown on the form.
+  syncVariants(db, req.params.id, productType, category, colorList, 0, sizeList);
+  const stockUpdates = req.body.stock || {};
+  const setStock = db.prepare('UPDATE product_variants SET stock = ? WHERE id = ? AND product_id = ?');
+  const resetAlert = db.prepare('UPDATE product_variants SET low_stock_alerted = 0 WHERE id = ?');
+  const threshold = getLowStockThreshold();
+  const restocked = [];
+  Object.entries(stockUpdates).forEach(([variantId, value]) => {
+    const before = db
+      .prepare('SELECT * FROM product_variants WHERE id = ? AND product_id = ?')
+      .get(variantId, req.params.id);
+    if (!before) return;
+    const stock = Math.max(0, parseInt(value, 10) || 0);
+    setStock.run(stock, variantId, req.params.id);
+    if (before.stock === 0 && stock > 0) restocked.push(before);
+    // Once stock is comfortably above the threshold again, clear the
+    // "already alerted" flag so a future dip can alert again.
+    if (stock > threshold) resetAlert.run(variantId);
+  });
+
+  // Notify anyone waiting on a variant that just came back into stock.
+  restocked.forEach((v) => {
+    const waiting = db
+      .prepare(
+        'SELECT * FROM stock_notifications WHERE product_id = ? AND size = ? AND color = ? AND notified = 0'
+      )
+      .all(v.product_id, v.size, v.color);
+    const markNotified = db.prepare('UPDATE stock_notifications SET notified = 1 WHERE id = ?');
+    waiting.forEach((w) => {
+      sendBackInStockEmail(w.email, name, v.product_id, v.size, v.color).catch((err) =>
+        console.error('Back-in-stock email failed:', err.message)
+      );
+      markNotified.run(w.id);
+    });
+  });
+
+  res.redirect(`/admin/products/${req.params.id}/edit`);
+});
+
+router.post('/products/:id/delete', (req, res) => {
+  db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/products');
+});
+
+router.post('/products/:id/move', (req, res) => {
+  moveItem('products', req.params.id, req.body.direction);
+  res.redirect('/admin/products');
+});
+
+/* ================= NEWS ================= */
+router.get('/news', (req, res) => {
+  const posts = db.prepare('SELECT * FROM news_posts ORDER BY sort_order ASC').all();
+  res.render('news/list', { posts });
+});
+
+router.get('/news/new', (req, res) => {
+  res.render('news/form', { post: null });
+});
+
+function slugify(title) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+router.post('/news', upload.array('newPhotos', 12), (req, res) => {
+  const { title, date, body } = req.body;
+  const slug = (req.body.slug || slugify(title)).trim();
+  const photos = (req.files || []).map((f) => toUrl(f.filename));
+  const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM news_posts').get().m;
+
+  db.prepare(`
+    INSERT INTO news_posts (slug, title, date, body, photos, sort_order)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(
+    slug,
+    title,
+    date,
+    JSON.stringify((body || '').split('\n').map((p) => p.trim()).filter(Boolean)),
+    JSON.stringify(photos),
+    maxOrder + 1
+  );
+  res.redirect('/admin/news');
+});
+
+router.get('/news/:id/edit', (req, res) => {
+  const post = db.prepare('SELECT * FROM news_posts WHERE id = ?').get(req.params.id);
+  if (!post) return res.status(404).send('Post not found');
+  res.render('news/form', {
+    post: {
+      ...post,
+      body: JSON.parse(post.body || '[]').join('\n'),
+      photos: JSON.parse(post.photos || '[]'),
+    },
+  });
+});
+
+router.post('/news/:id', upload.array('newPhotos', 12), (req, res) => {
+  const existing = db.prepare('SELECT * FROM news_posts WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).send('Post not found');
+
+  const { title, date, body, slug } = req.body;
+  let photos = JSON.parse(existing.photos || '[]');
+  const keep = [].concat(req.body.keepPhotos || []);
+  photos = photos.filter((url) => keep.includes(url));
+  const newPhotos = (req.files || []).map((f) => toUrl(f.filename));
+  photos = photos.concat(newPhotos);
+
+  db.prepare(`
+    UPDATE news_posts SET slug=?, title=?, date=?, body=?, photos=?
+    WHERE id=?
+  `).run(
+    (slug || slugify(title)).trim(),
+    title,
+    date,
+    JSON.stringify((body || '').split('\n').map((p) => p.trim()).filter(Boolean)),
+    JSON.stringify(photos),
+    req.params.id
+  );
+  res.redirect('/admin/news');
+});
+
+router.post('/news/:id/delete', (req, res) => {
+  db.prepare('DELETE FROM news_posts WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/news');
+});
+
+router.post('/news/:id/move', (req, res) => {
+  moveItem('news_posts', req.params.id, req.body.direction);
+  res.redirect('/admin/news');
+});
+
+/* ================= STUDIO (Sound / Screen) ================= */
+router.get('/studio', (req, res) => {
+  const type = req.query.type === 'screen' ? 'screen' : 'sound';
+  const sessions = db
+    .prepare('SELECT * FROM studio_sessions WHERE type = ? ORDER BY sort_order ASC')
+    .all(type);
+  res.render('studio/list', { sessions, type });
+});
+
+router.get('/studio/new', (req, res) => {
+  const type = req.query.type === 'screen' ? 'screen' : 'sound';
+  res.render('studio/form', { session: null, type });
+});
+
+function extractYoutubeId(input) {
+  if (!input) return '';
+  const match = input.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/);
+  return match ? match[1] : input.trim();
+}
+
+router.post('/studio', upload.single('photo'), (req, res) => {
+  const { type, artist, location, date, videoId, description } = req.body;
+  const photo = req.file ? toUrl(req.file.filename) : '';
+  const maxOrder = db
+    .prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM studio_sessions WHERE type = ?')
+    .get(type).m;
+
+  db.prepare(`
+    INSERT INTO studio_sessions (type, artist, location, date, video_id, description, photo, sort_order)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(type, artist, location, date, extractYoutubeId(videoId), description || '', photo, maxOrder + 1);
+  res.redirect('/admin/studio?type=' + type);
+});
+
+router.get('/studio/:id/edit', (req, res) => {
+  const session = db.prepare('SELECT * FROM studio_sessions WHERE id = ?').get(req.params.id);
+  if (!session) return res.status(404).send('Session not found');
+  res.render('studio/form', { session, type: session.type });
+});
+
+router.post('/studio/:id', upload.single('photo'), (req, res) => {
+  const existing = db.prepare('SELECT * FROM studio_sessions WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).send('Session not found');
+
+  const { artist, location, date, videoId, description } = req.body;
+  const photo = req.file ? toUrl(req.file.filename) : existing.photo;
+
+  db.prepare(`
+    UPDATE studio_sessions SET artist=?, location=?, date=?, video_id=?, description=?, photo=?
+    WHERE id=?
+  `).run(artist, location, date, extractYoutubeId(videoId), description || '', photo, req.params.id);
+  res.redirect('/admin/studio?type=' + existing.type);
+});
+
+router.post('/studio/:id/delete', (req, res) => {
+  const existing = db.prepare('SELECT * FROM studio_sessions WHERE id = ?').get(req.params.id);
+  db.prepare('DELETE FROM studio_sessions WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/studio?type=' + (existing ? existing.type : 'sound'));
+});
+
+router.post('/studio/:id/move', (req, res) => {
+  const existing = db.prepare('SELECT * FROM studio_sessions WHERE id = ?').get(req.params.id);
+  moveItem('studio_sessions', req.params.id, req.body.direction, `type = '${existing.type}'`);
+  res.redirect('/admin/studio?type=' + (existing ? existing.type : 'sound'));
+});
+
+/* ================= EVENTS ================= */
+router.get('/events', (req, res) => {
+  const events = db.prepare('SELECT * FROM events ORDER BY event_date DESC').all();
+  res.render('events/list', { events });
+});
+
+router.get('/events/new', (req, res) => {
+  res.render('events/form', { event: null });
+});
+
+router.post('/events', upload.single('photo'), (req, res) => {
+  const { title, eventDate, eventTime, location, description } = req.body;
+  const photo = req.file ? toUrl(req.file.filename) : '';
+  db.prepare(`
+    INSERT INTO events (title, event_date, event_time, location, description, photo)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(title, eventDate, eventTime || '', location || '', description || '', photo);
+  res.redirect('/admin/events');
+});
+
+router.get('/events/:id/edit', (req, res) => {
+  const event = db.prepare('SELECT * FROM events WHERE id = ?').get(req.params.id);
+  if (!event) return res.status(404).send('Event not found');
+  res.render('events/form', { event });
+});
+
+router.post('/events/:id', upload.single('photo'), (req, res) => {
+  const existing = db.prepare('SELECT * FROM events WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).send('Event not found');
+
+  const { title, eventDate, eventTime, location, description } = req.body;
+  const photo = req.file ? toUrl(req.file.filename) : existing.photo;
+
+  db.prepare(`
+    UPDATE events SET title=?, event_date=?, event_time=?, location=?, description=?, photo=?
+    WHERE id=?
+  `).run(title, eventDate, eventTime || '', location || '', description || '', photo, req.params.id);
+  res.redirect('/admin/events');
+});
+
+router.post('/events/:id/delete', (req, res) => {
+  db.prepare('DELETE FROM events WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/events');
+});
+
+/* ================= GATHERING PHOTOS ================= */
+router.get('/gathering', (req, res) => {
+  const photos = db.prepare('SELECT * FROM gathering_photos ORDER BY sort_order ASC').all();
+  res.render('gathering/list', { photos });
+});
+
+router.post('/gathering', upload.array('newPhotos', 12), (req, res) => {
+  const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM gathering_photos').get().m;
+  const insert = db.prepare('INSERT INTO gathering_photos (url, sort_order) VALUES (?, ?)');
+  (req.files || []).forEach((f, i) => insert.run(toUrl(f.filename), maxOrder + 1 + i));
+  res.redirect('/admin/gathering');
+});
+
+router.post('/gathering/:id/delete', (req, res) => {
+  db.prepare('DELETE FROM gathering_photos WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/gathering');
+});
+
+router.post('/gathering/:id/move', (req, res) => {
+  moveItem('gathering_photos', req.params.id, req.body.direction);
+  res.redirect('/admin/gathering');
+});
+
+/* ================= SITE SETTINGS (hero photos) ================= */
+router.get('/settings', (req, res) => {
+  const rows = db.prepare('SELECT key, value FROM site_settings').all();
+  const settings = {};
+  rows.forEach((r) => { settings[r.key] = r.value; });
+  settings.shipping_flat_rate_cents = settings.shipping_flat_rate_cents || '0';
+  settings.shipping_free_threshold_cents = settings.shipping_free_threshold_cents || '0';
+  settings.shipping_express_rate_cents = settings.shipping_express_rate_cents || '0';
+  settings.low_stock_threshold = settings.low_stock_threshold || '3';
+  settings.hero_media_type = settings.hero_media_type || 'photo';
+  settings.email_header_photo = settings.email_header_photo || '/assets/brandmark-word.png';
+  res.render('settings/form', { settings });
+});
+
+router.post(
+  '/settings',
+  heroUpload.fields([
+    { name: 'hero_photo', maxCount: 1 },
+    { name: 'hero_video', maxCount: 1 },
+    { name: 'about_hero_photo', maxCount: 1 },
+    { name: 'gathering_hero_photo', maxCount: 1 },
+    { name: 'email_header_photo', maxCount: 1 },
+  ]),
+  (req, res) => {
+    const set = db.prepare('INSERT INTO site_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value');
+    ['hero_photo', 'hero_video', 'about_hero_photo', 'gathering_hero_photo', 'email_header_photo'].forEach((key) => {
+      const file = req.files && req.files[key] && req.files[key][0];
+      if (file) set.run(key, toUrl(file.filename));
+    });
+    const heroMediaType = req.body.hero_media_type === 'video' ? 'video' : 'photo';
+    set.run('hero_media_type', heroMediaType);
+    set.run('hero_heading', (req.body.hero_heading || '').trim());
+    set.run('hero_copy', (req.body.hero_copy || '').trim());
+    res.redirect('/admin/settings');
+  }
+);
+
+/* ================= ORDERS ================= */
+router.get('/orders', (req, res) => {
+  const orders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
+  res.render('orders/list', { orders });
+});
+
+router.get('/orders/new', (req, res) => {
+  const products = db.prepare('SELECT * FROM products ORDER BY sort_order ASC').all();
+  const variants = db.prepare('SELECT * FROM product_variants WHERE stock > 0 ORDER BY product_id ASC, color ASC, size ASC').all();
+  const productsWithVariants = products
+    .map((p) => ({ ...p, variants: variants.filter((v) => v.product_id === p.id) }))
+    .filter((p) => p.variants.length);
+  res.render('orders/manual', { products: productsWithVariants });
+});
+
+router.post('/orders/manual', (req, res) => {
+  const variantIds = [].concat(req.body.variantId || []);
+  const quantities = [].concat(req.body.quantity || []);
+  const { customerName, customerEmail, shippingCents, notes } = req.body;
+
+  const lines = [];
+  for (let i = 0; i < variantIds.length; i++) {
+    const variantId = variantIds[i];
+    const quantity = Math.max(1, parseInt(quantities[i], 10) || 0);
+    if (!variantId || !quantity) continue;
+    const variant = db.prepare('SELECT * FROM product_variants WHERE id = ?').get(variantId);
+    if (!variant) continue;
+    const product = db.prepare('SELECT * FROM products WHERE id = ?').get(variant.product_id);
+    if (!product) continue;
+    if (variant.stock < quantity) {
+      return res
+        .status(400)
+        .send(`${product.name} (${variant.size}, ${variant.color}) only has ${variant.stock} in stock.`);
+    }
+    lines.push({ product, variant, quantity });
+  }
+
+  if (!lines.length) {
+    return res.status(400).send('Add at least one item with a quantity before saving.');
+  }
+
+  const subtotalCents = lines.reduce((sum, l) => sum + Math.round(l.product.price * 100) * l.quantity, 0);
+  const shipCents = Math.max(0, Math.round(parseFloat(shippingCents) * 100) || 0);
+  const totalCents = subtotalCents + shipCents;
+
+  const insertOrder = db.prepare(`
+    INSERT INTO orders (status, channel, customer_name, customer_email, subtotal_cents, shipping_cents, total_cents, shipping_address)
+    VALUES ('paid', 'manual', ?, ?, ?, ?, ?, ?)
+  `);
+  const insertItem = db.prepare(`
+    INSERT INTO order_items (order_id, product_id, variant_id, product_name, size, color, quantity, unit_price_cents)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const decrementStock = db.prepare('UPDATE product_variants SET stock = MAX(0, stock - ?) WHERE id = ?');
+
+  const tx = db.transaction(() => {
+    const result = insertOrder.run(
+      customerName || '',
+      customerEmail || '',
+      subtotalCents,
+      shipCents,
+      totalCents,
+      JSON.stringify(notes ? { note: notes } : {})
+    );
+    const orderId = result.lastInsertRowid;
+    lines.forEach((l) => {
+      insertItem.run(
+        orderId,
+        l.product.id,
+        l.variant.id,
+        l.product.name,
+        l.variant.size,
+        l.variant.color,
+        l.quantity,
+        Math.round(l.product.price * 100)
+      );
+      decrementStock.run(l.quantity, l.variant.id);
+    });
+    return orderId;
+  });
+  const orderId = tx();
+
+  res.redirect(`/admin/orders/${orderId}`);
+});
+
+router.get('/orders/:id', (req, res) => {
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+  if (!order) return res.status(404).send('Order not found');
+  const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id);
+  let shippingAddress = {};
+  try { shippingAddress = JSON.parse(order.shipping_address || '{}'); } catch (e) { /* ignore */ }
+  res.render('orders/detail', { order, items, shippingAddress });
+});
+
+router.post('/orders/:id/ship', async (req, res) => {
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+  if (!order) return res.status(404).send('Order not found');
+  const { trackingNumber, trackingCarrier } = req.body;
+  db.prepare(`
+    UPDATE orders SET status = 'shipped', tracking_number = ?, tracking_carrier = ? WHERE id = ?
+  `).run(trackingNumber || '', trackingCarrier || '', order.id);
+  try {
+    await sendShippingUpdateEmail(order, trackingNumber, trackingCarrier);
+  } catch (err) {
+    console.error('Shipping email failed:', err.message);
+  }
+  res.redirect(`/admin/orders/${order.id}`);
+});
+
+router.post('/orders/:id/refund', async (req, res) => {
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+  if (!order) return res.status(404).send('Order not found');
+
+  if (order.channel !== 'manual') {
+    if (!order.payment_intent_id) {
+      return res.status(400).send('This order has no Stripe payment on file to refund (it may still be pending).');
+    }
+    try {
+      const stripe = getStripe();
+      await stripe.refunds.create({ payment_intent: order.payment_intent_id });
+    } catch (err) {
+      console.error('Stripe refund error:', err.message);
+      return res.status(500).send(`Could not refund via Stripe: ${err.message}`);
+    }
+  }
+
+  const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id);
+  const restock = db.prepare('UPDATE product_variants SET stock = stock + ? WHERE id = ?');
+  const tx = db.transaction(() => {
+    items.forEach((item) => {
+      if (item.variant_id) restock.run(item.quantity, item.variant_id);
+    });
+    db.prepare("UPDATE orders SET status = 'refunded' WHERE id = ?").run(order.id);
+  });
+  tx();
+
+  res.redirect(`/admin/orders/${order.id}`);
+});
+
+router.get('/orders.csv', (req, res) => {
+  const orders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
+  const header = ['Order #', 'Date', 'Channel', 'Status', 'Customer', 'Email', 'Subtotal', 'Discount', 'Shipping', 'Total'];
+  const rows = orders.map((o) => [
+    o.id,
+    o.created_at,
+    o.channel,
+    o.status,
+    o.customer_name,
+    o.customer_email,
+    (o.subtotal_cents / 100).toFixed(2),
+    (o.discount_cents / 100).toFixed(2),
+    (o.shipping_cents / 100).toFixed(2),
+    (o.total_cents / 100).toFixed(2),
+  ]);
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="orders.csv"');
+  res.send(toCsv(header, rows));
+});
+
+router.get('/products.csv', (req, res) => {
+  const products = db.prepare('SELECT * FROM products ORDER BY sort_order ASC').all();
+  const variants = db.prepare('SELECT * FROM product_variants').all();
+  const header = ['ID', 'Name', 'Category', 'Price', 'Size', 'Colour', 'Stock'];
+  const rows = [];
+  products.forEach((p) => {
+    const pv = variants.filter((v) => v.product_id === p.id);
+    if (!pv.length) {
+      rows.push([p.id, p.name, p.category, p.price, '', '', '']);
+    } else {
+      pv.forEach((v) => rows.push([p.id, p.name, p.category, p.price, v.size, v.color, v.stock]));
+    }
+  });
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="products.csv"');
+  res.send(toCsv(header, rows));
+});
+
+function toCsv(header, rows) {
+  const escape = (v) => {
+    const s = String(v == null ? '' : v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  return [header, ...rows].map((row) => row.map(escape).join(',')).join('\n');
+}
+
+/* ================= DISCOUNT CODES ================= */
+router.get('/discounts', (req, res) => {
+  const codes = db.prepare('SELECT * FROM discount_codes ORDER BY created_at DESC').all();
+  res.render('discounts/list', { codes });
+});
+
+router.get('/discounts/new', (req, res) => {
+  res.render('discounts/form', { discount: null });
+});
+
+router.post('/discounts', (req, res) => {
+  const { code, type, value, minSubtotal, maxUses } = req.body;
+  db.prepare(`
+    INSERT INTO discount_codes (code, type, value, min_subtotal_cents, max_uses, active)
+    VALUES (?, ?, ?, ?, ?, 1)
+  `).run(
+    code.trim().toUpperCase(),
+    type === 'fixed' ? 'fixed' : 'percent',
+    type === 'fixed' ? Math.round(parseFloat(value) * 100) || 0 : Math.max(1, Math.min(100, parseInt(value, 10) || 0)),
+    Math.max(0, Math.round(parseFloat(minSubtotal) * 100) || 0),
+    maxUses ? Math.max(1, parseInt(maxUses, 10)) : null
+  );
+  res.redirect('/admin/discounts');
+});
+
+router.post('/discounts/:id/toggle', (req, res) => {
+  db.prepare('UPDATE discount_codes SET active = 1 - active WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/discounts');
+});
+
+router.post('/discounts/:id/delete', (req, res) => {
+  db.prepare('DELETE FROM discount_codes WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/discounts');
+});
+
+/* ================= SITE SETTINGS (shipping rates + low-stock threshold) ================= */
+router.post('/settings/shipping', (req, res) => {
+  const flatRate = Math.max(0, Math.round(parseFloat(req.body.flatRate) * 100) || 0);
+  const freeThreshold = Math.max(0, Math.round(parseFloat(req.body.freeThreshold) * 100) || 0);
+  const expressRate = Math.max(0, Math.round(parseFloat(req.body.expressRate) * 100) || 0);
+  const lowStockThreshold = Math.max(0, parseInt(req.body.lowStockThreshold, 10) || 0);
+  const set = db.prepare('INSERT INTO site_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value');
+  set.run('shipping_flat_rate_cents', String(flatRate));
+  set.run('shipping_free_threshold_cents', String(freeThreshold));
+  set.run('shipping_express_rate_cents', String(expressRate));
+  set.run('low_stock_threshold', String(lowStockThreshold));
+  res.redirect('/admin/settings');
+});
+
+/* ================= LEADS (newsletter + back-in-stock signups) ================= */
+router.get('/leads', (req, res) => {
+  const subscribers = db
+    .prepare('SELECT * FROM newsletter_subscribers ORDER BY created_at DESC')
+    .all();
+  const stockRequests = db
+    .prepare(
+      `SELECT sn.*, p.name AS product_name
+       FROM stock_notifications sn
+       LEFT JOIN products p ON p.id = sn.product_id
+       ORDER BY sn.created_at DESC`
+    )
+    .all();
+  res.render('leads/list', { subscribers, stockRequests });
+});
+
+router.post('/leads/subscribers/:id/delete', (req, res) => {
+  db.prepare('DELETE FROM newsletter_subscribers WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/leads');
+});
+
+router.get('/leads/subscribers.csv', (req, res) => {
+  const subscribers = db
+    .prepare('SELECT * FROM newsletter_subscribers ORDER BY created_at DESC')
+    .all();
+  const header = ['Email', 'Source', 'Date'];
+  const rows = subscribers.map((s) => [s.email, s.source, s.created_at]);
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="subscribers.csv"');
+  res.send(toCsv(header, rows));
+});
+
+router.get('/leads/stock-requests.csv', (req, res) => {
+  const stockRequests = db
+    .prepare(
+      `SELECT sn.*, p.name AS product_name
+       FROM stock_notifications sn
+       LEFT JOIN products p ON p.id = sn.product_id
+       ORDER BY sn.created_at DESC`
+    )
+    .all();
+  const header = ['Email', 'Product', 'Size', 'Colour', 'Notified', 'Date'];
+  const rows = stockRequests.map((s) => [
+    s.email,
+    s.product_name || s.product_id,
+    s.size,
+    s.color,
+    s.notified ? 'Yes' : 'No',
+    s.created_at,
+  ]);
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="stock-requests.csv"');
+  res.send(toCsv(header, rows));
+});
+
+/* ---------------- helper: reorder rows within a table ---------------- */
+function moveItem(table, id, direction, extraWhere) {
+  const idCol = table === 'products' ? 'id' : 'id';
+  const where = extraWhere ? `WHERE ${extraWhere}` : '';
+  const rows = db.prepare(`SELECT ${idCol} as id, sort_order FROM ${table} ${where} ORDER BY sort_order ASC`).all();
+  const idx = rows.findIndex((r) => String(r.id) === String(id));
+  if (idx === -1) return;
+  const swapWith = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapWith < 0 || swapWith >= rows.length) return;
+
+  const a = rows[idx];
+  const b = rows[swapWith];
+  const update = db.prepare(`UPDATE ${table} SET sort_order = ? WHERE ${idCol} = ?`);
+  update.run(b.sort_order, a.id);
+  update.run(a.sort_order, b.id);
+}
+
+module.exports = router;

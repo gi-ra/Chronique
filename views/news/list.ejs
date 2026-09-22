@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'News' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>News</h1>
+      <a class="btn" href="/admin/news/new">+ Add post</a>
+    </div>
+
+    <% if (!posts.length) { %>
+      <p class="empty">No posts yet.</p>
+    <% } else { %>
+    <table>
+      <thead><tr><th>Title</th><th>Date</th><th>Slug</th><th></th></tr></thead>
+      <tbody>
+        <% posts.forEach((p, i) => { %>
+          <tr>
+            <td><%= p.title %></td>
+            <td><%= p.date %></td>
+            <td class="muted">/<%= p.slug %></td>
+            <td style="white-space:nowrap;">
+              <form class="inline" method="POST" action="/admin/news/<%= p.id %>/move">
+                <input type="hidden" name="direction" value="up">
+                <button class="btn small secondary" <%= i===0 ? 'disabled' : '' %>>&uarr;</button>
+              </form>
+              <form class="inline" method="POST" action="/admin/news/<%= p.id %>/move">
+                <input type="hidden" name="direction" value="down">
+                <button class="btn small secondary" <%= i===posts.length-1 ? 'disabled' : '' %>>&darr;</button>
+              </form>
+              <a class="btn small secondary" href="/admin/news/<%= p.id %>/edit">Edit</a>
+              <form class="inline" method="POST" action="/admin/news/<%= p.id %>/delete" onsubmit="return confirm('Delete this post?');">
+                <button class="btn small danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</body>
+</html>

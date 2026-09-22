@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('partials/head', { pageTitle: 'Overview' }) %></head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="wrap">
+    <h1>Overview</h1>
+    <p class="muted">Everything here updates the live site immediately after you save.</p>
+
+    <h2 style="margin-top:28px;">Sales</h2>
+    <div class="grid-3">
+      <div class="card">
+        <div class="count-badge">$<%= (revenue.today / 100).toFixed(0) %></div>
+        <div class="muted">Revenue today</div>
+      </div>
+      <div class="card">
+        <div class="count-badge">$<%= (revenue.week / 100).toFixed(0) %></div>
+        <div class="muted">Last 7 days</div>
+      </div>
+      <div class="card">
+        <div class="count-badge">$<%= (revenue.allTime / 100).toFixed(0) %></div>
+        <div class="muted">All time</div>
+      </div>
+    </div>
+
+    <% if (bestSellers.length) { %>
+      <h2>Best sellers</h2>
+      <table>
+        <thead><tr><th>Product</th><th>Units sold</th><th>Revenue</th></tr></thead>
+        <tbody>
+          <% bestSellers.forEach(b => { %>
+            <tr><td><%= b.name %></td><td><%= b.units %></td><td>$<%= (b.revenueCents / 100).toFixed(2) %></td></tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+
+    <% if (lowStock.length || outOfStock.length) { %>
+      <h2>Stock warnings</h2>
+      <% if (lowStock.length) { %>
+        <div class="card" style="border-color:#E8B04B;">
+          <strong>Running low</strong>
+          <ul style="margin:8px 0 0; padding-left:18px;">
+            <% lowStock.forEach(v => { %>
+              <li><a href="/admin/products/<%= v.product_id %>/edit"><%= v.productName %></a> — <%= v.size !== 'ONE SIZE' ? v.size + ', ' : '' %><%= v.color %>: <%= v.stock %> left</li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
+      <% if (outOfStock.length) { %>
+        <div class="card" style="border-color:#B3261E;">
+          <strong>Sold out</strong>
+          <ul style="margin:8px 0 0; padding-left:18px;">
+            <% outOfStock.forEach(v => { %>
+              <li><a href="/admin/products/<%= v.product_id %>/edit"><%= v.productName %></a> — <%= v.size !== 'ONE SIZE' ? v.size + ', ' : '' %><%= v.color %></li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
+    <% } %>
+
+    <h2>Content</h2>
+    <div class="grid-3">
+      <a class="card" href="/admin/products" style="text-decoration:none;">
+        <div class="count-badge"><%= counts.products %></div>
+        <div class="muted">Products</div>
+      </a>
+      <a class="card" href="/admin/orders" style="text-decoration:none;">
+        <div class="count-badge"><%= counts.orders %></div>
+        <div class="muted">Orders (<%= counts.paidOrders %> paid)</div>
+      </a>
+      <a class="card" href="/admin/discounts" style="text-decoration:none;">
+        <div class="count-badge">%</div>
+        <div class="muted">Discount codes</div>
+      </a>
+      <a class="card" href="/admin/leads" style="text-decoration:none;">
+        <div class="count-badge"><%= counts.leads %></div>
+        <div class="muted">Leads (mailing list + back-in-stock)</div>
+      </a>
+      <a class="card" href="/admin/news" style="text-decoration:none;">
+        <div class="count-badge"><%= counts.news %></div>
+        <div class="muted">News posts</div>
+      </a>
+      <a class="card" href="/admin/studio?type=sound" style="text-decoration:none;">
+        <div class="count-badge"><%= counts.sound + counts.screen %></div>
+        <div class="muted">Studio videos (<%= counts.sound %> sound / <%= counts.screen %> screen)</div>
+      </a>
+      <a class="card" href="/admin/gathering" style="text-decoration:none;">
+        <div class="count-badge"><%= counts.gathering %></div>
+        <div class="muted">Gathering photos</div>
+      </a>
+      <a class="card" href="/admin/settings" style="text-decoration:none;">
+        <div class="count-badge">&#8594;</div>
+        <div class="muted">Home / About / Gathering hero photos, shipping</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

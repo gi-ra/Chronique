@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: post ? 'Edit post' : 'Add post' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <h1><%= post ? 'Edit post' : 'Add post' %></h1>
+
+    <form method="POST" action="<%= post ? '/admin/news/' + post.id : '/admin/news' %>" enctype="multipart/form-data">
+      <label for="title">Title</label>
+      <input type="text" id="title" name="title" required value="<%= post ? post.title : '' %>">
+
+      <div class="row">
+        <div>
+          <label for="date">Date (shown as-is, e.g. "September 16, 2026")</label>
+          <input type="text" id="date" name="date" required value="<%= post ? post.date : '' %>">
+        </div>
+        <div>
+          <label for="slug">URL slug (leave blank to auto-generate from title)</label>
+          <input type="text" id="slug" name="slug" value="<%= post ? post.slug : '' %>" placeholder="the-aw26-edit">
+        </div>
+      </div>
+
+      <label for="body">Body text — one paragraph per line</label>
+      <textarea id="body" name="body"><%= post ? post.body : '' %></textarea>
+
+      <% if (post && post.photos.length) { %>
+        <label>Existing photos (uncheck to remove)</label>
+        <div class="photo-grid">
+          <% post.photos.forEach(url => { %>
+            <div class="item">
+              <img src="<%= url %>" alt="">
+              <label style="margin:0; font-weight:400;">
+                <input type="checkbox" name="keepPhotos" value="<%= url %>" checked style="width:auto;"> keep
+              </label>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <label for="newPhotos">Add photos (this is the photo essay shown in the post)</label>
+      <input type="file" id="newPhotos" name="newPhotos" accept="image/*" multiple>
+
+      <div style="margin-top:26px;">
+        <button type="submit" class="btn">Save</button>
+        <a class="btn secondary" href="/admin/news">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

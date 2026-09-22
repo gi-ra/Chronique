@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Order ' + order.id }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>Order #<%= order.id %></h1>
+      <a class="btn secondary" href="/admin/orders">&larr; All orders</a>
+    </div>
+    <p class="muted">
+      <%= order.created_at %> &middot; Channel: <%= order.channel %> &middot; Status: <strong><%= order.status %></strong>
+      <% if (order.shipping_method === 'express') { %> &middot; Express shipping<% } %>
+    </p>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Customer</h2>
+      <p><%= order.customer_name || '—' %><br><%= order.customer_email || '—' %></p>
+      <% if (shippingAddress && shippingAddress.line1) { %>
+        <p class="muted">
+          <%= shippingAddress.line1 %><% if (shippingAddress.line2) { %>, <%= shippingAddress.line2 %><% } %><br>
+          <%= [shippingAddress.city, shippingAddress.state, shippingAddress.postal_code].filter(Boolean).join(', ') %><br>
+          <%= shippingAddress.country %>
+        </p>
+      <% } %>
+    </div>
+
+    <h2>Items</h2>
+    <table>
+      <thead><tr><th>Product</th><th>Size / Colour</th><th>Qty</th><th>Price</th></tr></thead>
+      <tbody>
+        <% items.forEach(it => { %>
+          <tr>
+            <td><%= it.product_name %></td>
+            <td><%= it.size && it.size !== 'ONE SIZE' ? it.size + ' / ' : '' %><%= it.color %></td>
+            <td><%= it.quantity %></td>
+            <td>$<%= ((it.unit_price_cents * it.quantity) / 100).toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <div class="card" style="max-width:320px; margin-left:auto;">
+      <div style="display:flex; justify-content:space-between; padding:4px 0;"><span>Subtotal</span><span>$<%= (order.subtotal_cents / 100).toFixed(2) %></span></div>
+      <% if (order.discount_cents) { %>
+        <div style="display:flex; justify-content:space-between; padding:4px 0;"><span>Discount (<%= order.discount_code %>)</span><span>-$<%= (order.discount_cents / 100).toFixed(2) %></span></div>
+      <% } %>
+      <div style="display:flex; justify-content:space-between; padding:4px 0;"><span>Shipping</span><span>$<%= (order.shipping_cents / 100).toFixed(2) %></span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0 0; margin-top:6px; border-top:1px solid var(--line); font-weight:600;"><span>Total</span><span>$<%= (order.total_cents / 100).toFixed(2) %></span></div>
+    </div>
+
+    <% if (order.status === 'paid' || order.status === 'shipped') { %>
+      <h2>Fulfillment</h2>
+      <div class="card">
+        <form method="POST" action="/admin/orders/<%= order.id %>/ship">
+          <div class="row">
+            <div>
+              <label for="trackingCarrier">Carrier</label>
+              <input type="text" id="trackingCarrier" name="trackingCarrier" value="<%= order.tracking_carrier %>" placeholder="e.g. Australia Post">
+            </div>
+            <div>
+              <label for="trackingNumber">Tracking number</label>
+              <input type="text" id="trackingNumber" name="trackingNumber" value="<%= order.tracking_number %>">
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <button type="submit" class="btn"><%= order.status === 'shipped' ? 'Update shipping details' : 'Mark as shipped' %></button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <form method="POST" action="/admin/orders/<%= order.id %>/refund" onsubmit="return confirm('Refund this order and put the items back in stock? This cannot be undone.');">
+          <button type="submit" class="btn danger">Refund order</button>
+          <span class="muted" style="margin-left:10px;">
+            <%= order.channel === 'manual' ? 'Restocks the items (no Stripe payment to reverse for a manual order).' : 'Refunds the payment via Stripe and restocks the items.' %>
+          </span>
+        </form>
+      </div>
+    <% } else if (order.status === 'refunded') { %>
+      <p class="muted" style="margin-top:20px;">This order was refunded and its items were returned to stock.</p>
+    <% } %>
+  </div>
+</body>
+</html>

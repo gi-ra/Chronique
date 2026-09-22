@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.bak*
+chronique.db
+chronique.db-wal
+chronique.db-shm
+/uploads/
+.DS_Store
+._*
