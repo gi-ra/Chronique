@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Chronique — self-hosted storefront with a built-in admin panel",
   "main": "server.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "start": "node server.js",
     "seed": "node db/seed.js",

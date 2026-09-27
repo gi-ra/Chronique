@@ -340,7 +340,6 @@ router.post('/checkout/create-session', async (req, res) => {
       mode: 'payment',
       line_items: lineItems,
       discounts: discounts.length ? discounts : undefined,
-      automatic_payment_methods: { enabled: true },
       shipping_address_collection: { allowed_countries: ['AU'] },
       success_url: `${siteUrl}/#/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/#/cart`,
