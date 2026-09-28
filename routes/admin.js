@@ -522,6 +522,15 @@ router.post('/products/:id', upload.array('newPhotos', 8), (req, res) => {
   const newPhotos = (req.files || []).map((f) => toUrl(f.filename));
   photos = photos.concat(newPhotos);
 
+  // Move whichever kept photo was picked as "main" to the front — the
+  // public product page always uses photos[0] as the main image. Ignored
+  // if the selection doesn't match a surviving photo (e.g. it was just
+  // unchecked in the same save), so the array's natural order still wins.
+  const mainPhoto = req.body.mainPhoto;
+  if (mainPhoto && photos.includes(mainPhoto)) {
+    photos = [mainPhoto, ...photos.filter((url) => url !== mainPhoto)];
+  }
+
   const infoSections = parseInfoSections(req);
   const effectiveSizes = sizeList.length ? sizeList : sizesForType(productType, category);
   const sizeGuide = parseSizeGuide(req, effectiveSizes);

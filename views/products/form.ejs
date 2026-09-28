@@ -148,20 +148,23 @@
       <textarea id="description" name="description"><%= product ? product.description : '' %></textarea>
 
       <% if (product && product.photos.length) { %>
-        <label>Existing photos (uncheck to remove)</label>
+        <label>Existing photos (uncheck to remove, pick one as the main image)</label>
         <div class="photo-grid">
-          <% product.photos.forEach(url => { %>
+          <% product.photos.forEach((url, i) => { %>
             <div class="item">
               <img src="<%= url %>" alt="">
               <label style="margin:0; font-weight:400;">
                 <input type="checkbox" name="keepPhotos" value="<%= url %>" checked style="width:auto;"> keep
+              </label>
+              <label style="margin:0; font-weight:400;">
+                <input type="radio" name="mainPhoto" value="<%= url %>" <%= i === 0 ? 'checked' : '' %> style="width:auto;"> main
               </label>
             </div>
           <% }) %>
         </div>
       <% } %>
 
-      <label for="newPhotos">Add photos (first photo becomes the main image)</label>
+      <label for="newPhotos">Add photos (becomes the main image only if no existing photo is picked as main above)</label>
       <input type="file" id="newPhotos" name="newPhotos" accept="image/*" multiple>
 
       <h2>Info sections</h2>
