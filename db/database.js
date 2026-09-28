@@ -35,6 +35,10 @@ ensureColumn('orders', 'discount_code', "TEXT NOT NULL DEFAULT ''");
 ensureColumn('orders', 'discount_cents', "INTEGER NOT NULL DEFAULT 0");
 ensureColumn('orders', 'tracking_number', "TEXT NOT NULL DEFAULT ''");
 ensureColumn('orders', 'tracking_carrier', "TEXT NOT NULL DEFAULT ''");
+// Internal-only notes (e.g. "customer requested gift wrap") — never shown
+// to the customer, just visible to whoever's looking at the order in
+// admin.
+ensureColumn('orders', 'admin_notes', "TEXT NOT NULL DEFAULT ''");
 // 'garment' | 'photo' | 'accessory' — chosen in admin when a product is
 // created. Drives sensible defaults (sizing, whether a colour picker makes
 // sense) without hardcoding behaviour to specific category names.

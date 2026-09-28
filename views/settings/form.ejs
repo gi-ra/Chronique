@@ -155,12 +155,27 @@
     <p class="muted">These are exactly the categories shown in the main menu's Shop section and the shop page's filter chips. New ones appear automatically when you pick "+ Add new category…" on a product — delete one here once nothing uses it anymore.</p>
     <table>
       <thead>
-        <tr><th>Category</th><th>Products</th><th></th></tr>
+        <tr><th>Order</th><th>Category</th><th>Products</th><th></th></tr>
       </thead>
       <tbody>
         <% categories.forEach(c => { %>
           <tr>
-            <td><%= c.name %></td>
+            <td style="white-space:nowrap;">
+              <form class="inline" method="POST" action="/admin/settings/categories/<%= encodeURIComponent(c.name) %>/move">
+                <input type="hidden" name="direction" value="up">
+                <button class="btn small secondary" <%= c.isFirst ? 'disabled' : '' %>>&uarr;</button>
+              </form>
+              <form class="inline" method="POST" action="/admin/settings/categories/<%= encodeURIComponent(c.name) %>/move">
+                <input type="hidden" name="direction" value="down">
+                <button class="btn small secondary" <%= c.isLast ? 'disabled' : '' %>>&darr;</button>
+              </form>
+            </td>
+            <td>
+              <form class="inline" method="POST" action="/admin/settings/categories/<%= encodeURIComponent(c.name) %>/rename" style="display:flex; gap:6px;">
+                <input type="text" name="newName" value="<%= c.name %>" style="width:auto;">
+                <button class="btn small secondary" type="submit">Rename</button>
+              </form>
+            </td>
             <td><%= c.productCount %></td>
             <td style="white-space:nowrap;">
               <% if (c.productCount === 0) { %>

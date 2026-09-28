@@ -16,13 +16,25 @@
     <div class="card">
       <h2 style="margin-top:0;">Customer</h2>
       <p><%= order.customer_name || '—' %><br><%= order.customer_email || '—' %></p>
-      <% if (shippingAddress && shippingAddress.line1) { %>
-        <p class="muted">
-          <%= shippingAddress.line1 %><% if (shippingAddress.line2) { %>, <%= shippingAddress.line2 %><% } %><br>
-          <%= [shippingAddress.city, shippingAddress.state, shippingAddress.postal_code].filter(Boolean).join(', ') %><br>
-          <%= shippingAddress.country %>
-        </p>
-      <% } %>
+
+      <form method="POST" action="/admin/orders/<%= order.id %>/update">
+        <label for="line1">Shipping address</label>
+        <input type="text" id="line1" name="line1" value="<%= shippingAddress.line1 || '' %>" placeholder="Address line 1">
+        <input type="text" id="line2" name="line2" value="<%= shippingAddress.line2 || '' %>" placeholder="Address line 2 (optional)" style="margin-top:8px;">
+        <div class="row" style="margin-top:8px;">
+          <div><input type="text" name="city" value="<%= shippingAddress.city || '' %>" placeholder="City"></div>
+          <div><input type="text" name="state" value="<%= shippingAddress.state || '' %>" placeholder="State"></div>
+          <div><input type="text" name="postalCode" value="<%= shippingAddress.postal_code || '' %>" placeholder="Postcode"></div>
+        </div>
+        <input type="text" name="country" value="<%= shippingAddress.country || '' %>" placeholder="Country" style="margin-top:8px;">
+
+        <label for="adminNotes">Internal notes (not shown to the customer)</label>
+        <textarea id="adminNotes" name="adminNotes" placeholder="e.g. customer requested gift wrap" style="min-height:70px;"><%= order.admin_notes || '' %></textarea>
+
+        <div style="margin-top:16px;">
+          <button type="submit" class="btn secondary">Save changes</button>
+        </div>
+      </form>
     </div>
 
     <h2>Items</h2>

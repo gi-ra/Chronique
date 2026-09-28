@@ -12,30 +12,34 @@
       </div>
     </div>
 
-    <% if (!orders.length) { %>
-      <p class="empty">No orders yet.</p>
-    <% } else { %>
-    <div class="row" style="margin:18px 0;">
+    <form method="GET" action="/admin/orders" class="row" style="margin:18px 0;">
       <div>
-        <input type="text" id="orderSearch" placeholder="Search by order #, customer or email…">
+        <input type="text" name="q" value="<%= q %>" placeholder="Search by order #, customer or email…">
       </div>
       <div style="max-width:200px;">
-        <select id="statusFilter">
+        <select name="status" onchange="this.form.submit()">
           <option value="">All statuses</option>
-          <% [...new Set(orders.map(o => o.status))].forEach(s => { %>
-            <option value="<%= s %>"><%= s %></option>
+          <% allStatuses.forEach(s => { %>
+            <option value="<%= s %>" <%= status === s ? 'selected' : '' %>><%= s %></option>
           <% }) %>
         </select>
       </div>
-    </div>
-    <p class="muted" id="orderCount"></p>
+      <div>
+        <button type="submit" class="btn secondary">Search</button>
+      </div>
+    </form>
+
+    <% if (!orders.length) { %>
+      <p class="empty">No orders match.</p>
+    <% } else { %>
+    <p class="muted">Showing <%= orders.length %> of <%= totalCount %> order<%= totalCount === 1 ? '' : 's' %><%= totalPages > 1 ? ` — page ${currentPage} of ${totalPages}` : '' %></p>
     <table id="ordersTable">
       <thead>
         <tr><th>#</th><th>Date</th><th>Channel</th><th>Customer</th><th>Status</th><th>Total</th><th></th></tr>
       </thead>
       <tbody>
         <% orders.forEach(o => { %>
-          <tr data-search="<%= (String(o.id) + ' ' + (o.customer_name||'') + ' ' + (o.customer_email||'')).toLowerCase() %>" data-status="<%= o.status %>">
+          <tr>
             <td>#<%= o.id %></td>
             <td><%= o.created_at %></td>
             <td><%= o.channel %></td>
@@ -47,32 +51,16 @@
         <% }) %>
       </tbody>
     </table>
+
+    <% if (totalPages > 1) { %>
+      <% const qs = (p) => `?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}&page=${p}`; %>
+      <div style="display:flex; justify-content:center; gap:10px; margin-top:22px;">
+        <a class="btn small secondary" href="<%= qs(currentPage - 1) %>" <%= currentPage <= 1 ? 'style="pointer-events:none;opacity:.4;"' : '' %>>&larr; Prev</a>
+        <span class="muted" style="align-self:center;">Page <%= currentPage %> of <%= totalPages %></span>
+        <a class="btn small secondary" href="<%= qs(currentPage + 1) %>" <%= currentPage >= totalPages ? 'style="pointer-events:none;opacity:.4;"' : '' %>>Next &rarr;</a>
+      </div>
+    <% } %>
     <% } %>
   </div>
-  <script>
-    (function(){
-      const search = document.getElementById('orderSearch');
-      const statusFilter = document.getElementById('statusFilter');
-      if(!search) return;
-      const rows = Array.from(document.querySelectorAll('#ordersTable tbody tr'));
-      const countEl = document.getElementById('orderCount');
-      function apply(){
-        const q = (search.value || '').trim().toLowerCase();
-        const status = statusFilter.value;
-        let shown = 0;
-        rows.forEach(row => {
-          const matchesText = !q || row.dataset.search.includes(q);
-          const matchesStatus = !status || row.dataset.status === status;
-          const visible = matchesText && matchesStatus;
-          row.style.display = visible ? '' : 'none';
-          if(visible) shown++;
-        });
-        countEl.textContent = shown === rows.length ? `${rows.length} orders` : `Showing ${shown} of ${rows.length} orders`;
-      }
-      search.addEventListener('input', apply);
-      statusFilter.addEventListener('change', apply);
-      apply();
-    })();
-  </script>
 </body>
 </html>

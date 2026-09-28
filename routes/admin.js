@@ -937,11 +937,12 @@ router.get('/settings', (req, res) => {
   settings.subscribe_enabled = settings.subscribe_enabled === undefined ? '1' : settings.subscribe_enabled;
   settings.collections_heading_enabled = settings.collections_heading_enabled === undefined ? '1' : settings.collections_heading_enabled;
 
-  const categories = db.prepare('SELECT name FROM categories ORDER BY sort_order ASC').all().map((r) => {
+  const categoryRows = db.prepare('SELECT name FROM categories ORDER BY sort_order ASC').all();
+  const categories = categoryRows.map((r, i) => {
     const productCount = db
       .prepare('SELECT COUNT(*) AS c FROM products WHERE category = ?')
       .get(r.name).c;
-    return { name: r.name, productCount };
+    return { name: r.name, productCount, isFirst: i === 0, isLast: i === categoryRows.length - 1 };
   });
 
   res.render('settings/form', { settings, categories, error: req.query.error || '' });
@@ -958,6 +959,40 @@ router.post('/settings/categories/:name/delete', (req, res) => {
     );
   }
   db.prepare('DELETE FROM categories WHERE name = ?').run(name);
+  res.redirect('/admin/settings#categories');
+});
+
+function moveCategory(name, direction) {
+  const rows = db.prepare('SELECT name, sort_order FROM categories ORDER BY sort_order ASC').all();
+  const idx = rows.findIndex((r) => r.name === name);
+  if (idx === -1) return;
+  const swapWith = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapWith < 0 || swapWith >= rows.length) return;
+  const a = rows[idx];
+  const b = rows[swapWith];
+  const update = db.prepare('UPDATE categories SET sort_order = ? WHERE name = ?');
+  update.run(b.sort_order, a.name);
+  update.run(a.sort_order, b.name);
+}
+
+router.post('/settings/categories/:name/move', (req, res) => {
+  moveCategory(decodeURIComponent(req.params.name), req.body.direction);
+  res.redirect('/admin/settings#categories');
+});
+
+router.post('/settings/categories/:name/rename', (req, res) => {
+  const oldName = decodeURIComponent(req.params.name);
+  const newName = (req.body.newName || '').trim();
+  if (!newName) {
+    return res.redirect(`/admin/settings?error=${encodeURIComponent('New category name cannot be empty.')}#categories`);
+  }
+  if (newName !== oldName && db.prepare('SELECT 1 FROM categories WHERE name = ?').get(newName)) {
+    return res.redirect(
+      `/admin/settings?error=${encodeURIComponent(`"${newName}" already exists — pick a different name, or delete one of the duplicates first.`)}#categories`
+    );
+  }
+  db.prepare('UPDATE categories SET name = ? WHERE name = ?').run(newName, oldName);
+  db.prepare('UPDATE products SET category = ? WHERE category = ?').run(newName, oldName);
   res.redirect('/admin/settings#categories');
 });
 
@@ -992,9 +1027,45 @@ router.post(
 );
 
 /* ================= ORDERS ================= */
+const ORDERS_PER_PAGE = 50;
+
 router.get('/orders', (req, res) => {
-  const orders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
-  res.render('orders/list', { orders });
+  const q = (req.query.q || '').trim();
+  const status = req.query.status || '';
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+
+  const where = [];
+  const params = {};
+  if (q) {
+    where.push('(CAST(id AS TEXT) LIKE @q OR customer_name LIKE @q OR customer_email LIKE @q)');
+    params.q = `%${q}%`;
+  }
+  if (status) {
+    where.push('status = @status');
+    params.status = status;
+  }
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  const totalCount = db.prepare(`SELECT COUNT(*) AS c FROM orders ${whereSql}`).get(params).c;
+  const totalPages = Math.max(1, Math.ceil(totalCount / ORDERS_PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
+  const offset = (currentPage - 1) * ORDERS_PER_PAGE;
+
+  const orders = db
+    .prepare(`SELECT * FROM orders ${whereSql} ORDER BY created_at DESC LIMIT @limit OFFSET @offset`)
+    .all({ ...params, limit: ORDERS_PER_PAGE, offset });
+
+  const allStatuses = db.prepare('SELECT DISTINCT status FROM orders').all().map((r) => r.status);
+
+  res.render('orders/list', {
+    orders,
+    q,
+    status,
+    allStatuses,
+    currentPage,
+    totalPages,
+    totalCount,
+  });
 });
 
 router.get('/orders/new', (req, res) => {
@@ -1083,6 +1154,28 @@ router.get('/orders/:id', (req, res) => {
   let shippingAddress = {};
   try { shippingAddress = JSON.parse(order.shipping_address || '{}'); } catch (e) { /* ignore */ }
   res.render('orders/detail', { order, items, shippingAddress });
+});
+
+router.post('/orders/:id/update', (req, res) => {
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+  if (!order) return res.status(404).send('Order not found');
+
+  const { line1, line2, city, state, postalCode, country, adminNotes } = req.body;
+  const shippingAddress = {
+    line1: (line1 || '').trim(),
+    line2: (line2 || '').trim(),
+    city: (city || '').trim(),
+    state: (state || '').trim(),
+    postal_code: (postalCode || '').trim(),
+    country: (country || '').trim(),
+  };
+
+  db.prepare('UPDATE orders SET shipping_address = ?, admin_notes = ? WHERE id = ?').run(
+    JSON.stringify(shippingAddress),
+    (adminNotes || '').trim(),
+    order.id
+  );
+  res.redirect(`/admin/orders/${order.id}`);
 });
 
 router.post('/orders/:id/ship', async (req, res) => {
