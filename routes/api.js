@@ -1,7 +1,7 @@
 const express = require('express');
 const db = require('../db/database');
 const { getStripe } = require('../lib/stripe');
-const { calculateShippingCents, getShippingSettings } = require('../lib/shipping');
+const { calculateShipping, getShippingSettings } = require('../lib/shipping');
 
 const router = express.Router();
 
@@ -150,9 +150,21 @@ router.get('/settings', (req, res) => {
   res.json(settings);
 });
 
-// ---------- Shipping (for the cart page to show an estimate) ----------
+// ---------- Shipping ----------
+// Rates/threshold only, for the cart page's free-shipping progress message
+// — the real per-order price always comes from /shipping/quote below.
 router.get('/shipping-settings', (req, res) => {
   res.json(getShippingSettings());
+});
+
+// The cart page calls this every time the address or cart changes, so the
+// customer always sees the real price before paying — checkout itself
+// runs the exact same calculateShipping() so the two can never disagree.
+router.post('/shipping/quote', (req, res) => {
+  const subtotalCents = Math.max(0, parseInt(req.body.subtotalCents, 10) || 0);
+  const { country, postcode, line1, line2 } = req.body;
+  const quote = calculateShipping({ subtotalCents, country, postcode, line1, line2 });
+  res.json(quote);
 });
 
 // ---------- Discount codes ----------
@@ -235,13 +247,25 @@ router.post('/subscribe', (req, res) => {
 });
 
 // ---------- Checkout ----------
-// Body: { items: [{ productId, size, color, quantity }], discountCode, shippingMethod }
+// Body: { items: [{ productId, size, color, quantity }], discountCode, shippingAddress: { line1, line2, city, state, postcode, country } }
+// The shipping address is collected on our own cart page (not Stripe's
+// hosted page) specifically so shipping can be priced from it *before* the
+// Stripe session — and therefore the price — is created. See lib/shipping.js.
 router.post('/checkout/create-session', async (req, res) => {
   const items = Array.isArray(req.body.items) ? req.body.items : [];
   if (!items.length) {
     return res.status(400).json({ error: 'Your bag is empty.' });
   }
-  const shippingMethod = req.body.shippingMethod === 'express' ? 'express' : 'standard';
+  const address = req.body.shippingAddress || {};
+  const line1 = (address.line1 || '').trim();
+  const city = (address.city || '').trim();
+  const state = (address.state || '').trim();
+  const postcode = (address.postcode || '').trim();
+  const country = (address.country || '').trim();
+  const line2 = (address.line2 || '').trim();
+  if (!line1 || !city || !postcode || !country) {
+    return res.status(400).json({ error: 'Please complete your shipping address first.' });
+  }
   const discountCode = (req.body.discountCode || '').trim();
 
   // Validate every line against real products/variants and current stock.
@@ -277,19 +301,39 @@ router.post('/checkout/create-session', async (req, res) => {
     discountCents = discount.discountCents;
   }
 
-  const shippingCents = calculateShippingCents(subtotalCents, shippingMethod);
+  const quote = calculateShipping({ subtotalCents, country, postcode, line1, line2 });
+  const shippingCents = quote.cents;
   const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
+  const shippingRegion = quote.isLocalDelivery
+    ? 'local'
+    : country.toUpperCase() === 'NZ'
+      ? 'nz'
+      : country.toUpperCase() === 'AU'
+        ? 'standard'
+        : 'international';
+  const shippingAddressJson = JSON.stringify({
+    line1,
+    line2,
+    city,
+    state,
+    postal_code: postcode,
+    country,
+  });
 
   // Create a pending order in our own database first, then hand its id to
-  // Stripe as metadata so the webhook can find it again after payment.
+  // Stripe as metadata so the webhook can find it again after payment. The
+  // shipping address is saved here (not from Stripe's webhook) since we
+  // collected it ourselves before Stripe was ever involved.
   const insertOrder = db.prepare(`
-    INSERT INTO orders (status, subtotal_cents, shipping_cents, shipping_method, discount_code, discount_cents, total_cents)
-    VALUES ('pending', ?, ?, ?, ?, ?, ?)
+    INSERT INTO orders (status, subtotal_cents, shipping_cents, shipping_method, shipping_address, is_local_delivery, discount_code, discount_cents, total_cents)
+    VALUES ('pending', ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const orderResult = insertOrder.run(
     subtotalCents,
     shippingCents,
-    shippingMethod,
+    shippingRegion,
+    shippingAddressJson,
+    quote.isLocalDelivery ? 1 : 0,
     discountCode,
     discountCents,
     totalCents
@@ -333,7 +377,7 @@ router.post('/checkout/create-session', async (req, res) => {
         price_data: {
           currency: 'aud',
           unit_amount: shippingCents,
-          product_data: { name: shippingMethod === 'express' ? 'Express shipping' : 'Shipping' },
+          product_data: { name: quote.label },
         },
       });
     }
@@ -356,7 +400,10 @@ router.post('/checkout/create-session', async (req, res) => {
       mode: 'payment',
       line_items: lineItems,
       discounts: discounts.length ? discounts : undefined,
-      shipping_address_collection: { allowed_countries: ['AU'] },
+      // No shipping_address_collection here — we already collected and
+      // priced the shipping address ourselves before creating this
+      // session (see above), so asking Stripe to collect it again could
+      // let a customer enter a different address than the one we priced.
       success_url: `${siteUrl}/#/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/#/cart`,
       metadata: { order_id: String(orderId) },
@@ -394,6 +441,7 @@ router.get('/orders/confirm', (req, res) => {
     discountCode: order.discount_code,
     discountCents: order.discount_cents,
     totalCents: order.total_cents,
+    isLocalDelivery: !!order.is_local_delivery,
     items,
   });
 });

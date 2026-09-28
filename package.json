@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node server.js",
     "seed": "node db/seed.js",
-    "hash-password": "node scripts/hash-password.js"
+    "hash-password": "node scripts/hash-password.js",
+    "test": "node scripts/test-shipping.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -35,7 +35,7 @@
     <p class="muted">Showing <%= orders.length %> of <%= totalCount %> order<%= totalCount === 1 ? '' : 's' %><%= totalPages > 1 ? ` — page ${currentPage} of ${totalPages}` : '' %></p>
     <table id="ordersTable">
       <thead>
-        <tr><th>#</th><th>Date</th><th>Channel</th><th>Customer</th><th>Status</th><th>Total</th><th></th></tr>
+        <tr><th>#</th><th>Date</th><th>Channel</th><th>Customer</th><th>Shipping</th><th>Status</th><th>Total</th><th></th></tr>
       </thead>
       <tbody>
         <% orders.forEach(o => { %>
@@ -44,6 +44,7 @@
             <td><%= o.created_at %></td>
             <td><%= o.channel %></td>
             <td><%= o.customer_name || o.customer_email || '—' %></td>
+            <td><% if (o.is_local_delivery) { %><span style="display:inline-block; padding:3px 10px; border-radius:100px; font-size:12px; white-space:nowrap; background:#F3EAD8; color:#7A4430;">🚚 Hand-deliver</span><% } else { %><span class="muted"><%= o.shipping_method %></span><% } %></td>
             <td><%= o.status %></td>
             <td>$<%= (o.total_cents / 100).toFixed(2) %></td>
             <td><a class="btn small secondary" href="/admin/orders/<%= o.id %>">View</a></td>

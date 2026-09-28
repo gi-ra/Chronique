@@ -39,6 +39,11 @@ ensureColumn('orders', 'tracking_carrier', "TEXT NOT NULL DEFAULT ''");
 // to the customer, just visible to whoever's looking at the order in
 // admin.
 ensureColumn('orders', 'admin_notes', "TEXT NOT NULL DEFAULT ''");
+// Set at checkout time when the shipping address falls inside the local
+// hand-delivery zone (see config/local-postcodes.json) and isn't a PO Box
+// or Parcel Locker. Flagged in /admin and the new-order alert email so you
+// know which orders to hand-deliver yourself instead of posting.
+ensureColumn('orders', 'is_local_delivery', 'INTEGER NOT NULL DEFAULT 0');
 // 'garment' | 'photo' | 'accessory' — chosen in admin when a product is
 // created. Drives sensible defaults (sizing, whether a colour picker makes
 // sense) without hardcoding behaviour to specific category names.

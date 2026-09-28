@@ -792,6 +792,15 @@
   .shipping-method{ display:flex; align-items:center; gap:8px; border:1px solid var(--line-soft); padding:10px 12px; cursor:pointer; font-size:13px; }
   .shipping-method span:first-of-type{ flex:1; }
   .shipping-method.active{ border-color:var(--ink); }
+  .ship-address-form{ display:flex; flex-direction:column; gap:8px; }
+  .ship-address-form input, .ship-address-form select{
+    padding:10px 12px; border:1px solid var(--line); font-size:13px; font-family:inherit; width:100%;
+    background:var(--paper);
+  }
+  .ship-address-form .row2{ display:flex; gap:8px; }
+  .ship-address-form .row2 input{ flex:1; }
+  .ship-quote-note{ font-family:'JetBrains Mono', monospace; font-size:11.5px; margin-top:10px; color:var(--ink-faint); }
+  .ship-quote-note.progress{ color:var(--ink); }
   .discount-row{ display:flex; gap:8px; }
   .discount-row input{ flex:1; padding:10px 12px; border:1px solid var(--line); font-size:13px; font-family:inherit; }
   .discount-row button{ padding:10px 14px; background:var(--ink); color:var(--paper); border:none; font-family:'JetBrains Mono', monospace; font-size:12px; cursor:pointer; }

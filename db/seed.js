@@ -53,10 +53,14 @@ function seedSettings() {
     hero_photo: '/uploads/hero-photo.jpg',
     about_hero_photo: '/uploads/about-hero-photo.jpg',
     gathering_hero_photo: '/uploads/gathering-hero-photo.jpg',
-    // Shipping: flat rate in cents, waived at/above the free threshold (also in cents).
-    // $12 flat, free over $250 — matches the copy already on product pages.
-    shipping_flat_rate_cents: '1200',
-    shipping_free_threshold_cents: '25000',
+    // Shipping (see lib/shipping.js): flat rates in cents, plus the
+    // subtotal (also in cents) at/above which Rest-of-Australia shipping
+    // is waived. Local delivery inside the zone in config/local-postcodes.json
+    // is always free regardless of these settings.
+    shipping_au_flat_rate_cents: '1000',
+    shipping_au_free_threshold_cents: '15000',
+    shipping_nz_rate_cents: '2000',
+    shipping_row_rate_cents: '3000',
   };
   const insert = db.prepare(
     'INSERT OR IGNORE INTO site_settings (key, value) VALUES (?, ?)'

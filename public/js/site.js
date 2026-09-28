@@ -32,7 +32,38 @@ function colorHex(name){
 // have hardcoded.
 const DEFAULT_INFO_SECTIONS = [
   { title: 'Composition &amp; care', body: 'Made from responsibly sourced natural fibres. Machine wash cold, inside out, and lay flat to dry to preserve the shape.' },
-  { title: 'Shipping &amp; returns', body: 'Standard and express shipping available across Australia, with free standard shipping over $250. Unworn pieces can be returned within 30 days for a full refund.' }
+  { title: 'Shipping &amp; returns', body: 'Free local hand-delivery around Logan and Brisbane, flat-rate shipping across the rest of Australia (free over $150), and flat-rate New Zealand/international shipping — see the Shipping page for details. Unworn pieces can be returned within 30 days for a full refund.' }
+];
+// Australia and New Zealand get their own shipping rules (see
+// lib/shipping.js) — everything else is priced as one flat "Rest of World"
+// rate, but customers still pick their real country for the address.
+const COUNTRIES = [
+  ["AU","Australia"], ["NZ","New Zealand"],
+  ["AF","Afghanistan"],["AX","Åland Islands"],["AL","Albania"],["DZ","Algeria"],["AS","American Samoa"],["AD","Andorra"],["AO","Angola"],["AI","Anguilla"],["AQ","Antarctica"],["AG","Antigua and Barbuda"],["AR","Argentina"],["AM","Armenia"],["AW","Aruba"],["AT","Austria"],["AZ","Azerbaijan"],
+  ["BS","Bahamas"],["BH","Bahrain"],["BD","Bangladesh"],["BB","Barbados"],["BY","Belarus"],["BE","Belgium"],["BZ","Belize"],["BJ","Benin"],["BM","Bermuda"],["BT","Bhutan"],["BO","Bolivia"],["BA","Bosnia and Herzegovina"],["BW","Botswana"],["BR","Brazil"],["BN","Brunei"],["BG","Bulgaria"],["BF","Burkina Faso"],["BI","Burundi"],
+  ["KH","Cambodia"],["CM","Cameroon"],["CA","Canada"],["CV","Cape Verde"],["KY","Cayman Islands"],["CF","Central African Republic"],["TD","Chad"],["CL","Chile"],["CN","China"],["CO","Colombia"],["KM","Comoros"],["CG","Congo"],["CD","Congo (DRC)"],["CK","Cook Islands"],["CR","Costa Rica"],["CI","Côte d'Ivoire"],["HR","Croatia"],["CU","Cuba"],["CW","Curaçao"],["CY","Cyprus"],["CZ","Czechia"],
+  ["DK","Denmark"],["DJ","Djibouti"],["DM","Dominica"],["DO","Dominican Republic"],
+  ["EC","Ecuador"],["EG","Egypt"],["SV","El Salvador"],["GQ","Equatorial Guinea"],["ER","Eritrea"],["EE","Estonia"],["SZ","Eswatini"],["ET","Ethiopia"],
+  ["FK","Falkland Islands"],["FO","Faroe Islands"],["FJ","Fiji"],["FI","Finland"],["FR","France"],["GF","French Guiana"],["PF","French Polynesia"],
+  ["GA","Gabon"],["GM","Gambia"],["GE","Georgia"],["DE","Germany"],["GH","Ghana"],["GI","Gibraltar"],["GR","Greece"],["GL","Greenland"],["GD","Grenada"],["GP","Guadeloupe"],["GU","Guam"],["GT","Guatemala"],["GG","Guernsey"],["GN","Guinea"],["GW","Guinea-Bissau"],["GY","Guyana"],
+  ["HT","Haiti"],["HN","Honduras"],["HK","Hong Kong"],["HU","Hungary"],
+  ["IS","Iceland"],["IN","India"],["ID","Indonesia"],["IR","Iran"],["IQ","Iraq"],["IE","Ireland"],["IM","Isle of Man"],["IL","Israel"],["IT","Italy"],
+  ["JM","Jamaica"],["JP","Japan"],["JE","Jersey"],["JO","Jordan"],
+  ["KZ","Kazakhstan"],["KE","Kenya"],["KI","Kiribati"],["KW","Kuwait"],["KG","Kyrgyzstan"],
+  ["LA","Laos"],["LV","Latvia"],["LB","Lebanon"],["LS","Lesotho"],["LR","Liberia"],["LY","Libya"],["LI","Liechtenstein"],["LT","Lithuania"],["LU","Luxembourg"],
+  ["MO","Macao"],["MG","Madagascar"],["MW","Malawi"],["MY","Malaysia"],["MV","Maldives"],["ML","Mali"],["MT","Malta"],["MH","Marshall Islands"],["MQ","Martinique"],["MR","Mauritania"],["MU","Mauritius"],["YT","Mayotte"],["MX","Mexico"],["FM","Micronesia"],["MD","Moldova"],["MC","Monaco"],["MN","Mongolia"],["ME","Montenegro"],["MS","Montserrat"],["MA","Morocco"],["MZ","Mozambique"],["MM","Myanmar"],
+  ["NA","Namibia"],["NR","Nauru"],["NP","Nepal"],["NL","Netherlands"],["NC","New Caledonia"],["NI","Nicaragua"],["NE","Niger"],["NG","Nigeria"],["NU","Niue"],["NF","Norfolk Island"],["MK","North Macedonia"],["MP","Northern Mariana Islands"],["NO","Norway"],
+  ["OM","Oman"],
+  ["PK","Pakistan"],["PW","Palau"],["PS","Palestine"],["PA","Panama"],["PG","Papua New Guinea"],["PY","Paraguay"],["PE","Peru"],["PH","Philippines"],["PN","Pitcairn"],["PL","Poland"],["PT","Portugal"],["PR","Puerto Rico"],
+  ["QA","Qatar"],
+  ["RE","Réunion"],["RO","Romania"],["RU","Russia"],["RW","Rwanda"],
+  ["WS","Samoa"],["SM","San Marino"],["ST","São Tomé and Príncipe"],["SA","Saudi Arabia"],["SN","Senegal"],["RS","Serbia"],["SC","Seychelles"],["SL","Sierra Leone"],["SG","Singapore"],["SK","Slovakia"],["SI","Slovenia"],["SB","Solomon Islands"],["SO","Somalia"],["ZA","South Africa"],["KR","South Korea"],["SS","South Sudan"],["ES","Spain"],["LK","Sri Lanka"],["SD","Sudan"],["SR","Suriname"],["SE","Sweden"],["CH","Switzerland"],["SY","Syria"],
+  ["TW","Taiwan"],["TJ","Tajikistan"],["TZ","Tanzania"],["TH","Thailand"],["TL","Timor-Leste"],["TG","Togo"],["TO","Tonga"],["TT","Trinidad and Tobago"],["TN","Tunisia"],["TR","Türkiye"],["TM","Turkmenistan"],["TC","Turks and Caicos Islands"],["TV","Tuvalu"],
+  ["UG","Uganda"],["UA","Ukraine"],["AE","United Arab Emirates"],["GB","United Kingdom"],["US","United States"],["UY","Uruguay"],["UZ","Uzbekistan"],
+  ["VU","Vanuatu"],["VA","Vatican City"],["VE","Venezuela"],["VN","Vietnam"],["VG","British Virgin Islands"],["VI","U.S. Virgin Islands"],
+  ["WF","Wallis and Futuna"],
+  ["YE","Yemen"],
+  ["ZM","Zambia"],["ZW","Zimbabwe"]
 ];
 const SIZE_GUIDES = {
   bottoms: {
@@ -231,6 +262,18 @@ function getCart(){
 function saveCart(cart){
   try{ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }catch(e){}
   updateBagCount();
+}
+
+/* ---------------- SHIPPING ADDRESS (remembered per device, like the cart) ---------------- */
+const SHIP_ADDRESS_KEY = 'chronique_shipping_address';
+function getSavedAddress(){
+  try{
+    const raw = localStorage.getItem(SHIP_ADDRESS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveAddress(address){
+  try{ localStorage.setItem(SHIP_ADDRESS_KEY, JSON.stringify(address)); }catch(e){}
 }
 function cartLineKey(productId, size, color){ return `${productId}__${size}__${color}`; }
 function addToCart(productId, size, color, qty){
@@ -551,7 +594,6 @@ async function renderProduct(id){
 
       <button class="add-btn" id="addBtn">Add to bag — ${money(p.price)}</button>
       <button class="buy-now-btn" id="buyNowBtn">Buy now</button>
-      <div class="checkout-error" id="buyNowError"></div>
 
       <div class="accordion">
         ${(p.infoSections && p.infoSections.length ? p.infoSections : DEFAULT_INFO_SECTIONS).map((s) => `
@@ -565,7 +607,6 @@ async function renderProduct(id){
 
   const addBtn = document.getElementById('addBtn');
   const buyNowBtn = document.getElementById('buyNowBtn');
-  const buyNowError = document.getElementById('buyNowError');
   const qtyVal = document.getElementById('qtyVal');
   const stockNote = document.getElementById('stockNote');
   const notifyStock = document.getElementById('notifyStock');
@@ -661,35 +702,14 @@ async function renderProduct(id){
     addToCart(p.id, selectedSize, selectedColor, qty);
     showToast(`Added ${p.name} to bag`);
   });
-  buyNowBtn.addEventListener('click', async () => {
+  buyNowBtn.addEventListener('click', () => {
     const stock = stockFor(selectedSize, selectedColor);
     if(stock <= 0) return;
-    buyNowError.textContent = '';
-    buyNowBtn.disabled = true;
-    buyNowBtn.textContent = 'Redirecting…';
-    try{
-      const res = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: [{ productId: p.id, size: selectedSize, color: selectedColor, quantity: qty }],
-          shippingMethod: 'standard',
-          discountCode: '',
-        }),
-      });
-      const data = await res.json();
-      if(!res.ok || !data.url){
-        buyNowError.textContent = data.error || 'Could not start checkout. Please try again.';
-        buyNowBtn.disabled = false;
-        buyNowBtn.textContent = 'Buy now';
-        return;
-      }
-      location.href = data.url;
-    }catch(e){
-      buyNowError.textContent = 'Could not reach the server. Please try again.';
-      buyNowBtn.disabled = false;
-      buyNowBtn.textContent = 'Buy now';
-    }
+    // Checkout now needs a full shipping address to price shipping
+    // correctly (see the Bag page), so "Buy now" adds the item and takes
+    // the shopper straight there instead of skipping to Stripe directly.
+    addToCart(p.id, selectedSize, selectedColor, qty);
+    location.hash = '#/cart';
   });
   document.getElementById('notifyBtn').addEventListener('click', async () => {
     const email = document.getElementById('notifyEmail').value.trim();
@@ -782,9 +802,7 @@ function renderCartPage(){
     return renderCartPage();
   }
 
-  const shippingSettingsPromise = fetch('/api/shipping-settings')
-    .then(r => r.json())
-    .catch(() => ({ flatRateCents: 0, freeThresholdCents: 0, expressRateCents: 0 }));
+  const savedAddress = getSavedAddress();
 
   root.innerHTML = `
     <div>
@@ -795,17 +813,20 @@ function renderCartPage(){
       <h2>Order summary</h2>
 
       <div class="field" style="margin-bottom:16px;">
-        <span class="flabel">Shipping method</span>
-        <div class="shipping-methods" id="shippingMethods">
-          <label class="shipping-method active" data-method="standard">
-            <input type="radio" name="shippingMethod" value="standard" checked>
-            <span>Standard</span><span class="mono" id="standardRateLabel">—</span>
-          </label>
-          <label class="shipping-method" data-method="express">
-            <input type="radio" name="shippingMethod" value="express">
-            <span>Express</span><span class="mono" id="expressRateLabel">—</span>
-          </label>
+        <span class="flabel">Shipping address</span>
+        <div class="ship-address-form">
+          <select id="shipCountry">
+            ${COUNTRIES.map(([code, name]) => `<option value="${code}" ${(savedAddress.country || 'AU') === code ? 'selected' : ''}>${name}</option>`).join('')}
+          </select>
+          <input type="text" id="shipLine1" placeholder="Address line 1" autocomplete="address-line1" value="${savedAddress.line1 || ''}">
+          <input type="text" id="shipLine2" placeholder="Address line 2 (optional)" autocomplete="address-line2" value="${savedAddress.line2 || ''}">
+          <div class="row2">
+            <input type="text" id="shipCity" placeholder="City" autocomplete="address-level2" value="${savedAddress.city || ''}">
+            <input type="text" id="shipState" placeholder="State / region" autocomplete="address-level1" value="${savedAddress.state || ''}">
+          </div>
+          <input type="text" id="shipPostcode" placeholder="Postcode" autocomplete="postal-code" value="${savedAddress.postcode || ''}">
         </div>
+        <div class="ship-quote-note" id="shipQuoteNote">Enter your shipping address to see the cost.</div>
       </div>
 
       <div class="field" style="margin-bottom:16px;">
@@ -821,24 +842,40 @@ function renderCartPage(){
       <div class="cart-summary-row" id="cartDiscountRow" style="display:none;"><span>Discount</span><span class="mono" id="cartDiscountVal"></span></div>
       <div class="cart-summary-row" id="cartShippingRow"><span>Shipping</span><span class="mono">—</span></div>
       <div class="cart-summary-row total"><span>Total</span><span class="mono" id="cartTotalVal">${money(subtotal)}</span></div>
-      <div class="note" id="cartShippingNote"></div>
-      <button class="checkout-btn" id="checkoutBtn">Checkout</button>
+      <button class="checkout-btn" id="checkoutBtn" disabled>Checkout</button>
       <div class="checkout-error" id="checkoutError"></div>
     </div>
   `;
 
-  let shippingSettings = { flatRateCents: 0, freeThresholdCents: 0, expressRateCents: 0 };
-  let shippingMethod = 'standard';
+  let shippingSettings = { auFreeThresholdCents: 0 };
   let appliedDiscount = null; // { code, discountCents } once validated
+  let currentQuote = null; // { cents, isLocalDelivery, label, note } once a quote succeeds
+  let quoteRequestId = 0;
+
+  fetch('/api/shipping-settings').then(r => r.json()).then((settings) => {
+    shippingSettings = settings;
+    if(currentQuote) refreshQuote(); // redo the progress-message math now the threshold is known
+  }).catch(() => {});
+
+  function currentAddress(){
+    return {
+      country: document.getElementById('shipCountry').value,
+      line1: document.getElementById('shipLine1').value.trim(),
+      line2: document.getElementById('shipLine2').value.trim(),
+      city: document.getElementById('shipCity').value.trim(),
+      state: document.getElementById('shipState').value.trim(),
+      postcode: document.getElementById('shipPostcode').value.trim(),
+    };
+  }
 
   function recalcTotals(){
-    const subtotalCents = Math.round(subtotal * 100);
-    const shippingCents = calcShippingCentsLocal(subtotalCents, shippingMethod, shippingSettings);
+    const shippingCents = currentQuote ? currentQuote.cents : 0;
     const discountCents = appliedDiscount ? appliedDiscount.discountCents : 0;
     const total = Math.max(0, subtotal - discountCents / 100 + shippingCents / 100);
 
-    document.getElementById('cartShippingRow').innerHTML =
-      `<span>Shipping</span><span class="mono">${shippingCents === 0 ? 'Free' : money(shippingCents / 100)}</span>`;
+    document.getElementById('cartShippingRow').innerHTML = currentQuote
+      ? `<span>${currentQuote.label}</span><span class="mono">${shippingCents === 0 ? 'Free' : money(shippingCents / 100)}</span>`
+      : `<span>Shipping</span><span class="mono">—</span>`;
     document.getElementById('cartTotalVal').textContent = money(total);
 
     const discountRow = document.getElementById('cartDiscountRow');
@@ -848,32 +885,75 @@ function renderCartPage(){
     }else{
       discountRow.style.display = 'none';
     }
+  }
 
-    const note = document.getElementById('cartShippingNote');
-    if(shippingMethod === 'standard' && shippingCents > 0 && shippingSettings.freeThresholdCents > subtotalCents){
-      note.textContent = `Free standard shipping on orders over ${money(shippingSettings.freeThresholdCents / 100)}.`;
-    } else {
-      note.textContent = '';
+  // The single source of truth for shipping is the server (see
+  // /api/shipping/quote → lib/shipping.js) — this just calls it every time
+  // the address or cart changes, so the price shown here always matches
+  // what checkout will actually charge.
+  async function refreshQuote(){
+    const address = currentAddress();
+    const noteEl = document.getElementById('shipQuoteNote');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+
+    if(!address.line1 || !address.city || !address.postcode || !address.country){
+      currentQuote = null;
+      checkoutBtn.disabled = true;
+      noteEl.className = 'ship-quote-note';
+      noteEl.textContent = 'Enter your shipping address to see the cost.';
+      recalcTotals();
+      return;
+    }
+
+    const myRequestId = ++quoteRequestId;
+    noteEl.className = 'ship-quote-note';
+    noteEl.textContent = 'Calculating shipping…';
+
+    try{
+      const res = await fetch('/api/shipping/quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subtotalCents: Math.round(subtotal * 100), ...address }),
+      });
+      const data = await res.json();
+      if(myRequestId !== quoteRequestId) return; // a newer edit already superseded this request
+
+      currentQuote = data;
+      checkoutBtn.disabled = false;
+      saveAddress(address);
+      recalcTotals();
+
+      if(data.isLocalDelivery){
+        noteEl.textContent = data.label;
+      } else if(address.country === 'AU' && data.cents > 0 && shippingSettings.auFreeThresholdCents){
+        const remainingCents = shippingSettings.auFreeThresholdCents - Math.round(subtotal * 100);
+        if(remainingCents > 0){
+          noteEl.textContent = `You're ${money(remainingCents / 100)} away from free shipping.`;
+          noteEl.classList.add('progress');
+        } else {
+          noteEl.textContent = '';
+        }
+      } else {
+        noteEl.textContent = data.note || '';
+      }
+    }catch(e){
+      if(myRequestId !== quoteRequestId) return;
+      currentQuote = null;
+      checkoutBtn.disabled = true;
+      noteEl.textContent = 'Could not calculate shipping — check your connection and try again.';
     }
   }
 
-  shippingSettingsPromise.then((settings) => {
-    shippingSettings = settings;
-    document.getElementById('standardRateLabel').textContent =
-      settings.flatRateCents === 0 ? 'Free' : money(settings.flatRateCents / 100);
-    document.getElementById('expressRateLabel').textContent = money(settings.expressRateCents / 100);
-    recalcTotals();
-  });
-
-  root.querySelectorAll('#shippingMethods input[name="shippingMethod"]').forEach(input => {
-    input.addEventListener('change', () => {
-      shippingMethod = input.value;
-      root.querySelectorAll('.shipping-method').forEach(label => {
-        label.classList.toggle('active', label.dataset.method === shippingMethod);
-      });
-      recalcTotals();
+  let addressDebounce;
+  ['shipCountry', 'shipLine1', 'shipLine2', 'shipCity', 'shipState', 'shipPostcode'].forEach((id) => {
+    const el = document.getElementById(id);
+    const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+    el.addEventListener(evt, () => {
+      clearTimeout(addressDebounce);
+      addressDebounce = setTimeout(refreshQuote, 400);
     });
   });
+  refreshQuote();
 
   document.getElementById('discountApplyBtn').addEventListener('click', async () => {
     const codeInput = document.getElementById('discountInput');
@@ -924,6 +1004,10 @@ function renderCartPage(){
     const btn = document.getElementById('checkoutBtn');
     const errEl = document.getElementById('checkoutError');
     errEl.textContent = '';
+    if(!currentQuote){
+      errEl.textContent = 'Please complete your shipping address first.';
+      return;
+    }
     btn.disabled = true;
     btn.textContent = 'Redirecting…';
     try{
@@ -932,7 +1016,7 @@ function renderCartPage(){
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: getCart().map(l => ({ productId: l.productId, size: l.size, color: l.color, quantity: l.qty })),
-          shippingMethod,
+          shippingAddress: currentAddress(),
           discountCode: appliedDiscount ? appliedDiscount.code : '',
         }),
       });
@@ -950,12 +1034,6 @@ function renderCartPage(){
       btn.textContent = 'Checkout';
     }
   });
-}
-
-function calcShippingCentsLocal(subtotalCents, method, settings){
-  if(method === 'express') return settings.expressRateCents || 0;
-  if(subtotalCents >= (settings.freeThresholdCents || 0)) return 0;
-  return settings.flatRateCents || 0;
 }
 
 /* ---------------- ORDER CONFIRMATION PAGE ---------------- */
@@ -1005,6 +1083,7 @@ async function renderOrderConfirmationPage(){
       <div class="row"><span>Shipping</span><span class="mono">${order.shippingCents === 0 ? 'Free' : money(order.shippingCents / 100)}</span></div>
       <div class="row total"><span>Total</span><span class="mono">${money(order.totalCents / 100)}</span></div>
     </div>
+    ${order.isLocalDelivery ? `<p class="note">Free local delivery — hand-delivered by Chronique within 3 business days.</p>` : ''}
   `;
 }
 

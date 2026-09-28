@@ -1,0 +1,2842 @@
+{
+  "referencePoint": {
+    "label": "Logan Central QLD 4114",
+    "lat": -27.652812,
+    "lon": 153.110764
+  },
+  "radiusKm": 100,
+  "note": "Postcodes within 100km (straight-line) of Logan Central QLD 4114. Add or remove a postcode object below to adjust the list by hand - no code changes needed.",
+  "postcodes": [
+    {
+      "postcode": "4114",
+      "state": "QLD",
+      "distanceKm": 0.0,
+      "suburbs": [
+        "KINGSTON",
+        "LOGAN CENTRAL",
+        "LOGAN CITY BC",
+        "LOGAN CITY DC",
+        "TRINDER PARK",
+        "WOODRIDGE",
+        "WOODRIDGE EAST"
+      ]
+    },
+    {
+      "postcode": "4117",
+      "state": "QLD",
+      "distanceKm": 2.9,
+      "suburbs": [
+        "BERRINBA",
+        "KARAWATHA"
+      ]
+    },
+    {
+      "postcode": "4131",
+      "state": "QLD",
+      "distanceKm": 3.1,
+      "suburbs": [
+        "LOGANLEA",
+        "MEADOWBROOK"
+      ]
+    },
+    {
+      "postcode": "4127",
+      "state": "QLD",
+      "distanceKm": 4.0,
+      "suburbs": [
+        "CHATSWOOD HILLS",
+        "DAISY HILL",
+        "PRIESTDALE",
+        "SLACKS CREEK",
+        "SPRINGWOOD",
+        "SPRINGWOOD BC"
+      ]
+    },
+    {
+      "postcode": "4132",
+      "state": "QLD",
+      "distanceKm": 4.1,
+      "suburbs": [
+        "CRESTMEAD",
+        "CRESTMEAD DC",
+        "MARSDEN",
+        "MARSDEN POSTAL DEPOT"
+      ]
+    },
+    {
+      "postcode": "4119",
+      "state": "QLD",
+      "distanceKm": 4.6,
+      "suburbs": [
+        "UNDERWOOD"
+      ]
+    },
+    {
+      "postcode": "4112",
+      "state": "QLD",
+      "distanceKm": 5.2,
+      "suburbs": [
+        "KURABY"
+      ]
+    },
+    {
+      "postcode": "4205",
+      "state": "QLD",
+      "distanceKm": 5.9,
+      "suburbs": [
+        "BETHANIA"
+      ]
+    },
+    {
+      "postcode": "4128",
+      "state": "QLD",
+      "distanceKm": 6.2,
+      "suburbs": [
+        "KIMBERLEY PARK",
+        "LOGAN HYPERDOME BC",
+        "SHAILER PARK",
+        "TANAH MERAH"
+      ]
+    },
+    {
+      "postcode": "4116",
+      "state": "QLD",
+      "distanceKm": 6.3,
+      "suburbs": [
+        "CALAMVALE",
+        "DREWVALE",
+        "STRETTON"
+      ]
+    },
+    {
+      "postcode": "4113",
+      "state": "QLD",
+      "distanceKm": 7.6,
+      "suburbs": [
+        "EIGHT MILE PLAINS",
+        "FRUITGROVE",
+        "RUNCORN"
+      ]
+    },
+    {
+      "postcode": "4123",
+      "state": "QLD",
+      "distanceKm": 7.7,
+      "suburbs": [
+        "PRIESTS GULLY",
+        "ROCHEDALE",
+        "ROCHEDALE SOUTH"
+      ]
+    },
+    {
+      "postcode": "4133",
+      "state": "QLD",
+      "distanceKm": 7.9,
+      "suburbs": [
+        "CHAMBERS FLAT",
+        "LOGAN RESERVE",
+        "WATERFORD",
+        "WATERFORD WEST"
+      ]
+    },
+    {
+      "postcode": "4129",
+      "state": "QLD",
+      "distanceKm": 8.1,
+      "suburbs": [
+        "LOGANDALE",
+        "LOGANHOLME",
+        "LOGANHOLME BC",
+        "LOGANHOLME DC"
+      ]
+    },
+    {
+      "postcode": "4118",
+      "state": "QLD",
+      "distanceKm": 8.5,
+      "suburbs": [
+        "BROWNS PLAINS",
+        "BROWNS PLAINS BC",
+        "BROWNSLEIGH",
+        "FORESTDALE",
+        "HERITAGE PARK",
+        "HILLCREST",
+        "REGENTS PARK"
+      ]
+    },
+    {
+      "postcode": "4115",
+      "state": "QLD",
+      "distanceKm": 8.8,
+      "suburbs": [
+        "ALGESTER",
+        "PARKINSON"
+      ]
+    },
+    {
+      "postcode": "4109",
+      "state": "QLD",
+      "distanceKm": 9.7,
+      "suburbs": [
+        "ALTANDI",
+        "BANOON",
+        "MACGREGOR",
+        "ROBERTSON",
+        "SUNNYBANK",
+        "SUNNYBANK HILLS",
+        "SUNNYBANK SOUTH"
+      ]
+    },
+    {
+      "postcode": "4110",
+      "state": "QLD",
+      "distanceKm": 10.9,
+      "suburbs": [
+        "ACACIA RIDGE",
+        "ACACIA RIDGE BC",
+        "ACACIA RIDGE DC",
+        "HEATHWOOD",
+        "HEATHWOOD DF",
+        "LARAPINTA",
+        "PALLARA",
+        "WILLAWONG"
+      ]
+    },
+    {
+      "postcode": "4125",
+      "state": "QLD",
+      "distanceKm": 11.0,
+      "suburbs": [
+        "MUNRUBEN",
+        "PARK RIDGE",
+        "PARK RIDGE SOUTH"
+      ]
+    },
+    {
+      "postcode": "4156",
+      "state": "QLD",
+      "distanceKm": 11.3,
+      "suburbs": [
+        "BURBANK",
+        "MACKENZIE"
+      ]
+    },
+    {
+      "postcode": "4122",
+      "state": "QLD",
+      "distanceKm": 12.4,
+      "suburbs": [
+        "MANSFIELD",
+        "MANSFIELD BC",
+        "MANSFIELD DC",
+        "MOUNT GRAVATT",
+        "MOUNT GRAVATT EAST",
+        "UPPER MOUNT GRAVATT",
+        "UPPER MOUNT GRAVATT BC",
+        "WISHART"
+      ]
+    },
+    {
+      "postcode": "4111",
+      "state": "QLD",
+      "distanceKm": 12.7,
+      "suburbs": [
+        "GRIFFITH UNIVERSITY",
+        "NATHAN"
+      ]
+    },
+    {
+      "postcode": "4222",
+      "state": "QLD",
+      "distanceKm": 12.7,
+      "suburbs": [
+        "GRIFFITH UNIVERSITY"
+      ]
+    },
+    {
+      "postcode": "4207",
+      "state": "QLD",
+      "distanceKm": 12.9,
+      "suburbs": [
+        "ALBERTON",
+        "BAHRS SCRUB",
+        "BANNOCKBURN",
+        "BEENLEIGH",
+        "BELIVAH",
+        "BUCCAN",
+        "CABBAGE TREE POINT",
+        "CEDAR CREEK",
+        "EAGLEBY",
+        "EDENS LANDING",
+        "HOLMVIEW",
+        "KAIRABAH",
+        "LOGAN VILLAGE",
+        "LUSCOMBE",
+        "MOUNT WARREN PARK",
+        "STAPYLTON",
+        "STEIGLITZ",
+        "WINDAROO",
+        "WOLFFDENE",
+        "WOONGOOLBA",
+        "YARRABILBA",
+        "YATALA",
+        "YATALA DC",
+        "YELLOW WOOD"
+      ]
+    },
+    {
+      "postcode": "4108",
+      "state": "QLD",
+      "distanceKm": 13.0,
+      "suburbs": [
+        "ARCHERFIELD",
+        "ARCHERFIELD BC",
+        "COOPERS PLAINS"
+      ]
+    },
+    {
+      "postcode": "4130",
+      "state": "QLD",
+      "distanceKm": 13.2,
+      "suburbs": [
+        "CARBROOK",
+        "CORNUBIA"
+      ]
+    },
+    {
+      "postcode": "4157",
+      "state": "QLD",
+      "distanceKm": 13.4,
+      "suburbs": [
+        "CAPALABA",
+        "CAPALABA BC",
+        "CAPALABA DC",
+        "CAPALABA WEST",
+        "SHELDON"
+      ]
+    },
+    {
+      "postcode": "4107",
+      "state": "QLD",
+      "distanceKm": 13.7,
+      "suburbs": [
+        "SALISBURY",
+        "SALISBURY EAST"
+      ]
+    },
+    {
+      "postcode": "4077",
+      "state": "QLD",
+      "distanceKm": 15.0,
+      "suburbs": [
+        "DOOLANDELLA",
+        "DURACK",
+        "INALA",
+        "INALA EAST",
+        "INALA HEIGHTS",
+        "INALA WEST",
+        "RICHLANDS",
+        "RICHLANDS BC",
+        "RICHLANDS DC",
+        "SERVICETON"
+      ]
+    },
+    {
+      "postcode": "4121",
+      "state": "QLD",
+      "distanceKm": 15.1,
+      "suburbs": [
+        "EKIBIN",
+        "HOLLAND PARK",
+        "HOLLAND PARK EAST",
+        "HOLLAND PARK WEST",
+        "MOUNT THOMPSON",
+        "TARRAGINDI",
+        "WELLERS HILL"
+      ]
+    },
+    {
+      "postcode": "4124",
+      "state": "QLD",
+      "distanceKm": 15.1,
+      "suburbs": [
+        "BORONIA HEIGHTS",
+        "GREENBANK",
+        "LYONS",
+        "NEW BEITH",
+        "SILVERBARK RIDGE"
+      ]
+    },
+    {
+      "postcode": "4106",
+      "state": "QLD",
+      "distanceKm": 15.3,
+      "suburbs": [
+        "BRISBANE MARKET",
+        "ROCKLEA",
+        "ROCKLEA DC"
+      ]
+    },
+    {
+      "postcode": "4165",
+      "state": "QLD",
+      "distanceKm": 15.4,
+      "suburbs": [
+        "MOUNT COTTON",
+        "POINT HALLORAN",
+        "POINT TALBURPIN",
+        "REDLAND BAY",
+        "VICTORIA POINT",
+        "VICTORIA POINT WEST"
+      ]
+    },
+    {
+      "postcode": "4155",
+      "state": "QLD",
+      "distanceKm": 15.6,
+      "suburbs": [
+        "CHANDLER"
+      ]
+    },
+    {
+      "postcode": "4105",
+      "state": "QLD",
+      "distanceKm": 16.0,
+      "suburbs": [
+        "CLIFTON HILL",
+        "MOOROOKA",
+        "MOORVALE",
+        "TENNYSON",
+        "YEERONGPILLY"
+      ]
+    },
+    {
+      "postcode": "4153",
+      "state": "QLD",
+      "distanceKm": 16.0,
+      "suburbs": [
+        "BELMONT",
+        "BELMONT HEIGHTS"
+      ]
+    },
+    {
+      "postcode": "4078",
+      "state": "QLD",
+      "distanceKm": 16.4,
+      "suburbs": [
+        "ELLEN GROVE",
+        "FOREST LAKE"
+      ]
+    },
+    {
+      "postcode": "4152",
+      "state": "QLD",
+      "distanceKm": 16.9,
+      "suburbs": [
+        "CAMP HILL",
+        "CARINA",
+        "CARINA HEIGHTS",
+        "CARINA NORTH",
+        "CARINDALE",
+        "WHITES HILL"
+      ]
+    },
+    {
+      "postcode": "4120",
+      "state": "QLD",
+      "distanceKm": 17.3,
+      "suburbs": [
+        "GREENSLOPES",
+        "LORETO HILL",
+        "STONES CORNER"
+      ]
+    },
+    {
+      "postcode": "4075",
+      "state": "QLD",
+      "distanceKm": 17.4,
+      "suburbs": [
+        "CORINDA",
+        "GRACEVILLE",
+        "GRACEVILLE EAST",
+        "OXLEY",
+        "SHERWOOD"
+      ]
+    },
+    {
+      "postcode": "4164",
+      "state": "QLD",
+      "distanceKm": 17.4,
+      "suburbs": [
+        "PINKLANDS",
+        "THORNLANDS"
+      ]
+    },
+    {
+      "postcode": "4161",
+      "state": "QLD",
+      "distanceKm": 17.5,
+      "suburbs": [
+        "ALEXANDRA HILLS"
+      ]
+    },
+    {
+      "postcode": "4103",
+      "state": "QLD",
+      "distanceKm": 17.6,
+      "suburbs": [
+        "ANNERLEY",
+        "ANNERLEY DC",
+        "FAIRFIELD",
+        "FAIRFIELD GARDENS",
+        "THOMPSON ESTATE"
+      ]
+    },
+    {
+      "postcode": "4151",
+      "state": "QLD",
+      "distanceKm": 17.7,
+      "suburbs": [
+        "COORPAROO",
+        "COORPAROO BC",
+        "COORPAROO DC"
+      ]
+    },
+    {
+      "postcode": "4104",
+      "state": "QLD",
+      "distanceKm": 18.1,
+      "suburbs": [
+        "YERONGA",
+        "YERONGA WEST"
+      ]
+    },
+    {
+      "postcode": "4154",
+      "state": "QLD",
+      "distanceKm": 18.6,
+      "suburbs": [
+        "GUMDALE",
+        "RANSOME",
+        "WAKERLEY"
+      ]
+    },
+    {
+      "postcode": "4102",
+      "state": "QLD",
+      "distanceKm": 19.1,
+      "suburbs": [
+        "BURANDA",
+        "DUTTON PARK",
+        "PRINCESS ALEXANDRA HOSPITAL",
+        "WOOLLOONGABBA"
+      ]
+    },
+    {
+      "postcode": "4280",
+      "state": "QLD",
+      "distanceKm": 19.2,
+      "suburbs": [
+        "FLAGSTONE",
+        "GLENLOGAN",
+        "JIMBOOMBA",
+        "MACLEAN",
+        "NORTH MACLEAN",
+        "RIVERBEND",
+        "SOUTH MACLEAN",
+        "STOCKLEIGH"
+      ]
+    },
+    {
+      "postcode": "4159",
+      "state": "QLD",
+      "distanceKm": 19.4,
+      "suburbs": [
+        "BIRKDALE"
+      ]
+    },
+    {
+      "postcode": "4073",
+      "state": "QLD",
+      "distanceKm": 19.5,
+      "suburbs": [
+        "SEVENTEEN MILE ROCKS",
+        "SINNAMON PARK"
+      ]
+    },
+    {
+      "postcode": "4173",
+      "state": "QLD",
+      "distanceKm": 19.7,
+      "suburbs": [
+        "TINGALPA",
+        "TINGALPA BC",
+        "TINGALPA DC"
+      ]
+    },
+    {
+      "postcode": "4067",
+      "state": "QLD",
+      "distanceKm": 19.9,
+      "suburbs": [
+        "IRONSIDE",
+        "ST LUCIA",
+        "ST LUCIA SOUTH"
+      ]
+    },
+    {
+      "postcode": "4169",
+      "state": "QLD",
+      "distanceKm": 20.0,
+      "suburbs": [
+        "EAST BRISBANE",
+        "KANGAROO POINT",
+        "STANLEY BRIDGE"
+      ]
+    },
+    {
+      "postcode": "4163",
+      "state": "QLD",
+      "distanceKm": 20.1,
+      "suburbs": [
+        "CLEVELAND",
+        "CLEVELAND DC"
+      ]
+    },
+    {
+      "postcode": "4076",
+      "state": "QLD",
+      "distanceKm": 20.2,
+      "suburbs": [
+        "DARRA",
+        "WACOL",
+        "WACOL EAST IMMIGRATION CENTRE"
+      ]
+    },
+    {
+      "postcode": "4158",
+      "state": "QLD",
+      "distanceKm": 20.4,
+      "suburbs": [
+        "THORNESIDE"
+      ]
+    },
+    {
+      "postcode": "4170",
+      "state": "QLD",
+      "distanceKm": 20.6,
+      "suburbs": [
+        "CANNON HILL",
+        "COLMSLIE",
+        "MORNINGSIDE",
+        "NORMAN PARK",
+        "SEVEN HILLS"
+      ]
+    },
+    {
+      "postcode": "4300",
+      "state": "QLD",
+      "distanceKm": 20.6,
+      "suburbs": [
+        "AUGUSTINE HEIGHTS",
+        "BELLBIRD PARK",
+        "BROOKWATER",
+        "CAMIRA",
+        "CAROLE PARK",
+        "GAILES",
+        "GOODNA",
+        "GOODNA DC",
+        "GOODNA EAST",
+        "OPOSSUM CREEK",
+        "SPRING MOUNTAIN",
+        "SPRINGFIELD",
+        "SPRINGFIELD CENTRAL",
+        "SPRINGFIELD LAKES"
+      ]
+    },
+    {
+      "postcode": "4208",
+      "state": "QLD",
+      "distanceKm": 20.7,
+      "suburbs": [
+        "BURNSIDE",
+        "GILBERTON",
+        "HALFWAY CREEK",
+        "JACOBS WELL",
+        "KINGSHOLME",
+        "NORWELL",
+        "ORMEAU",
+        "ORMEAU HILLS"
+      ]
+    },
+    {
+      "postcode": "4068",
+      "state": "QLD",
+      "distanceKm": 20.9,
+      "suburbs": [
+        "CHELMER",
+        "INDOOROOPILLY",
+        "INDOOROOPILLY CENTRE",
+        "LONG POCKET",
+        "TARINGA"
+      ]
+    },
+    {
+      "postcode": "4160",
+      "state": "QLD",
+      "distanceKm": 20.9,
+      "suburbs": [
+        "EROBIN",
+        "ORMISTON",
+        "WELLINGTON POINT"
+      ]
+    },
+    {
+      "postcode": "4101",
+      "state": "QLD",
+      "distanceKm": 21.2,
+      "suburbs": [
+        "HIGHGATE HILL",
+        "MATER HILL",
+        "MATER HOSPITAL",
+        "SOUTH BANK",
+        "SOUTH BRISBANE",
+        "SOUTH BRISBANE BC",
+        "WEST END"
+      ]
+    },
+    {
+      "postcode": "4005",
+      "state": "QLD",
+      "distanceKm": 21.3,
+      "suburbs": [
+        "NEW FARM",
+        "TENERIFFE"
+      ]
+    },
+    {
+      "postcode": "4074",
+      "state": "QLD",
+      "distanceKm": 21.6,
+      "suburbs": [
+        "JAMBOREE HEIGHTS",
+        "JINDALEE",
+        "MIDDLE PARK",
+        "MOUNT OMMANEY",
+        "RIVERHILLS",
+        "SUMNER",
+        "SUMNER PARK BC",
+        "WESTLAKE"
+      ]
+    },
+    {
+      "postcode": "4172",
+      "state": "QLD",
+      "distanceKm": 21.6,
+      "suburbs": [
+        "MURARRIE"
+      ]
+    },
+    {
+      "postcode": "4000",
+      "state": "QLD",
+      "distanceKm": 22.0,
+      "suburbs": [
+        "BRISBANE",
+        "BRISBANE ADELAIDE STREET",
+        "BRISBANE CITY",
+        "BRISBANE CITY DC",
+        "BRISBANE GPO",
+        "BRISBANE-CITY",
+        "PARLIAMENT HOUSE",
+        "PETRIE TERRACE",
+        "SPRING HILL"
+      ]
+    },
+    {
+      "postcode": "4171",
+      "state": "QLD",
+      "distanceKm": 22.4,
+      "suburbs": [
+        "BALMORAL",
+        "BULIMBA",
+        "GALLOWAYS HILL",
+        "HAWTHORNE"
+      ]
+    },
+    {
+      "postcode": "4174",
+      "state": "QLD",
+      "distanceKm": 22.6,
+      "suburbs": [
+        "DOBOY",
+        "HEMMANT"
+      ]
+    },
+    {
+      "postcode": "4270",
+      "state": "QLD",
+      "distanceKm": 23.4,
+      "suburbs": [
+        "TAMBORINE",
+        "TAMBORINE VILLAGE"
+      ]
+    },
+    {
+      "postcode": "4064",
+      "state": "QLD",
+      "distanceKm": 23.6,
+      "suburbs": [
+        "BAROONA",
+        "MILTON",
+        "MILTON BC",
+        "PADDINGTON",
+        "ROSALIE"
+      ]
+    },
+    {
+      "postcode": "4066",
+      "state": "QLD",
+      "distanceKm": 24.1,
+      "suburbs": [
+        "AUCHENFLOWER",
+        "MOUNT COOT-THA",
+        "STUARTHOLME",
+        "TOOWONG",
+        "TOOWONG BC",
+        "TOOWONG DC",
+        "TORWOOD"
+      ]
+    },
+    {
+      "postcode": "4059",
+      "state": "QLD",
+      "distanceKm": 24.5,
+      "suburbs": [
+        "BALLYMORE",
+        "ITHACA",
+        "KELVIN GROVE",
+        "KELVIN GROVE BC",
+        "KELVIN GROVE DC",
+        "NORMANBY",
+        "RED HILL"
+      ]
+    },
+    {
+      "postcode": "4007",
+      "state": "QLD",
+      "distanceKm": 24.6,
+      "suburbs": [
+        "ASCOT",
+        "BRISBANE AIRPORT",
+        "DOOMBEN",
+        "HAMILTON",
+        "HAMILTON CENTRAL",
+        "WHINSTANES"
+      ]
+    },
+    {
+      "postcode": "4065",
+      "state": "QLD",
+      "distanceKm": 25.0,
+      "suburbs": [
+        "BARDON",
+        "BARDON WEST",
+        "JUBILEE",
+        "RAINWORTH"
+      ]
+    },
+    {
+      "postcode": "4301",
+      "state": "QLD",
+      "distanceKm": 25.0,
+      "suburbs": [
+        "COLLINGWOOD PARK",
+        "GREENWOOD VILLAGE",
+        "REDBANK",
+        "REDBANK PLAINS"
+      ]
+    },
+    {
+      "postcode": "4010",
+      "state": "QLD",
+      "distanceKm": 25.3,
+      "suburbs": [
+        "ALBION",
+        "ALBION BC",
+        "ALBION DC",
+        "BREAKFAST CREEK"
+      ]
+    },
+    {
+      "postcode": "4070",
+      "state": "QLD",
+      "distanceKm": 25.8,
+      "suburbs": [
+        "ANSTEAD",
+        "BELLBOWRIE",
+        "MOGGILL",
+        "PRIORS POCKET"
+      ]
+    },
+    {
+      "postcode": "4060",
+      "state": "QLD",
+      "distanceKm": 26.2,
+      "suburbs": [
+        "ASHGROVE",
+        "ASHGROVE EAST",
+        "ASHGROVE WEST",
+        "DORRINGTON",
+        "ST JOHNS WOOD"
+      ]
+    },
+    {
+      "postcode": "4285",
+      "state": "QLD",
+      "distanceKm": 26.2,
+      "suburbs": [
+        "ALLENVIEW",
+        "BEAUDESERT",
+        "BIRNAM",
+        "BROMELTON",
+        "CAINBABLE",
+        "CEDAR GROVE",
+        "CEDAR VALE",
+        "CHINGHEE CREEK",
+        "CHRISTMAS CREEK",
+        "CRYNA",
+        "DARLINGTON",
+        "FLINDERS LAKES",
+        "GLENEAGLE",
+        "HILLVIEW",
+        "ILBOGAN",
+        "INNISPLAIN",
+        "JOSEPHVILLE",
+        "KAGARU",
+        "KERRY",
+        "KNAPP CREEK",
+        "KOORALBYN",
+        "LAMINGTON",
+        "LARAVALE",
+        "MONARCH GLEN",
+        "MOUNT GIPPS",
+        "MUNDOOLUN",
+        "NINDOOINBAH",
+        "OAKY CREEK",
+        "TABOOBA",
+        "TABRAGALBA",
+        "TAMROOKUM",
+        "TAMROOKUM CREEK",
+        "UNDULLAH",
+        "VERESDALE",
+        "VERESDALE SCRUB",
+        "WOODHILL"
+      ]
+    },
+    {
+      "postcode": "4306",
+      "state": "QLD",
+      "distanceKm": 26.2,
+      "suburbs": [
+        "AMBERLEY",
+        "BANKS CREEK",
+        "BARELLAN POINT",
+        "BELLHAVEN",
+        "BLACKSOIL",
+        "BLACKWALL",
+        "BORALLON",
+        "CHUWAR",
+        "DEEBING HEIGHTS",
+        "DUNDAS",
+        "ENGLAND CREEK",
+        "FAIRNEY VIEW",
+        "FERNVALE",
+        "FOREST GLADE",
+        "GLAMORGAN VALE",
+        "GOOLMAN",
+        "HAIGSLEA",
+        "HOLTS HILL",
+        "IRONBARK",
+        "KARALEE",
+        "KARANA DOWNS",
+        "KARRABIN",
+        "KHOLO",
+        "LAKE MANCHESTER",
+        "LARK HILL",
+        "LOAMSIDE",
+        "MONSILDALE",
+        "MOUNT CROSBY",
+        "MOUNT MARROW",
+        "MUIRLEA",
+        "PEAK CROSSING",
+        "PINE MOUNTAIN",
+        "PURGA",
+        "RIPLEY",
+        "SOUTH RIPLEY",
+        "SPLIT YARD CREEK",
+        "SWANBANK",
+        "THAGOONA",
+        "VERNOR",
+        "WALLOON",
+        "WANORA",
+        "WASHPOOL",
+        "WEST AMBERLEY",
+        "WHITE ROCK",
+        "WILLOWBANK",
+        "WIVENHOE",
+        "WIVENHOE POCKET"
+      ]
+    },
+    {
+      "postcode": "4011",
+      "state": "QLD",
+      "distanceKm": 26.4,
+      "suburbs": [
+        "CLAYFIELD",
+        "EAGLE JUNCTION",
+        "HENDRA"
+      ]
+    },
+    {
+      "postcode": "4030",
+      "state": "QLD",
+      "distanceKm": 26.4,
+      "suburbs": [
+        "EILDON HILL",
+        "KALINGA",
+        "LUTWYCHE",
+        "WINDSOR",
+        "WOOLOOWIN"
+      ]
+    },
+    {
+      "postcode": "4069",
+      "state": "QLD",
+      "distanceKm": 26.7,
+      "suburbs": [
+        "BROOKFIELD",
+        "CHAPEL HILL",
+        "FIG TREE POCKET",
+        "KENMORE",
+        "KENMORE DC",
+        "KENMORE EAST",
+        "KENMORE HILLS",
+        "LONE PINE",
+        "PINJARRA HILLS",
+        "PULLENVALE",
+        "UPPER BROOKFIELD"
+      ]
+    },
+    {
+      "postcode": "4184",
+      "state": "QLD",
+      "distanceKm": 27.1,
+      "suburbs": [
+        "COOCHIEMUDLO ISLAND",
+        "KARRAGARRA ISLAND",
+        "LAMB ISLAND",
+        "MACLEAY ISLAND",
+        "PEEL ISLAND",
+        "PERULPA ISLAND",
+        "RUSSELL ISLAND"
+      ]
+    },
+    {
+      "postcode": "4303",
+      "state": "QLD",
+      "distanceKm": 27.2,
+      "suburbs": [
+        "DINMORE",
+        "NEW CHUM",
+        "RIVERVIEW"
+      ]
+    },
+    {
+      "postcode": "4051",
+      "state": "QLD",
+      "distanceKm": 27.3,
+      "suburbs": [
+        "ALDERLEY",
+        "ENOGGERA",
+        "GAYTHORNE",
+        "GRANGE",
+        "NEWMARKET",
+        "THE GRANGE",
+        "WILSTON"
+      ]
+    },
+    {
+      "postcode": "4009",
+      "state": "QLD",
+      "distanceKm": 27.5,
+      "suburbs": [
+        "EAGLE FARM",
+        "EAGLE FARM BC"
+      ]
+    },
+    {
+      "postcode": "4061",
+      "state": "QLD",
+      "distanceKm": 27.8,
+      "suburbs": [
+        "THE GAP"
+      ]
+    },
+    {
+      "postcode": "4178",
+      "state": "QLD",
+      "distanceKm": 28.0,
+      "suburbs": [
+        "LINDUM",
+        "LYTTON",
+        "PORT OF BRISBANE",
+        "WYNNUM",
+        "WYNNUM CENTRAL",
+        "WYNNUM NORTH",
+        "WYNNUM PLAZA",
+        "WYNNUM WEST"
+      ]
+    },
+    {
+      "postcode": "4008",
+      "state": "QLD",
+      "distanceKm": 28.3,
+      "suburbs": [
+        "BRISBANE AIRPORT",
+        "BULWER ISLAND",
+        "MEEANDAH",
+        "MYRTLETOWN",
+        "PINKENBA"
+      ]
+    },
+    {
+      "postcode": "4031",
+      "state": "QLD",
+      "distanceKm": 28.3,
+      "suburbs": [
+        "GLEN KEDRON",
+        "GORDON PARK",
+        "KEDRON"
+      ]
+    },
+    {
+      "postcode": "4012",
+      "state": "QLD",
+      "distanceKm": 28.7,
+      "suburbs": [
+        "NUNDAH",
+        "TOOMBUL",
+        "WAVELL HEIGHTS",
+        "WAVELL HEIGHTS NORTH"
+      ]
+    },
+    {
+      "postcode": "4013",
+      "state": "QLD",
+      "distanceKm": 28.7,
+      "suburbs": [
+        "NORTHGATE",
+        "NORTHGATE MC"
+      ]
+    },
+    {
+      "postcode": "9464",
+      "state": "QLD",
+      "distanceKm": 28.7,
+      "suburbs": [
+        "NORTHGATE MC"
+      ]
+    },
+    {
+      "postcode": "4304",
+      "state": "QLD",
+      "distanceKm": 30.4,
+      "suburbs": [
+        "BLACKSTONE",
+        "BOOVAL",
+        "BOOVAL BC",
+        "BOOVAL DC",
+        "BOOVAL FAIR",
+        "BUNDAMBA",
+        "EBBW VALE",
+        "NORTH BOOVAL",
+        "SILKSTONE"
+      ]
+    },
+    {
+      "postcode": "4053",
+      "state": "QLD",
+      "distanceKm": 30.7,
+      "suburbs": [
+        "BROOKSIDE CENTRE",
+        "EVERTON HILLS",
+        "EVERTON PARK",
+        "MCDOWALL",
+        "MITCHELTON",
+        "OXFORD PARK",
+        "SOMERSET HILLS",
+        "STAFFORD",
+        "STAFFORD BC",
+        "STAFFORD CITY",
+        "STAFFORD DC",
+        "STAFFORD HEIGHTS"
+      ]
+    },
+    {
+      "postcode": "4271",
+      "state": "QLD",
+      "distanceKm": 30.8,
+      "suburbs": [
+        "EAGLE HEIGHTS"
+      ]
+    },
+    {
+      "postcode": "4032",
+      "state": "QLD",
+      "distanceKm": 31.0,
+      "suburbs": [
+        "CHERMSIDE",
+        "CHERMSIDE BC",
+        "CHERMSIDE CENTRE",
+        "CHERMSIDE SOUTH",
+        "CHERMSIDE WEST",
+        "CRAIGSLEA"
+      ]
+    },
+    {
+      "postcode": "4054",
+      "state": "QLD",
+      "distanceKm": 31.0,
+      "suburbs": [
+        "ARANA HILLS",
+        "GROVELY",
+        "KEPERRA"
+      ]
+    },
+    {
+      "postcode": "4014",
+      "state": "QLD",
+      "distanceKm": 31.1,
+      "suburbs": [
+        "BANYO",
+        "NUDGEE",
+        "NUDGEE BEACH",
+        "VIRGINIA",
+        "VIRGINIA BC",
+        "VIRGINIA DC"
+      ]
+    },
+    {
+      "postcode": "4179",
+      "state": "QLD",
+      "distanceKm": 31.6,
+      "suburbs": [
+        "LOTA",
+        "MANLY",
+        "MANLY WEST"
+      ]
+    },
+    {
+      "postcode": "4006",
+      "state": "QLD",
+      "distanceKm": 32.5,
+      "suburbs": [
+        "BOWEN BRIDGE",
+        "BOWEN HILLS",
+        "BRISBANE EXHIBITION",
+        "FORTITUDE VALLEY",
+        "FORTITUDE VALLEY BC",
+        "HERSTON",
+        "MAYNE",
+        "NEWSTEAD"
+      ]
+    },
+    {
+      "postcode": "4209",
+      "state": "QLD",
+      "distanceKm": 32.5,
+      "suburbs": [
+        "CANOWINDRA",
+        "COOMERA",
+        "PIMPAMA",
+        "UPPER COOMERA",
+        "WILLOW VALE"
+      ]
+    },
+    {
+      "postcode": "4272",
+      "state": "QLD",
+      "distanceKm": 33.2,
+      "suburbs": [
+        "MOUNT TAMBORINE",
+        "NORTH TAMBORINE",
+        "TAMBORINE MOUNTAIN"
+      ]
+    },
+    {
+      "postcode": "4034",
+      "state": "QLD",
+      "distanceKm": 33.9,
+      "suburbs": [
+        "ASPLEY",
+        "BOONDALL",
+        "CARSELDINE",
+        "GEEBUNG",
+        "ZILLMERE"
+      ]
+    },
+    {
+      "postcode": "4055",
+      "state": "QLD",
+      "distanceKm": 34.2,
+      "suburbs": [
+        "BUNYA",
+        "FERNY GROVE",
+        "FERNY HILLS",
+        "FERNY HILLS DC",
+        "KEDRON UPPER",
+        "UPPER KEDRON"
+      ]
+    },
+    {
+      "postcode": "4212",
+      "state": "QLD",
+      "distanceKm": 34.5,
+      "suburbs": [
+        "BOYKAMBIL",
+        "HELENSVALE",
+        "HELENSVALE TOWN CENTRE",
+        "HOPE ISLAND",
+        "MONTEREY KEYS",
+        "SANCTUARY COVE",
+        "SANTA BARBARA"
+      ]
+    },
+    {
+      "postcode": "4018",
+      "state": "QLD",
+      "distanceKm": 34.7,
+      "suburbs": [
+        "FITZGIBBON",
+        "TAIGUM"
+      ]
+    },
+    {
+      "postcode": "4210",
+      "state": "QLD",
+      "distanceKm": 35.2,
+      "suburbs": [
+        "GUANABA",
+        "MAUDSLAND",
+        "OXENFORD",
+        "STUDIO VILLAGE",
+        "WONGAWALLAN"
+      ]
+    },
+    {
+      "postcode": "4305",
+      "state": "QLD",
+      "distanceKm": 35.3,
+      "suburbs": [
+        "BASIN POCKET",
+        "BRASSALL",
+        "BRASSALL HEIGHTS",
+        "BREMER",
+        "CHURCHILL",
+        "COALFALLS",
+        "EAST IPSWICH",
+        "EASTERN HEIGHTS",
+        "FLINDERS VIEW",
+        "IPSWICH",
+        "LEICHHARDT",
+        "LIMESTONE RIDGES",
+        "MOORES POCKET",
+        "NEWTOWN",
+        "NORTH IPSWICH",
+        "NORTH TIVOLI",
+        "ONE MILE",
+        "RACEVIEW",
+        "RAYMONDS HILL",
+        "SADLIERS CROSSING",
+        "TIVOLI",
+        "WEST IPSWICH",
+        "WOODEND",
+        "WULKURAKA",
+        "YAMANTO"
+      ]
+    },
+    {
+      "postcode": "4183",
+      "state": "QLD",
+      "distanceKm": 35.4,
+      "suburbs": [
+        "AMITY",
+        "AMITY POINT",
+        "DUNWICH",
+        "NORTH STRADBROKE ISLAND",
+        "POINT LOOKOUT"
+      ]
+    },
+    {
+      "postcode": "4035",
+      "state": "QLD",
+      "distanceKm": 35.5,
+      "suburbs": [
+        "ALBANY CREEK",
+        "BRIDGEMAN DOWNS",
+        "CASHS CROSSING"
+      ]
+    },
+    {
+      "postcode": "4216",
+      "state": "QLD",
+      "distanceKm": 36.8,
+      "suburbs": [
+        "ANGLERS PARADISE",
+        "BIGGERA WATERS",
+        "COOMBABAH",
+        "CURRIGEE",
+        "HOLLYWELL",
+        "PARADISE POINT",
+        "PARADISE POINT KEYS",
+        "RUNAWAY BAY",
+        "SOUTH STRADBROKE",
+        "SOVEREIGN ISLANDS"
+      ]
+    },
+    {
+      "postcode": "4017",
+      "state": "QLD",
+      "distanceKm": 37.7,
+      "suburbs": [
+        "BRACKEN RIDGE",
+        "BRIGHTON",
+        "BRIGHTON EVENTIDE",
+        "BRIGHTON NATHAN STREET",
+        "DEAGON",
+        "NASHVILLE",
+        "SANDGATE",
+        "SANDGATE DC",
+        "SHORNCLIFFE"
+      ]
+    },
+    {
+      "postcode": "4275",
+      "state": "QLD",
+      "distanceKm": 38.4,
+      "suburbs": [
+        "BENOBBLE",
+        "BIDDADDABA",
+        "BLOOMFLEET",
+        "BOYLAND",
+        "CANUNGRA",
+        "FERNY GLEN",
+        "FLYING FOX",
+        "ILLINBAH",
+        "LAMINGTON NATIONAL PARK",
+        "O'REILLY",
+        "O'REILLYS",
+        "O\u2019REILLY",
+        "SARABAH",
+        "WITHEREN",
+        "WONGLEPONG"
+      ]
+    },
+    {
+      "postcode": "4037",
+      "state": "QLD",
+      "distanceKm": 38.7,
+      "suburbs": [
+        "EATONS HILL"
+      ]
+    },
+    {
+      "postcode": "4036",
+      "state": "QLD",
+      "distanceKm": 39.0,
+      "suburbs": [
+        "BALD HILLS"
+      ]
+    },
+    {
+      "postcode": "4500",
+      "state": "QLD",
+      "distanceKm": 41.9,
+      "suburbs": [
+        "BRAY PARK",
+        "BRENDALE",
+        "BRENDALE BC",
+        "BRENDALE DC",
+        "CASHMERE",
+        "CLEAR MOUNTAIN",
+        "JOYNER",
+        "STRATHPINE",
+        "STRATHPINE CENTRE",
+        "STRATHPINE CITY",
+        "WARNER"
+      ]
+    },
+    {
+      "postcode": "4214",
+      "state": "QLD",
+      "distanceKm": 43.0,
+      "suburbs": [
+        "ARUNDEL",
+        "ARUNDEL BC",
+        "ARUNDEL DC",
+        "ASHMORE",
+        "ASHMORE CITY",
+        "MOLENDINAR",
+        "PARKWOOD"
+      ]
+    },
+    {
+      "postcode": "4211",
+      "state": "QLD",
+      "distanceKm": 44.4,
+      "suburbs": [
+        "ADVANCETOWN",
+        "BEECHMONT",
+        "BINNA BURRA",
+        "CARRARA",
+        "CLAGIRABA",
+        "GAVEN",
+        "GILSTON",
+        "HIGHLAND PARK",
+        "LATIMER",
+        "LOWER BEECHMONT",
+        "MOUNT NATHAN",
+        "NATURAL BRIDGE",
+        "NERANG",
+        "NERANG BC",
+        "NERANG DC",
+        "NUMINBAH VALLEY",
+        "PACIFIC PINES",
+        "PINDARI HILLS",
+        "SOUTHERN LAMINGTON"
+      ]
+    },
+    {
+      "postcode": "4501",
+      "state": "QLD",
+      "distanceKm": 44.8,
+      "suburbs": [
+        "LAWNTON"
+      ]
+    },
+    {
+      "postcode": "4215",
+      "state": "QLD",
+      "distanceKm": 44.9,
+      "suburbs": [
+        "AUSTRALIA FAIR",
+        "CHIRN PARK",
+        "KEEBRA PARK",
+        "LABRADOR",
+        "SOUTHPORT",
+        "SOUTHPORT BC",
+        "SOUTHPORT PARK",
+        "SUNDALE"
+      ]
+    },
+    {
+      "postcode": "4019",
+      "state": "QLD",
+      "distanceKm": 45.0,
+      "suburbs": [
+        "CLONTARF",
+        "CLONTARF BEACH",
+        "CLONTARF DC",
+        "HUMPYBONG",
+        "MARGATE",
+        "MARGATE BEACH",
+        "SCOTTS POINT",
+        "WOODY POINT"
+      ]
+    },
+    {
+      "postcode": "4502",
+      "state": "QLD",
+      "distanceKm": 45.4,
+      "suburbs": [
+        "FRENCHS FOREST",
+        "PETRIE"
+      ]
+    },
+    {
+      "postcode": "4520",
+      "state": "QLD",
+      "distanceKm": 46.9,
+      "suburbs": [
+        "ARMSTRONG CREEK",
+        "CAMP MOUNTAIN",
+        "CEDAR CREEK",
+        "CLOSEBURN",
+        "DRAPER",
+        "ENOGGERA RESERVOIR",
+        "HIGHVALE",
+        "JOLLYS LOOKOUT",
+        "KOBBLE CREEK",
+        "MOUNT GLORIOUS",
+        "MOUNT NEBO",
+        "MOUNT SAMSON",
+        "SAMFORD",
+        "SAMFORD VALLEY",
+        "SAMFORD VILLAGE",
+        "SAMSONVALE",
+        "WIGHTS MOUNTAIN",
+        "YUGAR"
+      ]
+    },
+    {
+      "postcode": "4503",
+      "state": "QLD",
+      "distanceKm": 47.3,
+      "suburbs": [
+        "DAKABIN",
+        "DOHLES ROCKS",
+        "GRIFFIN",
+        "KALLANGUR",
+        "KURWONGBAH",
+        "MURRUMBA DOWNS",
+        "WHITESIDE"
+      ]
+    },
+    {
+      "postcode": "4509",
+      "state": "QLD",
+      "distanceKm": 47.6,
+      "suburbs": [
+        "MANGO HILL",
+        "NORTH LAKES"
+      ]
+    },
+    {
+      "postcode": "4021",
+      "state": "QLD",
+      "distanceKm": 48.2,
+      "suburbs": [
+        "KIPPA-RING"
+      ]
+    },
+    {
+      "postcode": "4020",
+      "state": "QLD",
+      "distanceKm": 48.8,
+      "suburbs": [
+        "NEWPORT",
+        "REDCLIFFE",
+        "REDCLIFFE NORTH",
+        "SCARBOROUGH"
+      ]
+    },
+    {
+      "postcode": "4022",
+      "state": "QLD",
+      "distanceKm": 49.4,
+      "suburbs": [
+        "ROTHWELL"
+      ]
+    },
+    {
+      "postcode": "4217",
+      "state": "QLD",
+      "distanceKm": 49.5,
+      "suburbs": [
+        "BENOWA",
+        "BUNDALL",
+        "BUNDALL BC",
+        "BUNDALL DC",
+        "CHEVRON ISLAND",
+        "GOLD COAST MC",
+        "ISLE OF CAPRI",
+        "MAIN BEACH",
+        "PARADISE ISLAND",
+        "PARADISE WATERS",
+        "SORRENTO",
+        "SURFERS PARADISE",
+        "THE SPIT"
+      ]
+    },
+    {
+      "postcode": "9726",
+      "state": "QLD",
+      "distanceKm": 49.5,
+      "suburbs": [
+        "GOLD COAST MC"
+      ]
+    },
+    {
+      "postcode": "4218",
+      "state": "QLD",
+      "distanceKm": 52.3,
+      "suburbs": [
+        "BROADBEACH",
+        "BROADBEACH WATERS",
+        "CYPRESS GARDENS",
+        "FLORIDA GARDENS",
+        "MERMAID BEACH",
+        "MERMAID KEYS",
+        "MERMAID WATERS",
+        "MIAMI KEYS",
+        "MOANA PARK",
+        "NOBBY BEACH",
+        "PACIFIC FAIR",
+        "Q SUPERCENTRE",
+        "RIALTO",
+        "RIO VISTA"
+      ]
+    },
+    {
+      "postcode": "4346",
+      "state": "QLD",
+      "distanceKm": 52.5,
+      "suburbs": [
+        "MARBURG"
+      ]
+    },
+    {
+      "postcode": "4508",
+      "state": "QLD",
+      "distanceKm": 53.3,
+      "suburbs": [
+        "DECEPTION BAY"
+      ]
+    },
+    {
+      "postcode": "4226",
+      "state": "QLD",
+      "distanceKm": 54.4,
+      "suburbs": [
+        "CLEAR ISLAND WATERS",
+        "KERRYDALE",
+        "MERRIMAC",
+        "ROBINA",
+        "ROBINA DC"
+      ]
+    },
+    {
+      "postcode": "4230",
+      "state": "QLD",
+      "distanceKm": 54.4,
+      "suburbs": [
+        "ROBINA TOWN CENTRE"
+      ]
+    },
+    {
+      "postcode": "4213",
+      "state": "QLD",
+      "distanceKm": 54.8,
+      "suburbs": [
+        "AUSTINVILLE",
+        "BONOGIN",
+        "MUDGEERABA",
+        "NERANWOOD",
+        "SPRINGBROOK",
+        "TALLAI",
+        "WORONGARY"
+      ]
+    },
+    {
+      "postcode": "4504",
+      "state": "QLD",
+      "distanceKm": 54.8,
+      "suburbs": [
+        "NARANGBA"
+      ]
+    },
+    {
+      "postcode": "4307",
+      "state": "QLD",
+      "distanceKm": 55.6,
+      "suburbs": [
+        "COLEYVILLE",
+        "HARRISVILLE",
+        "MUTDAPILLY",
+        "RADFORD",
+        "SILVERDALE",
+        "WARRILL VIEW",
+        "WILSONS PLAINS"
+      ]
+    },
+    {
+      "postcode": "4505",
+      "state": "QLD",
+      "distanceKm": 57.1,
+      "suburbs": [
+        "BURPENGARY",
+        "BURPENGARY DC",
+        "BURPENGARY EAST"
+      ]
+    },
+    {
+      "postcode": "4220",
+      "state": "QLD",
+      "distanceKm": 57.6,
+      "suburbs": [
+        "BURLEIGH BC",
+        "BURLEIGH DC",
+        "BURLEIGH HEADS",
+        "BURLEIGH TOWN",
+        "BURLEIGH WATERS",
+        "MIAMI",
+        "TALLY VALLEY"
+      ]
+    },
+    {
+      "postcode": "4227",
+      "state": "QLD",
+      "distanceKm": 58.0,
+      "suburbs": [
+        "REEDY CREEK",
+        "VARSITY LAKES"
+      ]
+    },
+    {
+      "postcode": "4219",
+      "state": "QLD",
+      "distanceKm": 60.1,
+      "suburbs": [
+        "WEST BURLEIGH"
+      ]
+    },
+    {
+      "postcode": "4506",
+      "state": "QLD",
+      "distanceKm": 60.8,
+      "suburbs": [
+        "MOORINA",
+        "MORAYFIELD"
+      ]
+    },
+    {
+      "postcode": "4025",
+      "state": "QLD",
+      "distanceKm": 61.3,
+      "suburbs": [
+        "BULWER",
+        "CAPE MORETON",
+        "COWAN COWAN",
+        "KOORINGAL",
+        "MORETON ISLAND",
+        "TANGALOOMA"
+      ]
+    },
+    {
+      "postcode": "4521",
+      "state": "QLD",
+      "distanceKm": 62.5,
+      "suburbs": [
+        "CAMPBELLS POCKET",
+        "DAYBORO",
+        "KING SCRUB",
+        "LACEYS CREEK",
+        "MOUNT MEE",
+        "MOUNT PLEASANT",
+        "OCEAN VIEW",
+        "RUSH CREEK"
+      ]
+    },
+    {
+      "postcode": "4221",
+      "state": "QLD",
+      "distanceKm": 62.9,
+      "suburbs": [
+        "ELANORA",
+        "PALM BEACH"
+      ]
+    },
+    {
+      "postcode": "4511",
+      "state": "QLD",
+      "distanceKm": 64.0,
+      "suburbs": [
+        "GODWIN BEACH",
+        "NINGI",
+        "SANDSTONE POINT"
+      ]
+    },
+    {
+      "postcode": "4228",
+      "state": "QLD",
+      "distanceKm": 64.4,
+      "suburbs": [
+        "INGLESIDE",
+        "TALLEBUDGERA",
+        "TALLEBUDGERA VALLEY"
+      ]
+    },
+    {
+      "postcode": "4513",
+      "state": "QLD",
+      "distanceKm": 64.8,
+      "suburbs": [
+        "CORYMBIA",
+        "GREENSTONE",
+        "LILYWOOD",
+        "WAGTAIL GROVE",
+        "WARABA"
+      ]
+    },
+    {
+      "postcode": "4340",
+      "state": "QLD",
+      "distanceKm": 65.0,
+      "suburbs": [
+        "ASHWELL",
+        "CALVERT",
+        "EBENEZER",
+        "GRANDCHESTER",
+        "JEEBROPILLY",
+        "LANEFIELD",
+        "LOWER MOUNT WALKER",
+        "MERRYVALE",
+        "MOORANG",
+        "MOUNT FORBES",
+        "MOUNT MORT",
+        "MOUNT WALKER",
+        "MOUNT WALKER WEST",
+        "ROSEVALE",
+        "ROSEWOOD",
+        "TALLEGALLA",
+        "THE BLUFF",
+        "WOOLSHED"
+      ]
+    },
+    {
+      "postcode": "4510",
+      "state": "QLD",
+      "distanceKm": 66.5,
+      "suburbs": [
+        "BALINGOOL",
+        "BEACHMERE",
+        "BELLMERE",
+        "CABOOLTURE",
+        "CABOOLTURE BC",
+        "CABOOLTURE SOUTH",
+        "DONNYBROOK",
+        "MELDALE",
+        "MOODLU",
+        "ROCKSBERG",
+        "TOORBUL",
+        "UPPER CABOOLTURE"
+      ]
+    },
+    {
+      "postcode": "4224",
+      "state": "QLD",
+      "distanceKm": 66.7,
+      "suburbs": [
+        "TUGUN",
+        "TUGUN HEIGHTS"
+      ]
+    },
+    {
+      "postcode": "4223",
+      "state": "QLD",
+      "distanceKm": 66.9,
+      "suburbs": [
+        "CURRUMBIN",
+        "CURRUMBIN DC",
+        "CURRUMBIN VALLEY",
+        "CURRUMBIN WATERS"
+      ]
+    },
+    {
+      "postcode": "4309",
+      "state": "QLD",
+      "distanceKm": 68.7,
+      "suburbs": [
+        "ARATULA",
+        "CHARLWOOD",
+        "CLUMBER",
+        "FASSIFERN",
+        "FASSIFERN VALLEY",
+        "FRAZERVIEW",
+        "KALBAR",
+        "KENTS LAGOON",
+        "KULGUN",
+        "MILORA",
+        "MOOGERAH",
+        "MORWINCHA",
+        "MOUNT EDWARDS",
+        "MUNBILLA",
+        "OBUM OBUM",
+        "TAROME",
+        "TEVIOTVILLE",
+        "WASHPOOL"
+      ]
+    },
+    {
+      "postcode": "4225",
+      "state": "QLD",
+      "distanceKm": 69.9,
+      "suburbs": [
+        "BILINGA",
+        "COOLANGATTA",
+        "GREENMOUNT",
+        "KIRRA",
+        "RAINBOW BAY"
+      ]
+    },
+    {
+      "postcode": "4341",
+      "state": "QLD",
+      "distanceKm": 70.4,
+      "suburbs": [
+        "BLENHEIM",
+        "HATTON VALE",
+        "KENSINGTON GROVE",
+        "KENTVILLE",
+        "LAIDLEY",
+        "LAIDLEY CREEK WEST",
+        "LAIDLEY HEIGHTS",
+        "LAIDLEY NORTH",
+        "LAIDLEY SOUTH",
+        "MOUNT BERRYMAN",
+        "MULGOWIE",
+        "PLAINLAND",
+        "REGENCY DOWNS",
+        "SUMMERHOLM",
+        "THORNTON",
+        "TOWNSON"
+      ]
+    },
+    {
+      "postcode": "4311",
+      "state": "QLD",
+      "distanceKm": 71.2,
+      "suburbs": [
+        "ATKINSONS DAM",
+        "BRIGHTVIEW",
+        "BUARABA",
+        "BUARABA SOUTH",
+        "CHURCHABLE",
+        "CLARENDON",
+        "COOLANA",
+        "COOMINYA",
+        "LAKE WIVENHOE",
+        "LOCKYER WATERS",
+        "LOWOOD",
+        "MINDEN",
+        "MOUNT TARAMPA",
+        "PATRICK ESTATE",
+        "PRENZLAU",
+        "RIFLE RANGE",
+        "TARAMPA",
+        "WIVENHOE HILL"
+      ]
+    },
+    {
+      "postcode": "2485",
+      "state": "NSW",
+      "distanceKm": 71.9,
+      "suburbs": [
+        "TWEED HEADS",
+        "TWEED HEADS WEST"
+      ]
+    },
+    {
+      "postcode": "2486",
+      "state": "NSW",
+      "distanceKm": 72.3,
+      "suburbs": [
+        "BANORA POINT",
+        "BILAMBIL",
+        "BILAMBIL HEIGHTS",
+        "BUNGALORA",
+        "CAROOL",
+        "COBAKI",
+        "COBAKI LAKES",
+        "DUROBY",
+        "GLENGARRIE",
+        "PIGGABEEN",
+        "TERRANORA",
+        "TWEED HEADS SOUTH",
+        "TWEED HEADS SOUTH DC",
+        "UPPER DUROBY"
+      ]
+    },
+    {
+      "postcode": "4310",
+      "state": "QLD",
+      "distanceKm": 72.3,
+      "suburbs": [
+        "ALLANDALE",
+        "ANTHONY",
+        "BLANTYRE",
+        "BOONAH",
+        "BUNBURRA",
+        "BUNJURGEN",
+        "BURNETT CREEK",
+        "CANNON CREEK",
+        "CARNEYS CREEK",
+        "COOCHIN",
+        "COULSON",
+        "CROFTBY",
+        "DUGANDAN",
+        "FRENCHES CREEK",
+        "HOYA",
+        "KENTS POCKET",
+        "LAKE MOOGERAH",
+        "MAROON",
+        "MAROON DAM",
+        "MILBONG",
+        "MILFORD",
+        "MOUNT ALFORD",
+        "MOUNT FRENCH",
+        "ROADVALE",
+        "TEMPLIN",
+        "WALLACES CREEK",
+        "WOOLOOMAN",
+        "WYARALONG"
+      ]
+    },
+    {
+      "postcode": "4287",
+      "state": "QLD",
+      "distanceKm": 73.1,
+      "suburbs": [
+        "BARNEY VIEW",
+        "MOUNT BARNEY",
+        "MOUNT LINDESAY",
+        "PALEN CREEK",
+        "RATHDOWNEY",
+        "RUNNING CREEK"
+      ]
+    },
+    {
+      "postcode": "4342",
+      "state": "QLD",
+      "distanceKm": 73.2,
+      "suburbs": [
+        "CROWLEY VALE",
+        "FOREST HILL",
+        "GLEN CAIRN",
+        "GLENORE GROVE",
+        "LOCKROSE",
+        "LYNFORD"
+      ]
+    },
+    {
+      "postcode": "4516",
+      "state": "QLD",
+      "distanceKm": 73.6,
+      "suburbs": [
+        "ELIMBAH"
+      ]
+    },
+    {
+      "postcode": "4507",
+      "state": "QLD",
+      "distanceKm": 74.0,
+      "suburbs": [
+        "BANKSIA BEACH",
+        "BELLARA",
+        "BONGAREE",
+        "BRIBIE ISLAND",
+        "BRIBIE ISLAND DC",
+        "BRIBIE ISLAND NORTH",
+        "WELSBY",
+        "WHITE PATCH",
+        "WOORIM"
+      ]
+    },
+    {
+      "postcode": "4512",
+      "state": "QLD",
+      "distanceKm": 74.4,
+      "suburbs": [
+        "BRACALBA",
+        "WAMURAN",
+        "WAMURAN BASIN"
+      ]
+    },
+    {
+      "postcode": "4312",
+      "state": "QLD",
+      "distanceKm": 76.1,
+      "suburbs": [
+        "BRYDEN",
+        "CABOONBAH",
+        "COAL CREEK",
+        "CROSSDALE",
+        "ESK",
+        "ESKDALE",
+        "GLEN ESK",
+        "MOOMBRA",
+        "MOUNT BYRON",
+        "MOUNT HALLEN",
+        "MURRUMBA",
+        "REDBANK CREEK",
+        "SOMERSET DAM"
+      ]
+    },
+    {
+      "postcode": "4345",
+      "state": "QLD",
+      "distanceKm": 77.2,
+      "suburbs": [
+        "GATTON COLLEGE"
+      ]
+    },
+    {
+      "postcode": "2490",
+      "state": "NSW",
+      "distanceKm": 77.5,
+      "suburbs": [
+        "NORTH TUMBULGUM",
+        "TUMBULGUM"
+      ]
+    },
+    {
+      "postcode": "4517",
+      "state": "QLD",
+      "distanceKm": 79.0,
+      "suburbs": [
+        "BEERBURRUM"
+      ]
+    },
+    {
+      "postcode": "2484",
+      "state": "NSW",
+      "distanceKm": 80.1,
+      "suburbs": [
+        "BACK CREEK",
+        "BOAT HARBOUR",
+        "BRAY PARK",
+        "BRAYS CREEK",
+        "BYANGUM",
+        "BYRRILL CREEK",
+        "CEDAR CREEK",
+        "CHILLINGHAM",
+        "CHOWAN CREEK",
+        "CLOTHIERS CREEK",
+        "COMMISSIONERS CREEK",
+        "CONDONG",
+        "CRYSTAL CREEK",
+        "CUDGERA CREEK",
+        "DOON DOON",
+        "DULGUIGAN",
+        "DUM DUM",
+        "DUNBIBLE",
+        "DUNGAY",
+        "EUNGELLA",
+        "EVIRON",
+        "FARRANTS HILL",
+        "FERNVALE",
+        "HOPKINS CREEK",
+        "KIELVALE",
+        "KUNGHUR",
+        "KUNGHUR CREEK",
+        "KYNNUMBOON",
+        "LIMPINWOOD",
+        "MEBBIN",
+        "MIDGINBIL",
+        "MOUNT BURRELL",
+        "MOUNT WARNING",
+        "MURWILLUMBAH",
+        "MURWILLUMBAH DC",
+        "MURWILLUMBAH SOUTH",
+        "NOBBYS CREEK",
+        "NORTH ARM",
+        "NUMINBAH",
+        "NUNDERI",
+        "PALMVALE",
+        "PUMPENBIL",
+        "RESERVE CREEK",
+        "ROUND MOUNTAIN",
+        "ROWLANDS CREEK",
+        "SMITHS CREEK",
+        "SOUTH MURWILLUMBAH",
+        "STOKERS SIDING",
+        "TERRAGON",
+        "TOMEWIN",
+        "TYALGUM",
+        "TYALGUM CREEK",
+        "TYGALGAH",
+        "UKI",
+        "UPPER CRYSTAL CREEK",
+        "URLIUP",
+        "WARDROP VALLEY",
+        "ZARA"
+      ]
+    },
+    {
+      "postcode": "2474",
+      "state": "NSW",
+      "distanceKm": 81.7,
+      "suburbs": [
+        "AFTERLEE",
+        "BARKERS VALE",
+        "BORDER RANGES",
+        "CAWONGLA",
+        "CEDAR POINT",
+        "COLLINS CREEK",
+        "COUGAL",
+        "DAIRY FLAT",
+        "EDEN CREEK",
+        "EDENVILLE",
+        "ETTRICK",
+        "FAWCETTS PLAIN",
+        "FINDON CREEK",
+        "GENEVA",
+        "GHINNI GHI",
+        "GRADYS CREEK",
+        "GREEN PIGEON",
+        "GREVILLIA",
+        "HOMELEIGH",
+        "HORSE STATION CREEK",
+        "HORSESHOE CREEK",
+        "IRON POT CREEK",
+        "KILGRA",
+        "KYOGLE",
+        "LITTLE BACK CREEK",
+        "LOADSTONE",
+        "LYNCHS CREEK",
+        "NEW PARK",
+        "OLD GREVILLIA",
+        "ROSEBERRY",
+        "ROSEBERRY CREEK",
+        "RUKENVALE",
+        "SAWPIT CREEK",
+        "SHERWOOD",
+        "SMITHS CREEK",
+        "TERRACE CREEK",
+        "THE RISK",
+        "TOONUMBAR",
+        "UNUMGAR",
+        "UPPER EDEN CREEK",
+        "UPPER HORSESHOE CREEK",
+        "WADEVILLE",
+        "WARRAZAMBIL CREEK",
+        "WEST WIANGAREE",
+        "WIANGAREE",
+        "WYNEDEN"
+      ]
+    },
+    {
+      "postcode": "2487",
+      "state": "NSW",
+      "distanceKm": 81.9,
+      "suburbs": [
+        "CASUARINA",
+        "CHINDERAH",
+        "CUDGEN",
+        "DURANBAH",
+        "FINGAL HEAD",
+        "KINGS FOREST",
+        "KINGSCLIFF",
+        "STOTTS CREEK"
+      ]
+    },
+    {
+      "postcode": "4518",
+      "state": "QLD",
+      "distanceKm": 84.3,
+      "suburbs": [
+        "GLASS HOUSE MOUNTAINS"
+      ]
+    },
+    {
+      "postcode": "4514",
+      "state": "QLD",
+      "distanceKm": 84.9,
+      "suburbs": [
+        "BELLTHORPE",
+        "CEDARTON",
+        "COMMISSIONERS FLAT",
+        "D'AGUILAR",
+        "DELANEYS CREEK",
+        "D\u2019AGUILAR",
+        "MOUNT ARCHER",
+        "MOUNT DELANEY",
+        "NEURUM",
+        "STANMORE",
+        "STONY CREEK",
+        "VILLENEUVE",
+        "WESTVALE",
+        "WOODFORD"
+      ]
+    },
+    {
+      "postcode": "4370",
+      "state": "QLD",
+      "distanceKm": 86.9,
+      "suburbs": [
+        "ALLAN",
+        "BONY MOUNTAIN",
+        "CANNINGVALE",
+        "CHERRY GULLY",
+        "CLINTONVALE",
+        "CUNNINGHAM",
+        "DANDEROO",
+        "ELBOW VALLEY",
+        "FREESTONE",
+        "GLADFIELD",
+        "GLENGALLAN",
+        "GLENNIE HEIGHTS",
+        "GREYMARE",
+        "JUNABEE",
+        "LESLIE",
+        "LESLIE DAM",
+        "LOCH LOMOND",
+        "MARYVALE",
+        "MASSIE",
+        "MONTROSE",
+        "MORGAN PARK",
+        "MOUNT COLLIERY",
+        "MOUNT STURT",
+        "MOUNT TABOR",
+        "MURRAYS BRIDGE",
+        "NORTH BRANCH",
+        "PRATTEN",
+        "RODGERS CREEK",
+        "ROSEHILL",
+        "ROSENTHAL",
+        "ROSENTHAL HEIGHTS",
+        "SILVERWOOD",
+        "SLADEVALE",
+        "SWAN CREEK",
+        "THANE",
+        "THANES CREEK",
+        "THE GLEN",
+        "THE HERMITAGE",
+        "TOOLBURRA",
+        "TREGONY",
+        "UPPER FREESTONE",
+        "UPPER WHEATVALE",
+        "WARWICK",
+        "WARWICK DC",
+        "WHEATVALE",
+        "WILDASH",
+        "WILLOWVALE",
+        "WIYARRA",
+        "WOMINA"
+      ]
+    },
+    {
+      "postcode": "4343",
+      "state": "QLD",
+      "distanceKm": 87.3,
+      "suburbs": [
+        "ADARE",
+        "BLACK DUCK CREEK",
+        "CAFFEY",
+        "COLLEGE VIEW",
+        "EAST HALDON",
+        "FORDSDALE",
+        "GATTON",
+        "INGOLDSBY",
+        "JUNCTION VIEW",
+        "LAKE CLARENDON",
+        "LAWES",
+        "LEFTHAND BRANCH",
+        "LOWER TENTHILL",
+        "MORTON VALE",
+        "MOUNT SYLVIA",
+        "PLACID HILLS",
+        "RINGWOOD",
+        "ROCKSIDE",
+        "ROPELEY",
+        "SPRING CREEK",
+        "UPPER TENTHILL",
+        "VINEGAR HILL",
+        "WOODBINE",
+        "WOODLANDS"
+      ]
+    },
+    {
+      "postcode": "2488",
+      "state": "NSW",
+      "distanceKm": 88.4,
+      "suburbs": [
+        "BOGANGAR",
+        "CABARITA BEACH",
+        "TANGLEWOOD"
+      ]
+    },
+    {
+      "postcode": "4515",
+      "state": "QLD",
+      "distanceKm": 89.1,
+      "suburbs": [
+        "GLENFERN",
+        "HAZELDEAN",
+        "JIMNA",
+        "KILCOY",
+        "KINGAHAM",
+        "MONSILDALE",
+        "MOUNT KILCOY",
+        "ROYSTON",
+        "SANDY CREEK",
+        "SHEEP STATION CREEK",
+        "WINYA",
+        "WOOLMAR"
+      ]
+    },
+    {
+      "postcode": "4551",
+      "state": "QLD",
+      "distanceKm": 90.6,
+      "suburbs": [
+        "AROONA",
+        "BANYA",
+        "BARINGA",
+        "BATTERY HILL",
+        "BELLS CREEK",
+        "CALOUNDRA",
+        "CALOUNDRA BC",
+        "CALOUNDRA DC",
+        "CALOUNDRA WEST",
+        "CORBOULD PARK",
+        "CURRIMUNDI",
+        "DIAMOND HEAD",
+        "DICKY BEACH",
+        "GAGALBA",
+        "GOLDEN BEACH",
+        "KINGS BEACH",
+        "LITTLE MOUNTAIN",
+        "MERIDAN PLAINS",
+        "MOFFAT BEACH",
+        "NIRIMBA",
+        "PELICAN WATERS",
+        "SHELLY BEACH"
+      ]
+    },
+    {
+      "postcode": "4519",
+      "state": "QLD",
+      "distanceKm": 91.3,
+      "suburbs": [
+        "BEERWAH",
+        "COOCHIN CREEK",
+        "CROHAMHURST",
+        "PEACHESTER"
+      ]
+    },
+    {
+      "postcode": "2489",
+      "state": "NSW",
+      "distanceKm": 92.4,
+      "suburbs": [
+        "HASTINGS POINT",
+        "POTTSVILLE",
+        "POTTSVILLE BEACH"
+      ]
+    },
+    {
+      "postcode": "4550",
+      "state": "QLD",
+      "distanceKm": 94.5,
+      "suburbs": [
+        "LANDSBOROUGH",
+        "MOUNT MELLUM"
+      ]
+    },
+    {
+      "postcode": "4373",
+      "state": "QLD",
+      "distanceKm": 94.6,
+      "suburbs": [
+        "KILLARNEY",
+        "THE FALLS",
+        "THE HEAD"
+      ]
+    },
+    {
+      "postcode": "4347",
+      "state": "QLD",
+      "distanceKm": 95.3,
+      "suburbs": [
+        "GRANTHAM",
+        "MA MA CREEK",
+        "MOUNT WHITESTONE",
+        "VERADILLA",
+        "WINWILL"
+      ]
+    },
+    {
+      "postcode": "2483",
+      "state": "NSW",
+      "distanceKm": 97.4,
+      "suburbs": [
+        "BILLINUDGEL",
+        "BRUNSWICK HEADS",
+        "BURRINGBAR",
+        "CRABBES CREEK",
+        "MIDDLE POCKET",
+        "MOOBALL",
+        "NEW BRIGHTON",
+        "OCEAN SHORES",
+        "SLEEPY HOLLOW",
+        "SOUTH GOLDEN BEACH",
+        "THE POCKET",
+        "UPPER BURRINGBAR",
+        "WOOYUNG",
+        "YELGUN"
+      ]
+    },
+    {
+      "postcode": "4553",
+      "state": "QLD",
+      "distanceKm": 98.4,
+      "suburbs": [
+        "DIAMOND VALLEY",
+        "GLENVIEW",
+        "MOOLOOLAH",
+        "MOOLOOLAH VALLEY",
+        "PALMVIEW"
+      ]
+    },
+    {
+      "postcode": "4352",
+      "state": "QLD",
+      "distanceKm": 98.8,
+      "suburbs": [
+        "AMIENS",
+        "BALLARD",
+        "BAPAUME",
+        "BIRNAM",
+        "BLANCHVIEW",
+        "BRANCHVIEW",
+        "CABARLAH",
+        "CAWDOR",
+        "CEMENT MILLS",
+        "COALBANK",
+        "CONDAMINE PLAINS",
+        "CUTELLA",
+        "DERRYMORE",
+        "DJUAN",
+        "DOCTOR CREEK",
+        "EVERGREEN",
+        "FIFTEEN MILE",
+        "GEHAM",
+        "GLENCOE",
+        "GORE",
+        "GOWRIE JUNCTION",
+        "GOWRIE LITTLE PLAIN",
+        "GRAPE TREE",
+        "GRAPETREE",
+        "GROOMSVILLE",
+        "HAMPTON",
+        "HIGHFIELDS",
+        "HIGHGROVE",
+        "HODGSON VALE",
+        "IREDALE",
+        "KARARA",
+        "KLEINTON",
+        "KULPI",
+        "KURROWAH",
+        "LILYVALE",
+        "LYRA",
+        "MACLAGAN",
+        "MALLING",
+        "MERINGANDAN",
+        "MERINGANDAN WEST",
+        "MERRITTS CREEK",
+        "MOUNT LUKE",
+        "MUNIGANEEN",
+        "MURPHYS CREEK",
+        "NARKO",
+        "NORTH MACLAGAN",
+        "NUTGROVE",
+        "OMAN AMA",
+        "PALM TREE",
+        "PALMTREE",
+        "PAMPAS",
+        "PECHEY",
+        "PERANGA",
+        "PERSEVERANCE",
+        "POSTMANS RIDGE",
+        "POZIERES",
+        "PRESTON",
+        "RAMSAY",
+        "RANGEMORE",
+        "RAVENSBOURNE",
+        "SEVERNLEA",
+        "SILVER RIDGE",
+        "SPRING BLUFF",
+        "ST AUBYN",
+        "THORNVILLE",
+        "TOOWOOMBA MC",
+        "TUMMAVILLE",
+        "UMBIRAM",
+        "UPPER LOCKYER",
+        "VALE VIEW",
+        "WHICHELLO",
+        "WHITE MOUNTAIN",
+        "WITHCOTT",
+        "WOODLEIGH",
+        "WOOLMER",
+        "WUTUL",
+        "WYREEMA",
+        "YALANGUR",
+        "YANDILLA"
+      ]
+    },
+    {
+      "postcode": "2480",
+      "state": "NSW",
+      "distanceKm": 99.3,
+      "suburbs": [
+        "BACK CREEK",
+        "BENTLEY",
+        "BEXHILL",
+        "BLAKEBROOK",
+        "BLUE KNOB",
+        "BOAT HARBOUR",
+        "BOOERIE CREEK",
+        "BOORABEE PARK",
+        "BOOYONG",
+        "BUNGABBEE",
+        "CANIABA",
+        "CHILCOTTS GRASS",
+        "CLOVASS",
+        "CLUNES",
+        "COFFEE CAMP",
+        "CORNDALE",
+        "DORROUGHBY",
+        "DUNGARUBBA",
+        "DUNOON",
+        "EAST LISMORE",
+        "ELTHAM",
+        "EUREKA",
+        "FEDERAL",
+        "FERNSIDE",
+        "GEORGICA",
+        "GIRARDS HILL",
+        "GOOLMANGAR",
+        "GOONELLABAH",
+        "GUNDURIMBA",
+        "HOWARDS GRASS",
+        "JIGGI",
+        "KEERRONG",
+        "KOONORIGAN",
+        "LAGOON GRASS",
+        "LARNOOK",
+        "LEYCESTER",
+        "LILLIAN ROCK",
+        "LINDENDALE",
+        "LISMORE",
+        "LISMORE DC",
+        "LISMORE HEIGHTS",
+        "LOFTVILLE",
+        "MAROM CREEK",
+        "MCKEES HILL",
+        "MCLEANS RIDGES",
+        "MISSINGHAM",
+        "MODANVILLE",
+        "MONALTRIE",
+        "MOUNTAIN TOP",
+        "NIGHTCAP",
+        "NIMBIN",
+        "NORTH LISMORE",
+        "NUMULGI",
+        "REPENTANCE CREEK",
+        "RICHMOND HILL",
+        "ROCK VALLEY",
+        "ROSEBANK",
+        "RUTHVEN",
+        "SOUTH GUNDURIMBA",
+        "SOUTH LISMORE",
+        "STEVE KINGS PLAINS",
+        "STONY CHUTE",
+        "TERANIA CREEK",
+        "THE CHANNON",
+        "TREGEAGLE",
+        "TUCKI TUCKI",
+        "TUCKURIMBA",
+        "TULLERA",
+        "TUNCESTER",
+        "TUNTABLE CREEK",
+        "TUNTABLE FALLS",
+        "UPPER COOPERS CREEK",
+        "WHIAN WHIAN",
+        "WOODLAWN",
+        "WYRALLAH"
+      ]
+    },
+    {
+      "postcode": "4344",
+      "state": "QLD",
+      "distanceKm": 99.3,
+      "suburbs": [
+        "CARPENDALE",
+        "EGYPT",
+        "FLAGSTONE CREEK",
+        "HELIDON",
+        "HELIDON SPA",
+        "IREDALE",
+        "LILYDALE",
+        "LOCKYER",
+        "ROCKMOUNT",
+        "SEVENTEEN MILE",
+        "SILVER PINCH",
+        "SILVER RIDGE",
+        "STOCKYARD",
+        "UPPER FLAGSTONE"
+      ]
+    },
+    {
+      "postcode": "2476",
+      "state": "NSW",
+      "distanceKm": 99.4,
+      "suburbs": [
+        "ACACIA CREEK",
+        "ACACIA PLATEAU",
+        "BOOMI CREEK",
+        "BRUMBY PLAINS",
+        "KOREELAH",
+        "LEGUME",
+        "LINDESAY CREEK",
+        "LOWER ACACIA CREEK",
+        "MULI MULI",
+        "OLD KOREELAH",
+        "THE GLEN",
+        "WOODENBONG"
+      ]
+    },
+    {
+      "postcode": "2482",
+      "state": "NSW",
+      "distanceKm": 99.8,
+      "suburbs": [
+        "GOONENGERRY",
+        "HUONBROOK",
+        "KOONYUM RANGE",
+        "MAIN ARM",
+        "MONTECOLLUM",
+        "MULLUMBIMBY",
+        "MULLUMBIMBY CREEK",
+        "PALMWOODS",
+        "UPPER COOPERS CREEK",
+        "UPPER MAIN ARM",
+        "UPPER WILSONS CREEK",
+        "WANGANUI",
+        "WILSONS CREEK"
+      ]
+    },
+    {
+      "postcode": "4313",
+      "state": "QLD",
+      "distanceKm": 100.0,
+      "suburbs": [
+        "BIARRA",
+        "BRAEMORE",
+        "COOEEIMBARDI",
+        "CRESSBROOK",
+        "FULHAM",
+        "GREGORS CREEK",
+        "IVORY CREEK",
+        "LOWER CRESSBROOK",
+        "MOUNT BEPPO",
+        "OTTABA",
+        "SCRUB CREEK",
+        "TOOGOOLAWAH",
+        "YIMBUN"
+      ]
+    }
+  ]
+}

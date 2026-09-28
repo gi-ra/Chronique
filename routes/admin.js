@@ -5,7 +5,7 @@ const db = require('../db/database');
 const { UPLOADS_DIR } = require('../db/paths');
 const { requireAdmin } = require('../middleware/auth');
 const { syncVariants, PHOTO_FORMATS, sizesForType } = require('../lib/variants');
-const { getLowStockThreshold } = require('../lib/shipping');
+const { getLowStockThreshold, getShippingSettings } = require('../lib/shipping');
 const { sendBackInStockEmail, sendShippingUpdateEmail } = require('../lib/mailer');
 const { getStripe } = require('../lib/stripe');
 const { parseShopifyCsv, downloadProductImages, stripDangerousTags, slugify: csvSlugify } = require('../lib/shopifyImport');
@@ -192,7 +192,7 @@ const DEFAULT_INFO_SECTIONS = [
   },
   {
     title: 'Shipping & returns',
-    body: 'Standard and express shipping available across Australia, with free standard shipping over $250. Unworn pieces can be returned within 30 days for a full refund.',
+    body: 'Free local hand-delivery around Logan and Brisbane, flat-rate shipping across the rest of Australia (free over $150), and flat-rate New Zealand/international shipping. Unworn pieces can be returned within 30 days for a full refund.',
   },
 ];
 
@@ -928,9 +928,10 @@ router.get('/settings', (req, res) => {
   const rows = db.prepare('SELECT key, value FROM site_settings').all();
   const settings = {};
   rows.forEach((r) => { settings[r.key] = r.value; });
-  settings.shipping_flat_rate_cents = settings.shipping_flat_rate_cents || '0';
-  settings.shipping_free_threshold_cents = settings.shipping_free_threshold_cents || '0';
-  settings.shipping_express_rate_cents = settings.shipping_express_rate_cents || '0';
+  settings.shipping_au_flat_rate_cents = settings.shipping_au_flat_rate_cents || '1000';
+  settings.shipping_au_free_threshold_cents = settings.shipping_au_free_threshold_cents || '15000';
+  settings.shipping_nz_rate_cents = settings.shipping_nz_rate_cents || '2000';
+  settings.shipping_row_rate_cents = settings.shipping_row_rate_cents || '3000';
   settings.low_stock_threshold = settings.low_stock_threshold || '3';
   settings.hero_media_type = settings.hero_media_type || 'photo';
   settings.email_header_photo = settings.email_header_photo || '/assets/brandmark-word.png';
@@ -945,7 +946,12 @@ router.get('/settings', (req, res) => {
     return { name: r.name, productCount, isFirst: i === 0, isLast: i === categoryRows.length - 1 };
   });
 
-  res.render('settings/form', { settings, categories, error: req.query.error || '' });
+  res.render('settings/form', {
+    settings,
+    categories,
+    error: req.query.error || '',
+    localDeliveryRadiusKm: getShippingSettings().localRadiusKm,
+  });
 });
 
 router.post('/settings/categories/:name/delete', (req, res) => {
@@ -1225,7 +1231,7 @@ router.post('/orders/:id/refund', async (req, res) => {
 
 router.get('/orders.csv', (req, res) => {
   const orders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
-  const header = ['Order #', 'Date', 'Channel', 'Status', 'Customer', 'Email', 'Subtotal', 'Discount', 'Shipping', 'Total'];
+  const header = ['Order #', 'Date', 'Channel', 'Status', 'Customer', 'Email', 'Subtotal', 'Discount', 'Shipping', 'Total', 'Local Delivery'];
   const rows = orders.map((o) => [
     o.id,
     o.created_at,
@@ -1237,6 +1243,7 @@ router.get('/orders.csv', (req, res) => {
     (o.discount_cents / 100).toFixed(2),
     (o.shipping_cents / 100).toFixed(2),
     (o.total_cents / 100).toFixed(2),
+    o.is_local_delivery ? 'Yes' : '',
   ]);
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="orders.csv"');
@@ -1306,14 +1313,16 @@ router.post('/discounts/:id/delete', (req, res) => {
 
 /* ================= SITE SETTINGS (shipping rates + low-stock threshold) ================= */
 router.post('/settings/shipping', (req, res) => {
-  const flatRate = Math.max(0, Math.round(parseFloat(req.body.flatRate) * 100) || 0);
-  const freeThreshold = Math.max(0, Math.round(parseFloat(req.body.freeThreshold) * 100) || 0);
-  const expressRate = Math.max(0, Math.round(parseFloat(req.body.expressRate) * 100) || 0);
+  const auFlatRate = Math.max(0, Math.round(parseFloat(req.body.auFlatRate) * 100) || 0);
+  const auFreeThreshold = Math.max(0, Math.round(parseFloat(req.body.auFreeThreshold) * 100) || 0);
+  const nzRate = Math.max(0, Math.round(parseFloat(req.body.nzRate) * 100) || 0);
+  const rowRate = Math.max(0, Math.round(parseFloat(req.body.rowRate) * 100) || 0);
   const lowStockThreshold = Math.max(0, parseInt(req.body.lowStockThreshold, 10) || 0);
   const set = db.prepare('INSERT INTO site_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value');
-  set.run('shipping_flat_rate_cents', String(flatRate));
-  set.run('shipping_free_threshold_cents', String(freeThreshold));
-  set.run('shipping_express_rate_cents', String(expressRate));
+  set.run('shipping_au_flat_rate_cents', String(auFlatRate));
+  set.run('shipping_au_free_threshold_cents', String(auFreeThreshold));
+  set.run('shipping_nz_rate_cents', String(nzRate));
+  set.run('shipping_row_rate_cents', String(rowRate));
   set.run('low_stock_threshold', String(lowStockThreshold));
   res.redirect('/admin/settings');
 });

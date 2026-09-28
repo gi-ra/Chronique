@@ -58,10 +58,6 @@ async function handleCheckoutCompleted(session) {
 
   const customerName = (session.customer_details && session.customer_details.name) || '';
   const customerEmail = (session.customer_details && session.customer_details.email) || '';
-  // Stripe returns the shipping address collected at checkout on
-  // session.shipping_details (present because we set shipping_address_collection
-  // when creating the session in routes/api.js).
-  const address = (session.shipping_details && session.shipping_details.address) || {};
   const paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : '';
 
   const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id);
@@ -69,8 +65,12 @@ async function handleCheckoutCompleted(session) {
   const decrementStock = db.prepare(
     'UPDATE product_variants SET stock = MAX(0, stock - ?) WHERE id = ?'
   );
+  // shipping_address is NOT touched here — the customer's address was
+  // already collected on our own cart page and saved on the order at
+  // checkout time (see routes/api.js), since shipping is priced from it
+  // *before* this Stripe session even exists. Stripe never collects it.
   const markPaid = db.prepare(`
-    UPDATE orders SET status = 'paid', customer_name = ?, customer_email = ?, shipping_address = ?, payment_intent_id = ?
+    UPDATE orders SET status = 'paid', customer_name = ?, customer_email = ?, payment_intent_id = ?
     WHERE id = ?
   `);
 
@@ -92,7 +92,7 @@ async function handleCheckoutCompleted(session) {
         }
       }
     });
-    markPaid.run(customerName, customerEmail, JSON.stringify(address), paymentIntentId, order.id);
+    markPaid.run(customerName, customerEmail, paymentIntentId, order.id);
   });
   tx();
 

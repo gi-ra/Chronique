@@ -9,8 +9,10 @@ third-party storefront:
   secure payment page Stripe provides (so this app never touches or stores
   card numbers), including Apple Pay and Google Pay where the shopper's
   device supports them.
-- **Shipping** — standard (flat rate, waived over a free-shipping threshold)
-  and express (flat rate, always charged), both set by you.
+- **Shipping** — priced automatically from the customer's address: free
+  local hand-delivery within 100km of Logan Central QLD 4114 (postcode list
+  in `config/local-postcodes.json`), a flat Rest-of-Australia rate (waived
+  over a threshold you set), and flat New Zealand / Rest-of-World rates.
 - **Inventory** — real stock counts per size/colour combination, checked at
   checkout and decremented automatically once an order is paid.
 - **Discount codes** — percent-off or fixed-amount codes you create, with an
@@ -29,8 +31,9 @@ comes from the database, and the shop actually sells things.
 ```
 server.js           the app's entry point
 db/                 database setup, schema, and starter content
+config/local-postcodes.json  postcodes eligible for free local hand-delivery
 lib/stripe.js        sets up the Stripe client from your API key
-lib/shipping.js       shipping-cost calculation + low-stock threshold
+lib/shipping.js       region-based shipping calculation + low-stock threshold
 lib/variants.js       keeps each product's size/colour stock rows in sync
 lib/mailer.js         sends transactional emails via Resend
 routes/api.js        the public JSON endpoints the site's JavaScript calls, incl. checkout
@@ -132,16 +135,23 @@ for trying things out locally.
 
 Once the server's running, log into `/admin` → **Site images** and scroll to
 **Shipping** to set:
-- your **standard rate** and the **free-shipping threshold** it's waived
-  over,
-- your **express rate** (always charged, no free threshold — offered as a
-  faster option at checkout),
+- your **Rest of Australia rate** and the **free-shipping threshold** it's
+  waived over,
+- your **New Zealand** and **Rest of World** flat rates,
 - your **low-stock threshold** — the units-remaining number that triggers a
   warning banner on the dashboard and (if `ADMIN_ALERT_EMAIL` is set) an
   email, once per dip below the line.
 
-All start at $0 / 0 units until you set them — change them any time; they
-apply to every checkout and stock change from that point on.
+Free local hand-delivery (within 100km of Logan Central QLD 4114) doesn't
+have a settable rate — it's always free, and always hand-delivered by you
+rather than posted. It's driven by `config/local-postcodes.json`, a plain
+list of postcodes you can add to or remove from by hand at any time — no
+code changes needed. A PO Box or Parcel Locker address inside that zone
+gets the Rest of Australia rate instead, since those can't be
+hand-delivered.
+
+These settings start at sensible defaults ($10 / $150 / $20 / $30) until
+you change them — updates apply to every checkout from that point on.
 
 ### Load the starter content
 
@@ -213,7 +223,9 @@ rebuild step.
   email to be notified when it's back — that's the `stock_notifications`
   table, checked automatically whenever you top up a variant's stock in
   `/admin`.
-- On the **bag** page, they choose standard or express shipping and can
+- On the **bag** page, they enter their shipping address and see the real
+  shipping cost calculated live from it (free local hand-delivery, Rest of
+  Australia, New Zealand, or Rest of World — see "Shipping" above), and can
   enter a discount code, which is checked live against your discount codes
   (a wrong or expired code shows an error without blocking checkout).
 - **Checkout** re-validates everything server-side (never trusts what the

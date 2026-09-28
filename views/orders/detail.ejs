@@ -10,8 +10,13 @@
     </div>
     <p class="muted">
       <%= order.created_at %> &middot; Channel: <%= order.channel %> &middot; Status: <strong><%= order.status %></strong>
-      <% if (order.shipping_method === 'express') { %> &middot; Express shipping<% } %>
+      &middot; Shipping: <%= order.shipping_method %>
     </p>
+    <% if (order.is_local_delivery) { %>
+      <div class="error-box" style="background:#F3EAD8; border-color:#D9CBAE; color:#7A4430;">
+        🚚 Hand-deliver this order — it's in the local free-delivery zone. Do not book a postage carrier for it.
+      </div>
+    <% } %>
 
     <div class="card">
       <h2 style="margin-top:0;">Customer</h2>
