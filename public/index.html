@@ -125,7 +125,7 @@
     <div class="drawer-section drawer-section--explore">
       <h4 class="mono">Explore</h4>
       <a href="#/about">About us</a>
-      <a href="#/shop">Collection</a>
+      <a href="#/collections">Collections</a>
       <a href="#/news">News</a>
       <a href="#/sound">Studio</a>
       <a href="#/gathering">Gathering</a>
@@ -170,11 +170,11 @@
     </div>
   </section>
 
-  <section class="coming-soon">
-    <div class="cs-photo photo-tex"></div>
+  <section class="coming-soon" id="comingSoonSection">
+    <div class="cs-photo photo-tex" id="csPhoto"></div>
     <div class="cs-content">
-      <span class="cs-label mono">Coming soon</span>
-      <h2>The next drop is on its way</h2>
+      <span class="cs-label mono" id="csLabel">Coming soon</span>
+      <h2 id="csHeading">The next drop is on its way</h2>
       <div class="subscribe">
         <label for="homeEmail" style="position:absolute;left:-9999px;">Email address</label>
         <input id="homeEmail" type="email" placeholder="Email address" autocomplete="email">
@@ -227,6 +227,33 @@
 </aside>
 
 
+
+<!-- ============ COLLECTIONS (landing grid) ============ -->
+<main id="route-collections" class="route">
+  <div class="collections-hero" id="collectionsHero">
+    <h1 id="collectionsHeading">Collections</h1>
+    <p id="collectionsCopy">Curated groupings from across the shop — pulled together by season, story or theme, not by category.</p>
+  </div>
+  <div class="collections-grid" id="collectionsGrid"></div>
+</main>
+
+<!-- ============ ONE COLLECTION ============ -->
+<main id="route-collection" class="route">
+  <div class="wrap breadcrumb">
+    <a href="#/collections">Collections</a> <span id="collectionCrumbName"></span>
+  </div>
+  <section class="collection-banner" id="collectionBanner">
+    <div class="collection-banner-photo" id="collectionBannerPhoto"></div>
+    <div class="collection-banner-text">
+      <h1 id="collectionName"></h1>
+      <p id="collectionDescription"></p>
+    </div>
+  </section>
+  <div class="wrap">
+    <div class="count mono" id="collectionCount" style="margin:26px 0 18px;"></div>
+    <div class="grid" id="collectionGrid"></div>
+  </div>
+</main>
 
 <!-- ============ PRODUCT DETAIL ============ -->
 <main id="route-product" class="route">
@@ -514,6 +541,20 @@
     <h1>Gathering</h1>
     <p>A recurring salon for conversation, craft, and quiet company — held in small rooms, for people who still read the room. Seats are limited by design.</p>
   </div>
+
+  <section class="wrap event-showcase" id="eventShowcase" style="display:none;">
+    <div class="event-showcase-media">
+      <img class="event-showcase-photo" id="eventShowcasePhoto" alt="">
+      <video class="event-showcase-video" id="eventShowcaseVideo" muted loop autoplay playsinline style="display:none;"></video>
+    </div>
+    <div class="event-showcase-info">
+      <span class="event-showcase-label mono" id="eventShowcaseDate"></span>
+      <h2 id="eventShowcaseTitle"></h2>
+      <div class="event-showcase-location mono" id="eventShowcaseLocation"></div>
+      <div class="event-showcase-desc" id="eventShowcaseDesc"></div>
+    </div>
+  </section>
+
   <div class="gathering-grid" id="gatheringGrid"></div>
   <div class="wrap gathering-rsvp">
     <h2>Reserve a seat</h2>

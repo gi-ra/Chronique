@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Import from CSV' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>Import products from Shopify</h1>
+      <a class="btn secondary" href="/admin/products">Back to products</a>
+    </div>
+    <p class="muted">
+      Upload the CSV you get from Shopify's <strong>Products &rarr; Export</strong>. Each product's
+      title, description, category (from its Type), price, photos, and size/colour stock are read
+      straight off it. Shopify's per-variant pricing isn't supported here, so the first price found
+      for each product is used for the whole product — check prices afterwards if a product had
+      more than one. New products land at the bottom of your list as normal, so you can edit, reorder
+      or delete any of them from the products page afterwards.
+    </p>
+
+    <div class="card">
+      <form method="POST" action="/admin/products/import" enctype="multipart/form-data">
+        <label for="csvFile">Shopify products CSV</label>
+        <input type="file" id="csvFile" name="csvFile" accept=".csv,text/csv" required>
+        <div style="margin-top:18px;">
+          <button type="submit" class="btn">Import</button>
+        </div>
+      </form>
+    </div>
+
+    <% if (result && result.error) { %>
+      <div class="error-box"><%= result.error %></div>
+    <% } %>
+
+    <% if (result && result.imported) { %>
+      <h2>Imported <%= result.imported.length %> product<%= result.imported.length === 1 ? '' : 's' %></h2>
+      <% if (!result.imported.length) { %>
+        <p class="empty">Nothing was imported — check the CSV has product rows with a Handle and Title.</p>
+      <% } else { %>
+        <table>
+          <thead><tr><th>Name</th><th>Variants created</th><th></th></tr></thead>
+          <tbody>
+            <% result.imported.forEach(p => { %>
+              <tr>
+                <td><%= p.name %></td>
+                <td><%= p.variantCount %></td>
+                <td><a class="btn small secondary" href="/admin/products/<%= p.id %>/edit">Review</a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+
+      <% if (result.skipped && result.skipped.length) { %>
+        <h2>Skipped</h2>
+        <ul>
+          <% result.skipped.forEach(s => { %>
+            <li><%= s.handle %> — <%= s.reason %></li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <% if (result.imageFailures && result.imageFailures.length) { %>
+        <h2>Photos that didn't download</h2>
+        <p class="muted">
+          These products were still created — just add the photo manually from the product's edit
+          page if you'd like it there.
+        </p>
+        <ul>
+          <% result.imageFailures.forEach(f => { %>
+            <li><%= f.handle %> — <%= f.error %></li>
+          <% }) %>
+        </ul>
+      <% } %>
+    <% } %>
+  </div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: collection ? 'Edit collection' : 'Add collection' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <h1><%= collection ? 'Edit collection' : 'Add collection' %></h1>
+    <p class="muted">
+      Shown as one tile on the client-facing Collections page, and as its own page listing every
+      product tagged with it. Tag products from their own edit page.
+    </p>
+
+    <form method="POST" action="<%= collection ? '/admin/collections/' + collection.id : '/admin/collections' %>" enctype="multipart/form-data">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required value="<%= collection ? collection.name : '' %>" placeholder="Fall / Winter '26">
+
+      <label for="description">Description (shown under the name on the collection's page)</label>
+      <textarea id="description" name="description"><%= collection ? collection.description : '' %></textarea>
+
+      <% if (collection && collection.cover_photo) { %>
+        <label>Current cover photo</label>
+        <img src="<%= collection.cover_photo %>" style="width:180px; border-radius:8px; display:block;" alt="">
+      <% } %>
+      <label for="coverPhoto">Cover photo <%= collection ? '(leave blank to keep current)' : '' %></label>
+      <input type="file" id="coverPhoto" name="coverPhoto" accept="image/*">
+      <p class="muted" style="margin-top:6px;">
+        Used as the tile image on the Collections page and the banner on this collection's own page.
+        A tall image (portrait, roughly 4:5) works best.
+      </p>
+
+      <div style="margin-top:26px;">
+        <button type="submit" class="btn">Save</button>
+        <a class="btn secondary" href="/admin/collections">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

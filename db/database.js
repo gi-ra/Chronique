@@ -39,5 +39,33 @@ ensureColumn('orders', 'tracking_carrier', "TEXT NOT NULL DEFAULT ''");
 // created. Drives sensible defaults (sizing, whether a colour picker makes
 // sense) without hardcoding behaviour to specific category names.
 ensureColumn('products', 'product_type', "TEXT NOT NULL DEFAULT 'garment'");
+// JSON array of { title, body } shown as expandable sections on the product
+// page (e.g. "Composition & care", "Shipping & returns") — editable per
+// product in admin, since not every piece is cut/cared for the same way.
+// Empty ('[]', the default for every existing product) falls back to the
+// same two generic sections that used to be hardcoded on every page.
+ensureColumn('products', 'info_sections', "TEXT NOT NULL DEFAULT '[]'");
+// Size guide (the measurements table behind the "Size guide" link next to
+// the Size picker). '' (the default) means "work it out from the category"
+// like every product used to — 'tops' or 'bottoms' pins this product to
+// that measurement chart's shape with its OWN numbers (size_guide_data),
+// since two products in the same category can still be cut differently.
+// 'none' hides the size guide link entirely for a product that doesn't
+// need one.
+ensureColumn('products', 'size_guide_type', "TEXT NOT NULL DEFAULT ''");
+ensureColumn('products', 'size_guide_data', "TEXT NOT NULL DEFAULT '{}'");
+// JSON array of collection ids this product belongs to (see the
+// `collections` table) — independent of `category`, which only drives the
+// shop's filter menu. A product can be in several collections, or none.
+ensureColumn('products', 'collections', "TEXT NOT NULL DEFAULT '[]'");
+// An event can be showcased with a photo OR a short looping video (like the
+// home hero) instead of just a plain photo row. media_type picks which one
+// shows; the other stays stored so switching back doesn't lose it.
+ensureColumn('events', 'media_type', "TEXT NOT NULL DEFAULT 'photo'");
+ensureColumn('events', 'video', "TEXT NOT NULL DEFAULT ''");
+// Only one event is featured at a time — the one shown in the big showcase
+// panel at the top of the Gathering page, picked explicitly in admin rather
+// than just "whichever is soonest".
+ensureColumn('events', 'is_featured', 'INTEGER NOT NULL DEFAULT 0');
 
 module.exports = db;

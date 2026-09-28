@@ -17,6 +17,19 @@ function parseProduct(row) {
     isNew: !!row.is_new,
     desc: row.description,
     photos: JSON.parse(row.photos || '[]'),
+    infoSections: JSON.parse(row.info_sections || '[]'),
+    sizeGuideType: row.size_guide_type || '',
+    sizeGuideData: JSON.parse(row.size_guide_data || '{}'),
+    collections: JSON.parse(row.collections || '[]'),
+  };
+}
+
+function parseCollection(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    coverPhoto: row.cover_photo,
   };
 }
 
@@ -86,6 +99,19 @@ router.get('/categories', (req, res) => {
     }
   });
   res.json(categories);
+});
+
+// ---------- Collections (editorial page — separate from category/menu) ----------
+router.get('/collections', (req, res) => {
+  const rows = db.prepare('SELECT * FROM collections ORDER BY sort_order ASC').all();
+  const productRows = db.prepare('SELECT collections FROM products').all();
+  const counts = {};
+  productRows.forEach((p) => {
+    JSON.parse(p.collections || '[]').forEach((cid) => {
+      counts[cid] = (counts[cid] || 0) + 1;
+    });
+  });
+  res.json(rows.map((r) => ({ ...parseCollection(r), productCount: counts[r.id] || 0 })));
 });
 
 // ---------- News ----------

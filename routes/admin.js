@@ -4,10 +4,12 @@ const bcrypt = require('bcryptjs');
 const db = require('../db/database');
 const { UPLOADS_DIR } = require('../db/paths');
 const { requireAdmin } = require('../middleware/auth');
-const { syncVariants, PHOTO_FORMATS } = require('../lib/variants');
+const { syncVariants, PHOTO_FORMATS, sizesForType } = require('../lib/variants');
 const { getLowStockThreshold } = require('../lib/shipping');
 const { sendBackInStockEmail, sendShippingUpdateEmail } = require('../lib/mailer');
 const { getStripe } = require('../lib/stripe');
+const { parseShopifyCsv, downloadProductImages, stripDangerousTags, slugify: csvSlugify } = require('../lib/shopifyImport');
+const { DEFAULT_GUIDES, defaultGuideTypeForCategory } = require('../lib/sizeGuide');
 
 const router = express.Router();
 
@@ -129,11 +131,125 @@ router.get('/', (req, res) => {
 // as suggestions — this is also exactly the list that becomes the shop's
 // category menu (see GET /api/categories), so picking from it (or typing a
 // new one) is literally editing that menu.
+// Composition & care / Shipping & returns / any other custom section shown
+// on a product's page. Submitted as parallel arrays (one <input>/<textarea>
+// pair per section, added/removed in the browser) — zipped back together
+// here and blank ones dropped, so an admin who clears a row just removes it.
+function parseInfoSections(req) {
+  const titles = [].concat(req.body.infoTitle || []);
+  const bodies = [].concat(req.body.infoBody || []);
+  const sections = [];
+  titles.forEach((title, i) => {
+    const t = (title || '').trim();
+    const b = (bodies[i] || '').trim();
+    if (t && b) sections.push({ title: t, body: b });
+  });
+  return sections;
+}
+
+// The size guide editor posts one input per (size, column) cell, named
+// "sizeGuideValue_<SIZE>_<columnIndex>" — multer doesn't do the nested
+// bracket-notation parsing express.urlencoded does, so this is the plainest
+// naming that survives a multipart form untouched.
+function parseSizeGuide(req, sizeList) {
+  const type = ['tops', 'bottoms', 'none'].includes(req.body.sizeGuideType) ? req.body.sizeGuideType : '';
+  if (type !== 'tops' && type !== 'bottoms') {
+    return { type, data: {} };
+  }
+  const columns = DEFAULT_GUIDES[type].columns;
+  const rows = {};
+  (sizeList.length ? sizeList : []).forEach((size) => {
+    const values = columns.map((_, i) => {
+      const raw = req.body[`sizeGuideValue_${size}_${i}`];
+      const n = parseFloat(raw);
+      return Number.isFinite(n) ? n : 0;
+    });
+    rows[size] = values;
+  });
+  return { type, data: { columns, rows } };
+}
+
+// Builds the rows the size-guide editor should show for `type` (tops or
+// bottoms) and `sizes`: the product's own saved numbers where it has them,
+// falling back to the shared default guide's numbers for a size it shares
+// with that default, and 0 for a size neither has (e.g. a custom run).
+function buildSizeGuideRows(type, sizes, storedData) {
+  if (!type) return { columns: [], rows: {} };
+  const columns = DEFAULT_GUIDES[type].columns;
+  const defaultRows = DEFAULT_GUIDES[type].rows;
+  const storedRows = (storedData && storedData.rows) || {};
+  const rows = {};
+  sizes.forEach((size) => {
+    rows[size] = storedRows[size] || defaultRows[size] || columns.map(() => 0);
+  });
+  return { columns, rows };
+}
+
+const DEFAULT_INFO_SECTIONS = [
+  {
+    title: 'Composition & care',
+    body: 'Made from responsibly sourced natural fibres. Machine wash cold, inside out, and lay flat to dry to preserve the shape.',
+  },
+  {
+    title: 'Shipping & returns',
+    body: 'Standard and express shipping available across Australia, with free standard shipping over $250. Unworn pieces can be returned within 30 days for a full refund.',
+  },
+];
+
 function existingCategories() {
   return db
     .prepare('SELECT DISTINCT category FROM products ORDER BY sort_order ASC')
     .all()
     .map((r) => r.category);
+}
+
+// All collections, in display order, for the product form's checklist.
+function allCollections() {
+  return db.prepare('SELECT * FROM collections ORDER BY sort_order ASC').all();
+}
+
+// How many products currently sit in each collection — for the admin
+// collections list, purely informational.
+function collectionProductCounts() {
+  const counts = {};
+  db.prepare('SELECT collections FROM products').all().forEach((row) => {
+    JSON.parse(row.collections || '[]').forEach((cid) => {
+      counts[cid] = (counts[cid] || 0) + 1;
+    });
+  });
+  return counts;
+}
+
+// The product form posts checkboxes for existing collections ("collections")
+// plus a free-text field ("newCollections", comma separated) for brand new
+// ones typed on the spot — any name typed there is created here (if it
+// doesn't already exist) and included in the returned list, exactly like
+// typing "+ Add new category" does for category.
+function parseCollections(req) {
+  const checked = [].concat(req.body.collections || []);
+  const newNames = (req.body.newCollections || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const newIds = newNames.map((name) => {
+    let id = slugify(name);
+    if (!id) return null;
+    let uniqueId = id;
+    let n = 2;
+    while (db.prepare('SELECT 1 FROM collections WHERE id = ? AND name != ?').get(uniqueId, name)) {
+      uniqueId = `${id}-${n}`;
+      n += 1;
+    }
+    const exists = db.prepare('SELECT 1 FROM collections WHERE id = ?').get(uniqueId);
+    if (!exists) {
+      const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM collections').get().m;
+      db.prepare('INSERT INTO collections (id, name, sort_order) VALUES (?, ?, ?)').run(uniqueId, name, maxOrder + 1);
+    }
+    return uniqueId;
+  }).filter(Boolean);
+
+  return [...new Set([...checked, ...newIds])];
 }
 
 router.get('/products', (req, res) => {
@@ -166,8 +282,8 @@ router.post('/products/:id/duplicate', (req, res) => {
   const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM products').get().m;
 
   db.prepare(`
-    INSERT INTO products (id, name, category, price, icon, colors, is_new, description, photos, sort_order, product_type)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (id, name, category, price, icon, colors, is_new, description, photos, sort_order, product_type, info_sections, size_guide_type, size_guide_data, collections)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     newId,
     `${original.name} (copy)`,
@@ -179,7 +295,11 @@ router.post('/products/:id/duplicate', (req, res) => {
     original.description,
     original.photos,
     maxOrder + 1,
-    original.product_type
+    original.product_type,
+    original.info_sections,
+    original.size_guide_type,
+    original.size_guide_data,
+    original.collections || '[]'
   );
 
   const colorList = JSON.parse(original.colors || '[]');
@@ -191,7 +311,116 @@ router.post('/products/:id/duplicate', (req, res) => {
 });
 
 router.get('/products/new', (req, res) => {
-  res.render('products/form', { product: null, categories: existingCategories(), photoFormats: PHOTO_FORMATS });
+  res.render('products/form', {
+    product: null,
+    categories: existingCategories(),
+    collections: allCollections(),
+    photoFormats: PHOTO_FORMATS,
+    defaultInfoSections: DEFAULT_INFO_SECTIONS,
+    sizeGuideEditorTops: buildSizeGuideRows('tops', ['XS', 'S', 'M', 'L', 'XL'], {}),
+    sizeGuideEditorBottoms: buildSizeGuideRows('bottoms', ['XS', 'S', 'M', 'L', 'XL'], {}),
+  });
+});
+
+/* ---- Bulk import from a Shopify "Export products" CSV ---- */
+const csvUpload = multer({ storage: multer.memoryStorage() });
+
+router.get('/products/import', (req, res) => {
+  res.render('products/import', { result: null });
+});
+
+router.post('/products/import', csvUpload.single('csvFile'), async (req, res) => {
+  if (!req.file) {
+    return res.render('products/import', { result: { error: 'Choose a CSV file first.' } });
+  }
+
+  let parsed;
+  try {
+    parsed = parseShopifyCsv(req.file.buffer.toString('utf8'));
+  } catch (err) {
+    return res.render('products/import', {
+      result: { error: `Could not read that file as a Shopify products CSV (${err.message}).` },
+    });
+  }
+
+  if (!parsed.length) {
+    return res.render('products/import', { result: { error: 'No products found in that file.' } });
+  }
+
+  const imageFailures = await downloadProductImages(parsed, UPLOADS_DIR);
+
+  const insertProduct = db.prepare(`
+    INSERT INTO products (id, name, category, price, icon, colors, is_new, description, photos, sort_order, product_type)
+    VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 'garment')
+  `);
+  const insertVariant = db.prepare(
+    'INSERT INTO product_variants (product_id, size, color, stock) VALUES (?, ?, ?, ?)'
+  );
+
+  const imported = [];
+  const skipped = [];
+
+  const tx = db.transaction(() => {
+    parsed.forEach((p) => {
+      if (!p.title) {
+        skipped.push({ handle: p.handle, reason: 'No product title found on any row.' });
+        return;
+      }
+      let id = csvSlugify(p.handle) || csvSlugify(p.title);
+      let n = 2;
+      while (db.prepare('SELECT 1 FROM products WHERE id = ?').get(id)) {
+        id = `${csvSlugify(p.handle) || csvSlugify(p.title)}-${n}`;
+        n += 1;
+      }
+
+      const category = p.type || p.productCategory || 'Uncategorized';
+      const price = p.variants.find((v) => v.price != null)?.price || 0;
+      const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM products').get().m;
+
+      // Collapse this product's variant rows into a distinct colour list
+      // (in first-seen order) and a stock lookup per (size, colour) — a
+      // product with no real colour option gets a single blank-colour
+      // bucket that becomes "Ink" below, same default as a manual add.
+      const colorsSeen = [];
+      const stockByKey = new Map();
+      p.variants.forEach((v) => {
+        const color = v.color || '';
+        if (color && !colorsSeen.includes(color)) colorsSeen.push(color);
+        stockByKey.set(`${v.size}__${color}`, (stockByKey.get(`${v.size}__${color}`) || 0) + v.qty);
+      });
+      const colorList = colorsSeen.length ? colorsSeen : ['Ink'];
+
+      const photos = p.localImages && p.localImages.length ? p.localImages : [];
+
+      insertProduct.run(
+        id,
+        p.title,
+        category,
+        price,
+        'icon-tee',
+        JSON.stringify(colorList),
+        stripDangerousTags(p.bodyHtml),
+        JSON.stringify(photos),
+        maxOrder + 1
+      );
+
+      if (p.variants.length) {
+        p.variants.forEach((v) => {
+          const color = v.color || colorList[0];
+          insertVariant.run(id, v.size, color, v.qty);
+        });
+      } else {
+        insertVariant.run(id, 'ONE SIZE', colorList[0], 0);
+      }
+
+      imported.push({ id, name: p.title, variantCount: Math.max(1, p.variants.length) });
+    });
+  });
+  tx();
+
+  res.render('products/import', {
+    result: { imported, skipped, imageFailures },
+  });
 });
 
 router.post('/products', upload.array('newPhotos', 8), (req, res) => {
@@ -206,10 +435,14 @@ router.post('/products', upload.array('newPhotos', 8), (req, res) => {
   const sizeList = (sizes || '').split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
   const cleanId = id.trim();
   const initialStock = Math.max(0, parseInt(req.body.initialStock, 10) || 0);
+  const infoSections = parseInfoSections(req);
+  const effectiveSizes = sizeList.length ? sizeList : sizesForType(productType, category);
+  const sizeGuide = parseSizeGuide(req, effectiveSizes);
+  const collectionsList = parseCollections(req);
 
   db.prepare(`
-    INSERT INTO products (id, name, category, price, icon, colors, is_new, description, photos, sort_order, product_type)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (id, name, category, price, icon, colors, is_new, description, photos, sort_order, product_type, info_sections, size_guide_type, size_guide_data, collections)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     cleanId,
     name,
@@ -221,7 +454,11 @@ router.post('/products', upload.array('newPhotos', 8), (req, res) => {
     description || '',
     JSON.stringify(photos),
     maxOrder + 1,
-    productType
+    productType,
+    JSON.stringify(infoSections),
+    sizeGuide.type,
+    JSON.stringify(sizeGuide.data),
+    JSON.stringify(collectionsList)
   );
   syncVariants(db, cleanId, productType, category, colorList, initialStock, sizeList);
   res.redirect(`/admin/products/${cleanId}/edit`);
@@ -234,16 +471,26 @@ router.get('/products/:id/edit', (req, res) => {
     .prepare('SELECT * FROM product_variants WHERE product_id = ? ORDER BY color ASC, size ASC')
     .all(product.id);
   const currentSizes = [...new Set(variants.map((v) => v.size))];
+  const storedSections = JSON.parse(product.info_sections || '[]');
+  const sizeGuideType = product.size_guide_type || '';
+  const storedGuideData = JSON.parse(product.size_guide_data || '{}');
+  const sizesForGuide = currentSizes.length ? currentSizes : ['XS', 'S', 'M', 'L', 'XL'];
   res.render('products/form', {
     product: {
       ...product,
       colors: JSON.parse(product.colors || '[]').join(', '),
       sizes: currentSizes.join(', '),
       photos: JSON.parse(product.photos || '[]'),
+      infoSections: storedSections.length ? storedSections : DEFAULT_INFO_SECTIONS,
+      sizeGuideType,
+      collections: JSON.parse(product.collections || '[]'),
     },
     variants,
     categories: existingCategories(),
+    collections: allCollections(),
     photoFormats: PHOTO_FORMATS,
+    sizeGuideEditorTops: buildSizeGuideRows('tops', sizesForGuide, sizeGuideType === 'tops' ? storedGuideData : {}),
+    sizeGuideEditorBottoms: buildSizeGuideRows('bottoms', sizesForGuide, sizeGuideType === 'bottoms' ? storedGuideData : {}),
   });
 });
 
@@ -265,8 +512,13 @@ router.post('/products/:id', upload.array('newPhotos', 8), (req, res) => {
   const newPhotos = (req.files || []).map((f) => toUrl(f.filename));
   photos = photos.concat(newPhotos);
 
+  const infoSections = parseInfoSections(req);
+  const effectiveSizes = sizeList.length ? sizeList : sizesForType(productType, category);
+  const sizeGuide = parseSizeGuide(req, effectiveSizes);
+  const collectionsList = parseCollections(req);
+
   db.prepare(`
-    UPDATE products SET name=?, category=?, price=?, icon=?, colors=?, is_new=?, description=?, photos=?, product_type=?
+    UPDATE products SET name=?, category=?, price=?, icon=?, colors=?, is_new=?, description=?, photos=?, product_type=?, info_sections=?, size_guide_type=?, size_guide_data=?, collections=?
     WHERE id=?
   `).run(
     name,
@@ -278,6 +530,10 @@ router.post('/products/:id', upload.array('newPhotos', 8), (req, res) => {
     description || '',
     JSON.stringify(photos),
     productType,
+    JSON.stringify(infoSections),
+    sizeGuide.type,
+    JSON.stringify(sizeGuide.data),
+    JSON.stringify(collectionsList),
     req.params.id
   );
 
@@ -330,6 +586,87 @@ router.post('/products/:id/delete', (req, res) => {
 router.post('/products/:id/move', (req, res) => {
   moveItem('products', req.params.id, req.body.direction);
   res.redirect('/admin/products');
+});
+
+/* ================= COLLECTIONS ================= */
+// Editorial groupings shown on the public Collections page — separate from
+// category (which only drives the shop's filter menu). Products opt into a
+// collection from a checklist on their own edit page (see parseCollections
+// above); this section is just for defining the collections themselves:
+// their name, description and cover photo.
+router.get('/collections', (req, res) => {
+  const collections = allCollections();
+  const counts = collectionProductCounts();
+  res.render('collections/list', {
+    collections: collections.map((c) => ({ ...c, productCount: counts[c.id] || 0 })),
+  });
+});
+
+router.get('/collections/new', (req, res) => {
+  res.render('collections/form', { collection: null });
+});
+
+router.post('/collections', upload.single('coverPhoto'), (req, res) => {
+  const { name, description } = req.body;
+  const cleanName = (name || '').trim();
+  if (!cleanName) return res.redirect('/admin/collections/new');
+
+  let id = slugify(cleanName);
+  let n = 2;
+  while (db.prepare('SELECT 1 FROM collections WHERE id = ?').get(id)) {
+    id = `${slugify(cleanName)}-${n}`;
+    n += 1;
+  }
+  const coverPhoto = req.file ? toUrl(req.file.filename) : '';
+  const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM collections').get().m;
+
+  db.prepare(`
+    INSERT INTO collections (id, name, description, cover_photo, sort_order)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(id, cleanName, description || '', coverPhoto, maxOrder + 1);
+
+  res.redirect('/admin/collections');
+});
+
+router.get('/collections/:id/edit', (req, res) => {
+  const collection = db.prepare('SELECT * FROM collections WHERE id = ?').get(req.params.id);
+  if (!collection) return res.status(404).send('Collection not found');
+  res.render('collections/form', { collection });
+});
+
+router.post('/collections/:id', upload.single('coverPhoto'), (req, res) => {
+  const existing = db.prepare('SELECT * FROM collections WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).send('Collection not found');
+
+  const { name, description } = req.body;
+  const coverPhoto = req.file ? toUrl(req.file.filename) : existing.cover_photo;
+
+  db.prepare(`
+    UPDATE collections SET name=?, description=?, cover_photo=?
+    WHERE id=?
+  `).run((name || '').trim() || existing.name, description || '', coverPhoto, req.params.id);
+
+  res.redirect('/admin/collections');
+});
+
+router.post('/collections/:id/delete', (req, res) => {
+  // Deleting a collection just un-tags every product from it — the
+  // products themselves are untouched.
+  const products = db.prepare('SELECT id, collections FROM products').all();
+  const updateProduct = db.prepare('UPDATE products SET collections = ? WHERE id = ?');
+  products.forEach((p) => {
+    const list = JSON.parse(p.collections || '[]');
+    if (list.includes(req.params.id)) {
+      updateProduct.run(JSON.stringify(list.filter((cid) => cid !== req.params.id)), p.id);
+    }
+  });
+  db.prepare('DELETE FROM collections WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/collections');
+});
+
+router.post('/collections/:id/move', (req, res) => {
+  moveItem('collections', req.params.id, req.body.direction);
+  res.redirect('/admin/collections');
 });
 
 /* ================= NEWS ================= */
@@ -493,13 +830,24 @@ router.get('/events/new', (req, res) => {
   res.render('events/form', { event: null });
 });
 
-router.post('/events', upload.single('photo'), (req, res) => {
+// Only one event can be featured at a time — clears the flag off every
+// other event before the caller sets it on the one that should have it.
+function clearOtherFeaturedEvents(exceptId) {
+  db.prepare('UPDATE events SET is_featured = 0 WHERE id != ?').run(exceptId || -1);
+}
+
+router.post('/events', heroUpload.fields([{ name: 'photo', maxCount: 1 }, { name: 'video', maxCount: 1 }]), (req, res) => {
   const { title, eventDate, eventTime, location, description } = req.body;
-  const photo = req.file ? toUrl(req.file.filename) : '';
-  db.prepare(`
-    INSERT INTO events (title, event_date, event_time, location, description, photo)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(title, eventDate, eventTime || '', location || '', description || '', photo);
+  const mediaType = req.body.mediaType === 'video' ? 'video' : 'photo';
+  const photo = req.files && req.files.photo ? toUrl(req.files.photo[0].filename) : '';
+  const video = req.files && req.files.video ? toUrl(req.files.video[0].filename) : '';
+  const isFeatured = req.body.isFeatured ? 1 : 0;
+
+  const info = db.prepare(`
+    INSERT INTO events (title, event_date, event_time, location, description, photo, media_type, video, is_featured)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(title, eventDate, eventTime || '', location || '', description || '', photo, mediaType, video, isFeatured);
+  if (isFeatured) clearOtherFeaturedEvents(info.lastInsertRowid);
   res.redirect('/admin/events');
 });
 
@@ -509,17 +857,21 @@ router.get('/events/:id/edit', (req, res) => {
   res.render('events/form', { event });
 });
 
-router.post('/events/:id', upload.single('photo'), (req, res) => {
+router.post('/events/:id', heroUpload.fields([{ name: 'photo', maxCount: 1 }, { name: 'video', maxCount: 1 }]), (req, res) => {
   const existing = db.prepare('SELECT * FROM events WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).send('Event not found');
 
   const { title, eventDate, eventTime, location, description } = req.body;
-  const photo = req.file ? toUrl(req.file.filename) : existing.photo;
+  const mediaType = req.body.mediaType === 'video' ? 'video' : 'photo';
+  const photo = req.files && req.files.photo ? toUrl(req.files.photo[0].filename) : existing.photo;
+  const video = req.files && req.files.video ? toUrl(req.files.video[0].filename) : existing.video;
+  const isFeatured = req.body.isFeatured ? 1 : 0;
 
   db.prepare(`
-    UPDATE events SET title=?, event_date=?, event_time=?, location=?, description=?, photo=?
+    UPDATE events SET title=?, event_date=?, event_time=?, location=?, description=?, photo=?, media_type=?, video=?, is_featured=?
     WHERE id=?
-  `).run(title, eventDate, eventTime || '', location || '', description || '', photo, req.params.id);
+  `).run(title, eventDate, eventTime || '', location || '', description || '', photo, mediaType, video, isFeatured, req.params.id);
+  if (isFeatured) clearOtherFeaturedEvents(req.params.id);
   res.redirect('/admin/events');
 });
 
@@ -562,6 +914,8 @@ router.get('/settings', (req, res) => {
   settings.low_stock_threshold = settings.low_stock_threshold || '3';
   settings.hero_media_type = settings.hero_media_type || 'photo';
   settings.email_header_photo = settings.email_header_photo || '/assets/brandmark-word.png';
+  settings.subscribe_enabled = settings.subscribe_enabled === undefined ? '1' : settings.subscribe_enabled;
+  settings.collections_heading_enabled = settings.collections_heading_enabled === undefined ? '1' : settings.collections_heading_enabled;
   res.render('settings/form', { settings });
 });
 
@@ -573,10 +927,11 @@ router.post(
     { name: 'about_hero_photo', maxCount: 1 },
     { name: 'gathering_hero_photo', maxCount: 1 },
     { name: 'email_header_photo', maxCount: 1 },
+    { name: 'subscribe_photo', maxCount: 1 },
   ]),
   (req, res) => {
     const set = db.prepare('INSERT INTO site_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value');
-    ['hero_photo', 'hero_video', 'about_hero_photo', 'gathering_hero_photo', 'email_header_photo'].forEach((key) => {
+    ['hero_photo', 'hero_video', 'about_hero_photo', 'gathering_hero_photo', 'email_header_photo', 'subscribe_photo'].forEach((key) => {
       const file = req.files && req.files[key] && req.files[key][0];
       if (file) set.run(key, toUrl(file.filename));
     });
@@ -584,6 +939,12 @@ router.post(
     set.run('hero_media_type', heroMediaType);
     set.run('hero_heading', (req.body.hero_heading || '').trim());
     set.run('hero_copy', (req.body.hero_copy || '').trim());
+    set.run('subscribe_enabled', req.body.subscribe_enabled ? '1' : '0');
+    set.run('subscribe_label', (req.body.subscribe_label || '').trim());
+    set.run('subscribe_heading', (req.body.subscribe_heading || '').trim());
+    set.run('collections_heading_enabled', req.body.collections_heading_enabled ? '1' : '0');
+    set.run('collections_heading', (req.body.collections_heading || '').trim());
+    set.run('collections_copy', (req.body.collections_copy || '').trim());
     res.redirect('/admin/settings');
   }
 );

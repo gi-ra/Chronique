@@ -3,6 +3,13 @@ const COLORS = {
   Charcoal:"#2B2A27", Olive:"#5B5B42", Camel:"#A9744F",
   Brown:"#7A4430"
 };
+// Shown on a product page when that product has no custom info sections of
+// its own set from admin — matches the generic copy every product used to
+// have hardcoded.
+const DEFAULT_INFO_SECTIONS = [
+  { title: 'Composition &amp; care', body: 'Made from responsibly sourced natural fibres. Machine wash cold, inside out, and lay flat to dry to preserve the shape.' },
+  { title: 'Shipping &amp; returns', body: 'Standard and express shipping available across Australia, with free standard shipping over $250. Unworn pieces can be returned within 30 days for a full refund.' }
+];
 const SIZE_GUIDES = {
   bottoms: {
     columns: ["Waist (Relaxed)","Inseam Length","Front Rise","Leg Opening"],
@@ -34,6 +41,23 @@ function guideForCategory(cat){
   if(["Tees & Sweats","Knitwear","Outerwear"].includes(cat)) return "tops";
   return null;
 }
+// Same size->EU-size mapping for every guide shape, used as a fallback for
+// a product's own custom size guide (which only stores measurements, not
+// an INTL column) — the shared default guides above carry their own copy
+// too, but it's identical, so a custom guide can just borrow this one.
+const INTL_SIZE_MAP = { XS:44, S:46, M:48, L:50, XL:52, XXL:54 };
+// Which measurements table (if any) a product's page should show. A
+// product with its own size_guide_type/data (set in admin because its cut
+// runs differently from the rest of its category) uses that; otherwise it
+// falls back to the shared default for its category, same as always.
+function guideForProduct(p){
+  if(p.sizeGuideType === 'none') return null;
+  if((p.sizeGuideType === 'tops' || p.sizeGuideType === 'bottoms') && p.sizeGuideData && p.sizeGuideData.rows){
+    return p.sizeGuideData;
+  }
+  const key = guideForCategory(p.category);
+  return key ? SIZE_GUIDES[key] : null;
+}
 function fmtIn(n){
   const whole = Math.floor(n);
   const frac = n - whole;
@@ -54,9 +78,10 @@ let CATEGORIES = ["All"];
 let GATHERING_PHOTOS = [];
 let EVENTS = [];
 let SITE_SETTINGS = {};
+let COLLECTIONS = [];
 
 async function loadAllData(){
-  const [products, news, sound, screen, categories, gathering, events, settings] = await Promise.all([
+  const [products, news, sound, screen, categories, gathering, events, settings, collections] = await Promise.all([
     fetch('/api/products').then(r => r.json()),
     fetch('/api/news').then(r => r.json()),
     fetch('/api/studio?type=sound').then(r => r.json()),
@@ -65,6 +90,7 @@ async function loadAllData(){
     fetch('/api/gathering').then(r => r.json()),
     fetch('/api/events').then(r => r.json()),
     fetch('/api/settings').then(r => r.json()),
+    fetch('/api/collections').then(r => r.json()),
   ]);
   PRODUCTS = products;
   NEWS_POSTS = news;
@@ -74,6 +100,7 @@ async function loadAllData(){
   GATHERING_PHOTOS = gathering;
   EVENTS = events;
   SITE_SETTINGS = settings;
+  COLLECTIONS = collections;
 
   const heroPhoto = document.getElementById('heroPhoto');
   const heroVideo = document.getElementById('heroVideo');
@@ -118,6 +145,33 @@ async function loadAllData(){
   }
   if(aboutHeroPhoto && settings.about_hero_photo) aboutHeroPhoto.src = settings.about_hero_photo;
   if(gatheringHeroPhoto && settings.gathering_hero_photo) gatheringHeroPhoto.src = settings.gathering_hero_photo;
+
+  // Home page "Coming soon" email block — admin can hide it entirely,
+  // change its label/heading copy, and swap in a real photo instead of
+  // the default textured panel.
+  const comingSoonSection = document.getElementById('comingSoonSection');
+  if(comingSoonSection){
+    const enabled = settings.subscribe_enabled !== '0';
+    comingSoonSection.style.display = enabled ? '' : 'none';
+    if(enabled){
+      const csLabel = document.getElementById('csLabel');
+      const csHeading = document.getElementById('csHeading');
+      const csPhoto = document.getElementById('csPhoto');
+      if(csLabel) csLabel.textContent = settings.subscribe_label || 'Coming soon';
+      if(csHeading) csHeading.textContent = settings.subscribe_heading || 'The next drop is on its way';
+      if(csPhoto){
+        if(settings.subscribe_photo){
+          csPhoto.style.backgroundImage = `url("${settings.subscribe_photo}")`;
+          csPhoto.style.backgroundSize = 'cover';
+          csPhoto.style.backgroundPosition = 'center';
+          csPhoto.classList.remove('photo-tex');
+        }else{
+          csPhoto.style.backgroundImage = '';
+          csPhoto.classList.add('photo-tex');
+        }
+      }
+    }
+  }
 
   // Optional heading/copy overlaid on the home hero — set from Admin > Site
   // images. Hidden entirely when both are blank, e.g. left over from an
@@ -219,7 +273,7 @@ function renderHome(){
 /* ---------------- SHOP ---------------- */
 let activeCat = "All";
 let activeSort = "recommended";
-let currentGuideKey = null;
+let currentGuide = null;
 
 function renderChips(){
   const row = document.getElementById('chipRow');
@@ -283,6 +337,78 @@ filterToggleBtn.addEventListener('click', () => {
 document.getElementById('sidebarCloseBtn').addEventListener('click', closeSidebar);
 sidebarBackdrop.addEventListener('click', closeSidebar);
 
+/* ---------------- COLLECTIONS ---------------- */
+// A collection is a curated editorial grouping (set up in Admin > Collections,
+// tagged onto products from each product's own edit page) — independent of
+// category, which only drives the shop's filter menu above.
+function collectionTileHTML(c){
+  const count = PRODUCTS.filter(p => (p.collections || []).includes(c.id)).length;
+  const photo = c.coverPhoto
+    ? `<img class="collection-tile-photo" src="${c.coverPhoto}" alt="">`
+    : `<div class="collection-tile-photo photo-tex" style="position:absolute; inset:0;"></div>`;
+  return `<a class="collection-tile" href="#/collections/${encodeURIComponent(c.id)}">
+    ${photo}
+    <div class="collection-tile-text">
+      <h2>${c.name}</h2>
+      <div class="ct-count mono">${count} piece${count===1?'':'s'}</div>
+      <span class="ct-link">View collection</span>
+    </div>
+  </a>`;
+}
+function renderCollectionsPage(){
+  const hero = document.getElementById('collectionsHero');
+  if(hero){
+    const enabled = SITE_SETTINGS.collections_heading_enabled !== '0';
+    hero.style.display = enabled ? '' : 'none';
+    if(enabled){
+      const headingEl = document.getElementById('collectionsHeading');
+      const copyEl = document.getElementById('collectionsCopy');
+      if(headingEl) headingEl.textContent = SITE_SETTINGS.collections_heading || 'Collections';
+      if(copyEl) copyEl.textContent = SITE_SETTINGS.collections_copy || 'Curated groupings from across the shop — pulled together by season, story or theme, not by category.';
+    }
+  }
+  const grid = document.getElementById('collectionsGrid');
+  grid.innerHTML = COLLECTIONS.length ? COLLECTIONS.map(collectionTileHTML).join('') :
+    `<div class="empty-state" style="grid-column:1/-1;">No collections yet.</div>`;
+}
+function renderCollectionDetail(id){
+  const c = COLLECTIONS.find(x => x.id === id);
+  const banner = document.getElementById('collectionBanner');
+  const bannerPhoto = document.getElementById('collectionBannerPhoto');
+  const nameEl = document.getElementById('collectionName');
+  const descEl = document.getElementById('collectionDescription');
+  const crumbEl = document.getElementById('collectionCrumbName');
+
+  if(!c){
+    nameEl.textContent = 'Collection not found';
+    descEl.textContent = '';
+    crumbEl.textContent = '';
+    banner.classList.remove('has-photo');
+    bannerPhoto.style.backgroundImage = '';
+    document.getElementById('collectionCount').textContent = '';
+    document.getElementById('collectionGrid').innerHTML =
+      `<div class="empty-state" style="grid-column:1/-1;">That collection doesn't exist.</div>`;
+    return;
+  }
+
+  nameEl.textContent = c.name;
+  descEl.textContent = c.description || '';
+  crumbEl.textContent = '/ ' + c.name;
+  setTitle(c.name);
+  if(c.coverPhoto){
+    banner.classList.add('has-photo');
+    bannerPhoto.style.backgroundImage = `url("${c.coverPhoto}")`;
+  } else {
+    banner.classList.remove('has-photo');
+    bannerPhoto.style.backgroundImage = '';
+  }
+
+  const list = PRODUCTS.filter(p => (p.collections || []).includes(id));
+  document.getElementById('collectionCount').textContent = `${list.length} piece${list.length===1?'':'s'}`;
+  document.getElementById('collectionGrid').innerHTML = list.length ? list.map(cardHTML).join('') :
+    `<div class="empty-state" style="grid-column:1/-1;">No pieces in this collection yet.</div>`;
+}
+
 /* ---------------- PRODUCT DETAIL ---------------- */
 async function renderProduct(id){
   const p = PRODUCTS.find(x => x.id === id);
@@ -320,8 +446,8 @@ async function renderProduct(id){
   let selectedSize = sizes[0] || 'ONE SIZE';
   let qty = 1;
   let photoIndex = 0;
-  const guideKey = guideForCategory(p.category);
-  currentGuideKey = guideKey;
+  const guide = guideForProduct(p);
+  currentGuide = guide;
 
   function variantFor(size, color){
     return variants.find(v => v.size === size && v.color === color);
@@ -365,7 +491,7 @@ async function renderProduct(id){
 
       ${hasSizes ? `
       <div class="field">
-        <span class="flabel">Size${guideKey ? ` — <button type="button" id="sizeGuideBtn" class="size-guide-link mono">Size guide</button>` : ''}</span>
+        <span class="flabel">Size${guide ? ` — <button type="button" id="sizeGuideBtn" class="size-guide-link mono">Size guide</button>` : ''}</span>
         <div class="sizepicker" id="sizePicker">
           ${sizes.map((s,i) => `<button data-size="${s}" class="${i===0?'active':''}">${s}</button>`).join('')}
         </div>
@@ -391,21 +517,22 @@ async function renderProduct(id){
       </div>
 
       <button class="add-btn" id="addBtn">Add to bag — ${money(p.price)}</button>
+      <button class="buy-now-btn" id="buyNowBtn">Buy now</button>
+      <div class="checkout-error" id="buyNowError"></div>
 
       <div class="accordion">
+        ${(p.infoSections && p.infoSections.length ? p.infoSections : DEFAULT_INFO_SECTIONS).map((s) => `
         <details>
-          <summary>Composition &amp; care</summary>
-          <div class="acc-body">Made from responsibly sourced natural fibres. Machine wash cold, inside out, and lay flat to dry to preserve the shape.</div>
-        </details>
-        <details>
-          <summary>Shipping &amp; returns</summary>
-          <div class="acc-body">Standard and express shipping available across Australia, with free standard shipping over $250. Unworn pieces can be returned within 30 days for a full refund.</div>
-        </details>
+          <summary>${s.title}</summary>
+          <div class="acc-body">${s.body}</div>
+        </details>`).join('')}
       </div>
     </div>
   `;
 
   const addBtn = document.getElementById('addBtn');
+  const buyNowBtn = document.getElementById('buyNowBtn');
+  const buyNowError = document.getElementById('buyNowError');
   const qtyVal = document.getElementById('qtyVal');
   const stockNote = document.getElementById('stockNote');
   const notifyStock = document.getElementById('notifyStock');
@@ -420,11 +547,13 @@ async function renderProduct(id){
       stockNote.classList.add('low');
       addBtn.disabled = true;
       addBtn.textContent = 'Sold out';
+      buyNowBtn.disabled = true;
       notifyStock.style.display = '';
       notifyNote.textContent = '';
     }else{
       addBtn.disabled = false;
       addBtn.textContent = `Add to bag — ${money(p.price)}`;
+      buyNowBtn.disabled = false;
       notifyStock.style.display = 'none';
       if(stock <= 3){
         stockNote.textContent = `Only ${stock} left in this size and colour.`;
@@ -498,6 +627,36 @@ async function renderProduct(id){
     if(stock <= 0) return;
     addToCart(p.id, selectedSize, selectedColor, qty);
     showToast(`Added ${p.name} to bag`);
+  });
+  buyNowBtn.addEventListener('click', async () => {
+    const stock = stockFor(selectedSize, selectedColor);
+    if(stock <= 0) return;
+    buyNowError.textContent = '';
+    buyNowBtn.disabled = true;
+    buyNowBtn.textContent = 'Redirecting…';
+    try{
+      const res = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{ productId: p.id, size: selectedSize, color: selectedColor, quantity: qty }],
+          shippingMethod: 'standard',
+          discountCode: '',
+        }),
+      });
+      const data = await res.json();
+      if(!res.ok || !data.url){
+        buyNowError.textContent = data.error || 'Could not start checkout. Please try again.';
+        buyNowBtn.disabled = false;
+        buyNowBtn.textContent = 'Buy now';
+        return;
+      }
+      location.href = data.url;
+    }catch(e){
+      buyNowError.textContent = 'Could not reach the server. Please try again.';
+      buyNowBtn.disabled = false;
+      buyNowBtn.textContent = 'Buy now';
+    }
   });
   document.getElementById('notifyBtn').addEventListener('click', async () => {
     const email = document.getElementById('notifyEmail').value.trim();
@@ -934,8 +1093,13 @@ function formatEventDate(dateStr, timeStr){
   }catch(e){}
   return timeStr ? `${label} · ${timeStr}` : label;
 }
+// A description can be several lines (one per paragraph) — used both in the
+// compact calendar-detail row and the full showcase panel.
+function eventDescParagraphs(desc){
+  return (desc || '').split('\n').map(p => p.trim()).filter(Boolean).map(p => `<p>${p}</p>`).join('');
+}
 function eventRowHTML(ev){
-  const photo = ev.photo || '';
+  const photo = ev.media_type !== 'video' ? (ev.photo || '') : '';
   return `
     <div class="event-row">
       ${photo ? `<div class="event-row-photo"><img src="${photo}" alt=""></div>` : ''}
@@ -947,6 +1111,47 @@ function eventRowHTML(ev){
       </div>
     </div>
   `;
+}
+// The single event picked in admin to headline the Gathering page. Falls
+// back to whichever event is soonest upcoming (or, if none are, the most
+// recent past one) so the panel still shows something sensible before an
+// admin has explicitly featured anything.
+function featuredEvent(){
+  const flagged = EVENTS.find(e => e.is_featured);
+  if(flagged) return flagged;
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = EVENTS.slice().filter(e => e.event_date >= today).sort((a,b) => a.event_date.localeCompare(b.event_date));
+  return upcoming[0] || EVENTS.slice().sort((a,b) => b.event_date.localeCompare(a.event_date))[0] || null;
+}
+function renderEventShowcase(){
+  const section = document.getElementById('eventShowcase');
+  if(!section) return;
+  const ev = featuredEvent();
+  if(!ev){ section.style.display = 'none'; return; }
+
+  const photoEl = document.getElementById('eventShowcasePhoto');
+  const videoEl = document.getElementById('eventShowcaseVideo');
+  const isVideo = ev.media_type === 'video' && ev.video;
+  if(isVideo){
+    videoEl.src = ev.video;
+    videoEl.style.display = '';
+    photoEl.style.display = 'none';
+    photoEl.removeAttribute('src');
+  } else {
+    videoEl.style.display = 'none';
+    videoEl.removeAttribute('src');
+    photoEl.style.display = '';
+    photoEl.src = ev.photo || '';
+  }
+
+  document.getElementById('eventShowcaseDate').textContent = formatEventDate(ev.event_date, ev.event_time);
+  document.getElementById('eventShowcaseTitle').textContent = ev.title;
+  const locEl = document.getElementById('eventShowcaseLocation');
+  locEl.textContent = ev.location || '';
+  locEl.style.display = ev.location ? '' : 'none';
+  document.getElementById('eventShowcaseDesc').innerHTML = eventDescParagraphs(ev.description);
+
+  section.style.display = '';
 }
 // Month currently shown in the Gathering page's calendar. Defaults to
 // whichever month has the next upcoming event once events load (see
@@ -999,6 +1204,8 @@ function showGatheringCalendarDetail(dateStr, dayEvents){
   detail.style.display = '';
 }
 function renderGatheringPage(){
+  renderEventShowcase();
+
   const grid = document.getElementById('gatheringGrid');
   const photos = GATHERING_PHOTOS;
   grid.innerHTML = photos.map((ph,i) => `
@@ -1062,6 +1269,8 @@ const routes = {
   newspost: document.getElementById('route-newspost'),
   sound: document.getElementById('route-sound'),
   gathering: document.getElementById('route-gathering'),
+  collections: document.getElementById('route-collections'),
+  collection: document.getElementById('route-collection'),
 };
 function setTitle(pageTitle){
   document.title = pageTitle ? `${pageTitle} — Chronique` : 'Chronique — Independent apparel';
@@ -1159,6 +1368,18 @@ function handleRoute(){
     showRoute('gathering');
     setActiveNav(null);
     setTitle('The Gathering');
+  } else if(pathPart === "/collections"){
+    currentRoute = 'collections';
+    renderCollectionsPage();
+    showRoute('collections');
+    setActiveNav(null);
+    setTitle('Collections');
+  } else if(pathPart.startsWith("/collections/")){
+    currentRoute = 'collection';
+    const cid = pathPart.split('/collections/')[1];
+    renderCollectionDetail(decodeURIComponent(cid));
+    showRoute('collection');
+    setActiveNav(null);
   } else {
     currentRoute = 'home';
     renderHome();
@@ -1243,16 +1464,16 @@ searchInput.addEventListener('keydown', (e) => {
 const sizeGuideModal = document.getElementById('sizeGuideModal');
 const sizeGuideBackdrop = document.getElementById('sizeGuideBackdrop');
 let activeUnit = 'in';
-function buildSizeTableHTML(guideKey, unit){
-  const guide = SIZE_GUIDES[guideKey];
+function buildSizeTableHTML(guide, unit){
   if(!guide) return '';
   const sizes = Object.keys(guide.rows);
   if(unit === 'intl'){
+    const intlMap = guide.intl || INTL_SIZE_MAP;
     return `
       <table class="sizeguide-table">
         <thead><tr><th>Size</th><th>Int'l</th></tr></thead>
         <tbody>
-          ${sizes.map(s => `<tr><td>${s}</td><td>${guide.intl[s]}</td></tr>`).join('')}
+          ${sizes.map(s => `<tr><td>${s}</td><td>${intlMap[s] != null ? intlMap[s] : '—'}</td></tr>`).join('')}
         </tbody>
       </table>`;
   }
@@ -1266,7 +1487,7 @@ function buildSizeTableHTML(guideKey, unit){
     </table>`;
 }
 function renderSizeGuideTable(){
-  document.getElementById('sizeGuideTableWrap').innerHTML = buildSizeTableHTML(currentGuideKey, activeUnit);
+  document.getElementById('sizeGuideTableWrap').innerHTML = buildSizeTableHTML(currentGuide, activeUnit);
 }
 function openSizeGuide(){
   activeUnit = 'in';

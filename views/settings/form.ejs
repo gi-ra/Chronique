@@ -57,6 +57,43 @@
       </script>
 
       <div class="card">
+        <label style="display:flex; align-items:center; gap:8px; margin-bottom:0;">
+          <input type="checkbox" name="subscribe_enabled" value="1" <%= settings.subscribe_enabled !== '0' ? 'checked' : '' %> style="width:auto;">
+          Show the "Coming soon" email block on the home page
+        </label>
+        <p class="muted" style="margin-top:6px;">Untick this to remove the whole section from the home page — the photo, heading and email box all disappear together. Tick it again any time to bring it back with the same text and photo.</p>
+
+        <label for="subscribe_label" style="margin-top:20px;">Small label above the heading</label>
+        <input type="text" id="subscribe_label" name="subscribe_label" value="<%= settings.subscribe_label || 'Coming soon' %>" placeholder="Coming soon">
+
+        <label for="subscribe_heading">Heading</label>
+        <input type="text" id="subscribe_heading" name="subscribe_heading" value="<%= settings.subscribe_heading || 'The next drop is on its way' %>" placeholder="The next drop is on its way">
+
+        <label for="subscribe_photo">Photo</label>
+        <% if (settings.subscribe_photo) { %>
+          <img src="<%= settings.subscribe_photo %>" style="width:220px; border-radius:8px; display:block; margin-bottom:10px; object-fit:cover; aspect-ratio:4/5;" alt="">
+        <% } else { %>
+          <p class="muted" style="margin-top:0;">No photo uploaded yet — a plain textured panel is shown instead.</p>
+        <% } %>
+        <input type="file" id="subscribe_photo" name="subscribe_photo" accept="image/*">
+        <p class="muted" style="margin-top:8px;">Sits beside the email box. Leave it unset to keep the plain textured panel.</p>
+      </div>
+
+      <div class="card">
+        <label style="display:flex; align-items:center; gap:8px; margin-bottom:0;">
+          <input type="checkbox" name="collections_heading_enabled" value="1" <%= settings.collections_heading_enabled !== '0' ? 'checked' : '' %> style="width:auto;">
+          Show a heading and copy at the top of the Collections page
+        </label>
+        <p class="muted" style="margin-top:6px;">Untick this to remove the title and text above the collection tiles — just the tiles themselves will show. Tick it again any time to bring the text back.</p>
+
+        <label for="collections_heading" style="margin-top:20px;">Heading</label>
+        <input type="text" id="collections_heading" name="collections_heading" value="<%= settings.collections_heading || 'Collections' %>" placeholder="Collections">
+
+        <label for="collections_copy">Copy</label>
+        <textarea id="collections_copy" name="collections_copy" placeholder="Curated groupings from across the shop — pulled together by season, story or theme, not by category."><%= settings.collections_copy || 'Curated groupings from across the shop — pulled together by season, story or theme, not by category.' %></textarea>
+      </div>
+
+      <div class="card">
         <label>About page hero</label>
         <img src="<%= settings.about_hero_photo %>" style="width:220px; border-radius:8px; display:block; margin-bottom:10px;" alt="">
         <input type="file" name="about_hero_photo" accept="image/*">

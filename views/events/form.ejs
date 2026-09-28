@@ -25,14 +25,47 @@
       <input type="text" id="location" name="location" value="<%= event ? event.location : '' %>" placeholder="Logan, QLD">
 
       <label for="description">Description</label>
-      <textarea id="description" name="description"><%= event ? event.description : '' %></textarea>
+      <textarea id="description" name="description" rows="6" placeholder="A paragraph or two about the event — shown in full on the Gathering page's showcase when this event is featured, and as a shorter line when it's just picked from the calendar."><%= event ? event.description : '' %></textarea>
+      <p class="muted" style="margin-top:6px;">Start a new line for a new paragraph.</p>
 
-      <% if (event && event.photo) { %>
-        <label>Current photo</label>
-        <img src="<%= event.photo %>" style="width:180px; border-radius:8px; display:block;" alt="">
-      <% } %>
-      <label for="photo">Photo <%= event ? '(leave blank to keep current)' : '' %></label>
-      <input type="file" id="photo" name="photo" accept="image/*">
+      <label>Photo or video</label>
+      <p class="muted" style="margin-top:-4px;">Choose whether this event shows a photo or a short looping video, then upload the file to use.</p>
+      <% const mediaType = event ? (event.media_type || 'photo') : 'photo'; %>
+      <div style="display:flex; gap:18px; margin-bottom:14px;">
+        <label style="display:flex; align-items:center; gap:6px; font-weight:400; margin:0;">
+          <input type="radio" name="mediaType" value="photo" style="width:auto;"
+            <%= mediaType !== 'video' ? 'checked' : '' %> onchange="toggleEventMediaFields()">
+          Photo
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-weight:400; margin:0;">
+          <input type="radio" name="mediaType" value="video" style="width:auto;"
+            <%= mediaType === 'video' ? 'checked' : '' %> onchange="toggleEventMediaFields()">
+          Video
+        </label>
+      </div>
+
+      <div id="eventPhotoField" style="<%= mediaType === 'video' ? 'display:none;' : '' %>">
+        <% if (event && event.photo) { %>
+          <img src="<%= event.photo %>" style="width:180px; border-radius:8px; display:block; margin-bottom:10px;" alt="">
+        <% } %>
+        <input type="file" id="photo" name="photo" accept="image/*">
+      </div>
+
+      <div id="eventVideoField" style="<%= mediaType === 'video' ? '' : 'display:none;' %>">
+        <% if (event && event.video) { %>
+          <video src="<%= event.video %>" style="width:220px; border-radius:8px; display:block; margin-bottom:10px;" muted loop autoplay playsinline></video>
+        <% } else { %>
+          <p class="muted" style="margin-top:0;">No video uploaded yet.</p>
+        <% } %>
+        <input type="file" id="video" name="video" accept="video/*">
+        <p class="muted" style="margin-top:8px;">MP4 works best, kept short and reasonably compressed — it plays muted and on a loop.</p>
+      </div>
+
+      <label style="display:flex; align-items:center; gap:8px; margin-top:22px;">
+        <input type="checkbox" name="isFeatured" value="1" <%= event && event.is_featured ? 'checked' : '' %> style="width:auto;">
+        Feature this event in the showcase panel on the Gathering page
+      </label>
+      <p class="muted" style="margin-top:6px;">Only one event can be featured at a time — ticking this un-features whichever one had it before.</p>
 
       <div style="margin-top:26px;">
         <button type="submit" class="btn">Save</button>
@@ -40,5 +73,12 @@
       </div>
     </form>
   </div>
+  <script>
+    function toggleEventMediaFields(){
+      const isVideo = document.querySelector('input[name="mediaType"][value="video"]').checked;
+      document.getElementById('eventPhotoField').style.display = isVideo ? 'none' : '';
+      document.getElementById('eventVideoField').style.display = isVideo ? '' : 'none';
+    }
+  </script>
 </body>
 </html>

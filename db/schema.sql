@@ -11,6 +11,18 @@ CREATE TABLE IF NOT EXISTS products (
   sort_order INTEGER NOT NULL DEFAULT 0
 );
 
+-- A curated editorial grouping of products (e.g. "Fall '26", "Studio
+-- Essentials") shown on its own Collections landing page — separate from
+-- category, which only drives the shop's filter menu. A product can belong
+-- to any number of collections (stored as a JSON array on products.collections).
+CREATE TABLE IF NOT EXISTS collections (
+  id TEXT PRIMARY KEY,   -- slug, e.g. "fall-26"
+  name TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  cover_photo TEXT NOT NULL DEFAULT '',
+  sort_order INTEGER NOT NULL DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS news_posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   slug TEXT UNIQUE NOT NULL,
@@ -50,6 +62,9 @@ CREATE TABLE IF NOT EXISTS events (
   location TEXT NOT NULL DEFAULT '',
   description TEXT NOT NULL DEFAULT '',
   photo TEXT NOT NULL DEFAULT '',
+  media_type TEXT NOT NULL DEFAULT 'photo',  -- 'photo' | 'video'
+  video TEXT NOT NULL DEFAULT '',
+  is_featured INTEGER NOT NULL DEFAULT 0,    -- shown in the Gathering page's showcase panel
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

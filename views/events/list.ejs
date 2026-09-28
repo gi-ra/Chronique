@@ -14,14 +14,21 @@
       <p class="empty">No events yet.</p>
     <% } else { %>
     <table>
-      <thead><tr><th></th><th>Title</th><th>Date</th><th>Location</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Title</th><th>Date</th><th>Location</th><th>Featured</th><th></th></tr></thead>
       <tbody>
         <% events.forEach((e) => { %>
           <tr>
-            <td><img class="thumb" style="width:70px; height:88px;" src="<%= e.photo %>" alt=""></td>
+            <td>
+              <% if (e.media_type === 'video' && e.video) { %>
+                <video style="width:70px; height:88px; object-fit:cover;" src="<%= e.video %>" muted autoplay loop playsinline></video>
+              <% } else { %>
+                <img class="thumb" style="width:70px; height:88px;" src="<%= e.photo %>" alt="">
+              <% } %>
+            </td>
             <td><%= e.title %></td>
             <td><%= e.event_date %><%= e.event_time ? ' · ' + e.event_time : '' %></td>
             <td><%= e.location %></td>
+            <td><%= e.is_featured ? '★ Featured' : '' %></td>
             <td style="white-space:nowrap;">
               <a class="btn small secondary" href="/admin/events/<%= e.id %>/edit">Edit</a>
               <form class="inline" method="POST" action="/admin/events/<%= e.id %>/delete" onsubmit="return confirm('Delete this event?');">

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { pageTitle: 'Collections' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>Collections</h1>
+      <a class="btn" href="/admin/collections/new">+ Add collection</a>
+    </div>
+    <p class="muted">
+      These make up the client-facing Collections page — a curated editorial grouping of
+      products, separate from category (category only drives the shop's filter menu). Add
+      products to a collection from the product's own edit page.
+    </p>
+
+    <% if (!collections.length) { %>
+      <p class="empty">No collections yet.</p>
+    <% } else { %>
+    <table>
+      <thead><tr><th></th><th>Name</th><th>Products</th><th></th></tr></thead>
+      <tbody>
+        <% collections.forEach((c, i) => { %>
+          <tr>
+            <td>
+              <% if (c.cover_photo) { %>
+                <img class="thumb" style="width:70px; height:88px;" src="<%= c.cover_photo %>" alt="">
+              <% } else { %>
+                <div style="width:70px; height:88px; background:var(--paper-dim, #eee); border-radius:4px;"></div>
+              <% } %>
+            </td>
+            <td><%= c.name %><div class="muted" style="font-size:12.5px;">/<%= c.id %></div></td>
+            <td><%= c.productCount %></td>
+            <td style="white-space:nowrap;">
+              <form class="inline" method="POST" action="/admin/collections/<%= c.id %>/move">
+                <input type="hidden" name="direction" value="up">
+                <button class="btn small secondary" <%= i===0 ? 'disabled' : '' %>>&uarr;</button>
+              </form>
+              <form class="inline" method="POST" action="/admin/collections/<%= c.id %>/move">
+                <input type="hidden" name="direction" value="down">
+                <button class="btn small secondary" <%= i===collections.length-1 ? 'disabled' : '' %>>&darr;</button>
+              </form>
+              <a class="btn small secondary" href="/admin/collections/<%= c.id %>/edit">Edit</a>
+              <form class="inline" method="POST" action="/admin/collections/<%= c.id %>/delete" onsubmit="return confirm('Delete this collection? Products stay — they just won\'t be tagged with it anymore.');">
+                <button class="btn small danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</body>
+</html>
