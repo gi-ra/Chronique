@@ -1,8 +1,32 @@
 const COLORS = {
-  Ink:"#121110", Ivory:"#EFEBDE", Stone:"#C9C2B3",
-  Charcoal:"#2B2A27", Olive:"#5B5B42", Camel:"#A9744F",
-  Brown:"#7A4430"
+  // Neutrals
+  Black:"#121110", Ink:"#121110", White:"#FFFFFF", Ivory:"#EFEBDE", Cream:"#F3EAD8", Ecru:"#E8E1CF",
+  Stone:"#C9C2B3", Sand:"#D9CBAE", Taupe:"#B8A99A", Beige:"#D8C9AE", Grey:"#8C887E", Gray:"#8C887E",
+  Charcoal:"#2B2A27", Slate:"#4C5459", Silver:"#B8B8B2",
+  // Browns / tans
+  Camel:"#A9744F", Tan:"#C8A671", Brown:"#7A4430", Chocolate:"#3E2723", Espresso:"#3B2A21",
+  Cognac:"#8A4B2D", Chestnut:"#6B3A2A", Mahogany:"#4E2A22", Walnut:"#5A3A2A", Rust:"#B35A32",
+  Terracotta:"#C1653D", Clay:"#A9633E", Mocha:"#5C4433",
+  // Greens
+  Olive:"#5B5B42", Sage:"#9CAE8C", Forest:"#31462B", Emerald:"#2E5D45", Green:"#3D6B4C",
+  Khaki:"#8C8465", Mint:"#B7D9C6", Moss:"#5B6B3F",
+  // Blues
+  Navy:"#1F2937", Denim:"#3A597A", Indigo:"#334066", Cobalt:"#2F5D8A", Sky:"#8FB6D9",
+  Teal:"#2F6B69", Turquoise:"#2FA6A0", Steel:"#5C6E77", Blue:"#33587A",
+  // Reds / pinks / purples
+  Red:"#8C2B22", Burgundy:"#5C1F2A", Maroon:"#4A1E22", Wine:"#5E1F2E", Rose:"#C48B8F",
+  Blush:"#E3C6C4", Pink:"#D9A9AC", Coral:"#D97456", Plum:"#5A3A50", Lavender:"#B7A6C9", Purple:"#5B3B5E",
+  // Yellows / oranges
+  Mustard:"#B98A2A", Gold:"#B8963E", Bronze:"#8A6A32", Orange:"#C1602A", Apricot:"#D99A5B",
+  Yellow:"#D9B23E", Peach:"#E3B79A"
 };
+// Case/whitespace-insensitive lookup — admin can type "green", "Green" or
+// "GREEN" and it'll still match, rather than silently falling back to grey.
+function colorHex(name){
+  if(!name) return '#999';
+  const key = Object.keys(COLORS).find(k => k.toLowerCase() === String(name).trim().toLowerCase());
+  return key ? COLORS[key] : '#999';
+}
 // Shown on a product page when that product has no custom info sections of
 // its own set from admin — matches the generic copy every product used to
 // have hardcoded.
@@ -486,7 +510,7 @@ async function renderProduct(id){
       <div class="field">
         <span class="flabel">Colour — <span id="colorLabel">${selectedColor}</span></span>
         <div class="colorpicker" id="colorPicker">
-          ${colors.map((c,i) => `<button data-color="${c}" class="${i===0?'active':''}" style="background:${COLORS[c] || '#999'}" aria-label="${c}"></button>`).join('')}
+          ${colors.map((c,i) => `<button data-color="${c}" class="${i===0?'active':''}" style="background:${colorHex(c)}" aria-label="${c}"></button>`).join('')}
         </div>
       </div>` : ''}
 
