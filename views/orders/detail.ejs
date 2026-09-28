@@ -12,9 +12,13 @@
       <%= order.created_at %> &middot; Channel: <%= order.channel %> &middot; Status: <strong><%= order.status %></strong>
       &middot; Shipping: <%= order.shipping_method %>
     </p>
-    <% if (order.is_local_delivery) { %>
+    <% if (order.shipping_method === 'local_hand') { %>
       <div class="error-box" style="background:#F3EAD8; border-color:#D9CBAE; color:#7A4430;">
-        🚚 Hand-deliver this order — it's in the local free-delivery zone. Do not book a postage carrier for it.
+        🚚 Hand-deliver this order yourself — it's within 50km, free local delivery zone. Do not book a courier for it.
+      </div>
+    <% } else if (order.shipping_method === 'local_courier') { %>
+      <div class="error-box" style="background:#EAF3EA; border-color:#CFE8CF; color:#2E6B33;">
+        🚚 Book a courier for this order — it's free local delivery, but outside the 50km hand-delivery range.
       </div>
     <% } %>
 

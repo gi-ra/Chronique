@@ -305,7 +305,7 @@ router.post('/checkout/create-session', async (req, res) => {
   const shippingCents = quote.cents;
   const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
   const shippingRegion = quote.isLocalDelivery
-    ? 'local'
+    ? (quote.deliveryMethod === 'hand' ? 'local_hand' : 'local_courier')
     : country.toUpperCase() === 'NZ'
       ? 'nz'
       : country.toUpperCase() === 'AU'
@@ -442,6 +442,7 @@ router.get('/orders/confirm', (req, res) => {
     discountCents: order.discount_cents,
     totalCents: order.total_cents,
     isLocalDelivery: !!order.is_local_delivery,
+    shippingMethod: order.shipping_method,
     items,
   });
 });

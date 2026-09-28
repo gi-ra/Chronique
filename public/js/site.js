@@ -1083,7 +1083,8 @@ async function renderOrderConfirmationPage(){
       <div class="row"><span>Shipping</span><span class="mono">${order.shippingCents === 0 ? 'Free' : money(order.shippingCents / 100)}</span></div>
       <div class="row total"><span>Total</span><span class="mono">${money(order.totalCents / 100)}</span></div>
     </div>
-    ${order.isLocalDelivery ? `<p class="note">Free local delivery — hand-delivered by Chronique within 3 business days.</p>` : ''}
+    ${order.shippingMethod === 'local_hand' ? `<p class="note">Free local delivery — hand-delivered by Chronique within 3 business days.</p>` : ''}
+    ${order.shippingMethod === 'local_courier' ? `<p class="note">Free local delivery.</p>` : ''}
   `;
 }
 

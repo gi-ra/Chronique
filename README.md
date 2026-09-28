@@ -10,9 +10,11 @@ third-party storefront:
   card numbers), including Apple Pay and Google Pay where the shopper's
   device supports them.
 - **Shipping** — priced automatically from the customer's address: free
-  local hand-delivery within 100km of Logan Central QLD 4114 (postcode list
-  in `config/local-postcodes.json`), a flat Rest-of-Australia rate (waived
-  over a threshold you set), and flat New Zealand / Rest-of-World rates.
+  local delivery within 100km of Logan Central QLD 4114 (postcode list in
+  `config/local-postcodes.json`) — hand-delivered by you within 50km,
+  couriered (still free) from 50–100km — plus a flat Rest-of-Australia rate
+  (waived over a threshold you set), and flat New Zealand / Rest-of-World
+  rates.
 - **Inventory** — real stock counts per size/colour combination, checked at
   checkout and decremented automatically once an order is paid.
 - **Discount codes** — percent-off or fixed-amount codes you create, with an
@@ -142,11 +144,14 @@ Once the server's running, log into `/admin` → **Site images** and scroll to
   warning banner on the dashboard and (if `ADMIN_ALERT_EMAIL` is set) an
   email, once per dip below the line.
 
-Free local hand-delivery (within 100km of Logan Central QLD 4114) doesn't
-have a settable rate — it's always free, and always hand-delivered by you
-rather than posted. It's driven by `config/local-postcodes.json`, a plain
-list of postcodes you can add to or remove from by hand at any time — no
-code changes needed. A PO Box or Parcel Locker address inside that zone
+Free local delivery (within 100km of Logan Central QLD 4114) doesn't have a
+settable rate — it's always free. Within 50km you hand-deliver it yourself;
+from 50–100km it's still free but booked with a courier instead, since
+that's too far to drive yourself (see the 🚚 badge on the order in
+`/admin` — it tells you which one applies). This is driven by
+`config/local-postcodes.json`, a plain list of postcodes you can add to or
+remove from by hand at any time — no code changes needed. A PO Box or
+Parcel Locker address inside that zone
 gets the Rest of Australia rate instead, since those can't be
 hand-delivered.
 

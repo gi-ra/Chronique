@@ -34,20 +34,32 @@ function run(label, input, assertions) {
 }
 
 run(
-  '1. Logan postcode 4114 -> free local delivery',
+  '1. Logan postcode 4114 (0km) -> free, hand-delivered',
   { subtotalCents: BELOW_THRESHOLD_CENTS, country: 'AU', postcode: '4114', line1: '1 Test Street' },
   (r) => {
     check('is local delivery', r.isLocalDelivery, true);
     check('cost is $0', r.cents, 0);
+    check('delivery method is hand (within 50km)', r.deliveryMethod, 'hand');
   }
 );
 
 run(
-  '2. Brisbane CBD postcode 4000 -> free local delivery',
+  '2. Brisbane CBD postcode 4000 (22km) -> free, hand-delivered',
   { subtotalCents: BELOW_THRESHOLD_CENTS, country: 'AU', postcode: '4000', line1: '1 Test Street' },
   (r) => {
     check('is local delivery', r.isLocalDelivery, true);
     check('cost is $0', r.cents, 0);
+    check('delivery method is hand (within 50km)', r.deliveryMethod, 'hand');
+  }
+);
+
+run(
+  '2b. Bribie Island postcode 4507 (74km) -> free, but courier not hand-delivery',
+  { subtotalCents: BELOW_THRESHOLD_CENTS, country: 'AU', postcode: '4507', line1: '1 Test Street' },
+  (r) => {
+    check('is local delivery', r.isLocalDelivery, true);
+    check('cost is $0', r.cents, 0);
+    check('delivery method is courier (50-100km)', r.deliveryMethod, 'courier');
   }
 );
 
