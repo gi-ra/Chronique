@@ -101,6 +101,7 @@ async function loadAllData(){
   EVENTS = events;
   SITE_SETTINGS = settings;
   COLLECTIONS = collections;
+  renderNavCategories();
 
   const heroPhoto = document.getElementById('heroPhoto');
   const heroVideo = document.getElementById('heroVideo');
@@ -274,6 +275,14 @@ function renderHome(){
 let activeCat = "All";
 let activeSort = "recommended";
 let currentGuide = null;
+
+function renderNavCategories(){
+  const row = document.getElementById('navCategoryLinks');
+  if (!row) return;
+  row.innerHTML = CATEGORIES.filter(c => c !== "All").map(c =>
+    `<a href="#/shop?cat=${encodeURIComponent(c)}">${c}</a>`
+  ).join('');
+}
 
 function renderChips(){
   const row = document.getElementById('chipRow');

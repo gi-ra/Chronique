@@ -11,6 +11,16 @@ CREATE TABLE IF NOT EXISTS products (
   sort_order INTEGER NOT NULL DEFAULT 0
 );
 
+-- The canonical shop category list, shown identically in the main nav's
+-- Shop menu and the shop page's filter chips (see GET /api/categories).
+-- Kept separate from products.category so a category persists in both
+-- menus even if no product currently uses it (e.g. the starting set) or
+-- its last product gets deleted/recategorised.
+CREATE TABLE IF NOT EXISTS categories (
+  name TEXT PRIMARY KEY,
+  sort_order INTEGER NOT NULL DEFAULT 0
+);
+
 -- A curated editorial grouping of products (e.g. "Fall '26", "Studio
 -- Essentials") shown on its own Collections landing page — separate from
 -- category, which only drives the shop's filter menu. A product can belong

@@ -68,4 +68,30 @@ ensureColumn('events', 'video', "TEXT NOT NULL DEFAULT ''");
 // than just "whichever is soonest".
 ensureColumn('events', 'is_featured', 'INTEGER NOT NULL DEFAULT 0');
 
+// Seed the canonical category list once, the first time this table is
+// empty — matches the site's original fixed categories, so the nav's Shop
+// menu and the shop page's filter chips start populated (in sync) instead
+// of empty. Only runs while the table is empty, so an admin who later
+// deletes/renames one doesn't have it silently reappear on next boot.
+if (db.prepare('SELECT COUNT(*) AS c FROM categories').get().c === 0) {
+  const insertCategory = db.prepare(
+    'INSERT OR IGNORE INTO categories (name, sort_order) VALUES (?, ?)'
+  );
+  const startingCategories = [
+    'Outerwear',
+    'Knitwear',
+    'Tees & Sweats',
+    'Pants',
+    'Leather Goods',
+    'Accessories',
+  ];
+  startingCategories.forEach((name, i) => insertCategory.run(name, i));
+  // Also carry over any category already in use by an existing product
+  // that isn't in the starting list above, so nothing already live in the
+  // shop goes missing from the menu once it switches to this table.
+  db.prepare('SELECT DISTINCT category FROM products').all().forEach((r, i) => {
+    insertCategory.run(r.category, startingCategories.length + i);
+  });
+}
+
 module.exports = db;

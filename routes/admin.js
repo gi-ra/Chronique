@@ -198,9 +198,18 @@ const DEFAULT_INFO_SECTIONS = [
 
 function existingCategories() {
   return db
-    .prepare('SELECT DISTINCT category FROM products ORDER BY sort_order ASC')
+    .prepare('SELECT name FROM categories ORDER BY sort_order ASC')
     .all()
-    .map((r) => r.category);
+    .map((r) => r.name);
+}
+
+// Registers a category typed into "+ Add new category…" on the product
+// form, so it sticks in the canonical list (and therefore both the nav and
+// shop menus) even after this product is edited again or deleted.
+function ensureCategoryExists(name) {
+  if (!name) return;
+  const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM categories').get().m;
+  db.prepare('INSERT OR IGNORE INTO categories (name, sort_order) VALUES (?, ?)').run(name, maxOrder + 1);
 }
 
 // All collections, in display order, for the product form's checklist.
@@ -439,6 +448,7 @@ router.post('/products', upload.array('newPhotos', 8), (req, res) => {
   const effectiveSizes = sizeList.length ? sizeList : sizesForType(productType, category);
   const sizeGuide = parseSizeGuide(req, effectiveSizes);
   const collectionsList = parseCollections(req);
+  ensureCategoryExists(category);
 
   db.prepare(`
     INSERT INTO products (id, name, category, price, icon, colors, is_new, description, photos, sort_order, product_type, info_sections, size_guide_type, size_guide_data, collections)
@@ -516,6 +526,7 @@ router.post('/products/:id', upload.array('newPhotos', 8), (req, res) => {
   const effectiveSizes = sizeList.length ? sizeList : sizesForType(productType, category);
   const sizeGuide = parseSizeGuide(req, effectiveSizes);
   const collectionsList = parseCollections(req);
+  ensureCategoryExists(category);
 
   db.prepare(`
     UPDATE products SET name=?, category=?, price=?, icon=?, colors=?, is_new=?, description=?, photos=?, product_type=?, info_sections=?, size_guide_type=?, size_guide_data=?, collections=?

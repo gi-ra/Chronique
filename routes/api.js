@@ -87,18 +87,8 @@ router.get('/products/:id', (req, res) => {
 });
 
 router.get('/categories', (req, res) => {
-  const rows = db
-    .prepare('SELECT DISTINCT category FROM products ORDER BY sort_order ASC')
-    .all();
-  const seen = new Set();
-  const categories = ['All'];
-  rows.forEach((r) => {
-    if (!seen.has(r.category)) {
-      seen.add(r.category);
-      categories.push(r.category);
-    }
-  });
-  res.json(categories);
+  const rows = db.prepare('SELECT name FROM categories ORDER BY sort_order ASC').all();
+  res.json(['All', ...rows.map((r) => r.name)]);
 });
 
 // ---------- Collections (editorial page — separate from category/menu) ----------
