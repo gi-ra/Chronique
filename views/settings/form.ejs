@@ -7,6 +7,10 @@
     <h1>Site images</h1>
     <p class="muted">Swap the big hero photos on the Home, About and Gathering pages, and the header photo used in customer emails.</p>
 
+    <% if (error) { %>
+      <div class="error-box"><%= error %></div>
+    <% } %>
+
     <form method="POST" action="/admin/settings" enctype="multipart/form-data">
       <div class="card">
         <label>Home page hero</label>
@@ -146,6 +150,31 @@
         <button type="submit" class="btn">Save shipping</button>
       </div>
     </form>
+
+    <h2 id="categories">Categories</h2>
+    <p class="muted">These are exactly the categories shown in the main menu's Shop section and the shop page's filter chips. New ones appear automatically when you pick "+ Add new category…" on a product — delete one here once nothing uses it anymore.</p>
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Products</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% categories.forEach(c => { %>
+          <tr>
+            <td><%= c.name %></td>
+            <td><%= c.productCount %></td>
+            <td style="white-space:nowrap;">
+              <% if (c.productCount === 0) { %>
+                <form class="inline" method="POST" action="/admin/settings/categories/<%= encodeURIComponent(c.name) %>/delete" onsubmit="return confirm('Delete the category &quot;<%= c.name %>&quot;?');">
+                  <button class="btn small danger">Delete</button>
+                </form>
+              <% } else { %>
+                <span class="muted">In use</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
 
     <h2>Export</h2>
     <p class="muted">Download your data as a spreadsheet-friendly CSV file.</p>

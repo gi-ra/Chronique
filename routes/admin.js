@@ -927,7 +927,29 @@ router.get('/settings', (req, res) => {
   settings.email_header_photo = settings.email_header_photo || '/assets/brandmark-word.png';
   settings.subscribe_enabled = settings.subscribe_enabled === undefined ? '1' : settings.subscribe_enabled;
   settings.collections_heading_enabled = settings.collections_heading_enabled === undefined ? '1' : settings.collections_heading_enabled;
-  res.render('settings/form', { settings });
+
+  const categories = db.prepare('SELECT name FROM categories ORDER BY sort_order ASC').all().map((r) => {
+    const productCount = db
+      .prepare('SELECT COUNT(*) AS c FROM products WHERE category = ?')
+      .get(r.name).c;
+    return { name: r.name, productCount };
+  });
+
+  res.render('settings/form', { settings, categories, error: req.query.error || '' });
+});
+
+router.post('/settings/categories/:name/delete', (req, res) => {
+  const name = decodeURIComponent(req.params.name);
+  const productCount = db.prepare('SELECT COUNT(*) AS c FROM products WHERE category = ?').get(name).c;
+  if (productCount > 0) {
+    return res.redirect(
+      `/admin/settings?error=${encodeURIComponent(
+        `Can't delete "${name}" — ${productCount} product${productCount === 1 ? '' : 's'} still use it. Move or delete ${productCount === 1 ? 'it' : 'them'} first.`
+      )}#categories`
+    );
+  }
+  db.prepare('DELETE FROM categories WHERE name = ?').run(name);
+  res.redirect('/admin/settings#categories');
 });
 
 router.post(
