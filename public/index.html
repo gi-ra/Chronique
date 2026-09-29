@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chronique — Independent apparel</title>
-<meta name="description" content="Chronique — independent apparel out of Logan, Queensland. Considered garments, small runs, made to last.">
+<!--SEO_HEAD-->
 
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
@@ -13,27 +12,11 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
 <meta name="theme-color" content="#FAF8F4">
 
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Chronique">
-<meta property="og:title" content="Chronique — Independent apparel">
-<meta property="og:description" content="Independent apparel out of Logan, Queensland. Considered garments, small runs, made to last.">
-<meta property="og:image" content="https://chronique.au/assets/og-image.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:url" content="https://chronique.au/">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Chronique — Independent apparel">
-<meta name="twitter:description" content="Independent apparel out of Logan, Queensland. Considered garments, small runs, made to last.">
-<meta name="twitter:image" content="https://chronique.au/assets/og-image.jpg">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/css/site.css">
-</head>
-<body>
-
 </head>
 <body>
 
@@ -81,12 +64,12 @@
     <button class="icon-btn" id="searchBtn" aria-label="Search">
       <svg viewBox="0 0 24 24" width="18" height="18"><circle cx="10" cy="10" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="14.6" y1="14.6" x2="20.5" y2="20.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
     </button>
-    <a class="icon-btn bag-btn" href="#/cart" aria-label="Bag" id="bagLink">
+    <a class="icon-btn bag-btn" href="/cart" aria-label="Bag" id="bagLink">
       <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6.5 8.5h11l-1 12h-9l-1-12z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 8.5V6.8a3 3 0 0 1 6 0v1.7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
       <span class="bag-count">0</span>
     </a>
   </div>
-  <a href="#/" class="brand-link" aria-label="Chronique — home">
+  <a href="/" class="brand-link" aria-label="Chronique — home">
     <img class="brandmark brandmark-word" src="/assets/brandmark-word.png" alt="Chronique">
     <img class="brandmark brandmark-icon" src="/assets/brandmark-icon.png" alt="Chronique">
   </a>
@@ -111,32 +94,35 @@
   <div class="drawer-inner">
     <div class="drawer-section drawer-section--shop">
       <h4 class="mono">Shop</h4>
-      <a href="#/shop?sort=new">New arrivals</a>
-      <a href="#/shop">Shop all</a>
+      <a href="/shop?sort=new">New arrivals</a>
+      <a href="/shop">Shop all</a>
       <div id="navCategoryLinks" style="display:flex;flex-direction:column;"></div>
-      <a href="#/shop?sort=new">Curated</a>
+      <a href="/shop?curated=1">Curated</a>
     </div>
 
     <div class="drawer-section drawer-section--explore">
       <h4 class="mono">Explore</h4>
-      <a href="#/about">About us</a>
-      <a href="#/collections">Collections</a>
-      <a href="#/news">News</a>
-      <a href="#/sound">Studio</a>
-      <a href="#/gathering">Gathering</a>
+      <a href="/about">About us</a>
+      <a href="/collections">Collections</a>
+      <a href="/news">News</a>
+      <a href="/studio">Studio</a>
+      <a href="/gathering">Gathering</a>
     </div>
 
     <div class="drawer-newsletter">
       <h4 class="mono">Stay in touch</h4>
+      <p class="consent-note">Get first access to new drops and Gathering invites. Unsubscribe anytime.</p>
       <div class="subscribe">
         <label for="drawerEmail" style="position:absolute;left:-9999px;">Email address</label>
         <input id="drawerEmail" type="email" placeholder="Email address" autocomplete="email">
+        <label for="drawerEmailWebsite" class="honeypot-field" aria-hidden="true" tabindex="-1">Website</label>
+        <input id="drawerEmailWebsite" name="website" type="text" class="honeypot-field" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button type="button" id="drawerSubBtn">Subscribe</button>
       </div>
       <div class="note mono" id="drawerSubNote"></div>
       <div class="drawer-links-secondary mono">
-        <a href="#/client-services">Client services</a>
-        <a href="#/legal">Legal &amp; Privacy</a>
+        <a href="/client-services">Client services</a>
+        <a href="/legal">Legal &amp; Privacy</a>
         <a href="https://www.instagram.com/kro__nik/" target="_blank" rel="noopener">Instagram</a>
       </div>
     </div>
@@ -151,7 +137,7 @@
 <!-- ============ HOME ============ -->
 <main id="route-home" class="route">
   <section class="hero">
-    <a class="hero-link" href="#/shop" aria-label="Shop the collection">
+    <a class="hero-link" href="/shop" aria-label="Shop the collection">
       <img class="hero-photo" id="heroPhoto" src="/uploads/hero-photo.jpg" alt="">
       <video class="hero-photo hero-video" id="heroVideo" autoplay muted loop playsinline style="display:none;"></video>
     </a>
@@ -170,9 +156,12 @@
     <div class="cs-content">
       <span class="cs-label mono" id="csLabel">Coming soon</span>
       <h2 id="csHeading">The next drop is on its way</h2>
+      <p class="consent-note">Get first access to new drops and Gathering invites. Unsubscribe anytime.</p>
       <div class="subscribe">
         <label for="homeEmail" style="position:absolute;left:-9999px;">Email address</label>
         <input id="homeEmail" type="email" placeholder="Email address" autocomplete="email">
+        <label for="homeEmailWebsite" class="honeypot-field" aria-hidden="true" tabindex="-1">Website</label>
+        <input id="homeEmailWebsite" name="website" type="text" class="honeypot-field" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button type="button" id="homeSubBtn">Notify me</button>
       </div>
       <div class="note mono" id="homeSubNote"></div>
@@ -210,9 +199,9 @@
   <div class="sidebar-inner">
     <div class="sidebar-block">
       <h4 class="mono">Discover</h4>
-      <a href="#/shop" class="sidebar-link" id="discShopAll">Shop all</a>
-      <a href="#/shop?sort=new" class="sidebar-link" id="discNewArrivals">New arrivals</a>
-      <a href="#/shop?sort=new" class="sidebar-link">Curated</a>
+      <a href="/shop" class="sidebar-link" id="discShopAll">Shop all</a>
+      <a href="/shop?sort=new" class="sidebar-link" id="discNewArrivals">New arrivals</a>
+      <a href="/shop?curated=1" class="sidebar-link" id="discCurated">Curated</a>
     </div>
     <div class="sidebar-block">
       <h4 class="mono">Shop by category</h4>
@@ -235,7 +224,7 @@
 <!-- ============ ONE COLLECTION ============ -->
 <main id="route-collection" class="route">
   <div class="wrap breadcrumb">
-    <a href="#/collections">Collections</a> <span id="collectionCrumbName"></span>
+    <a href="/collections">Collections</a> <span id="collectionCrumbName"></span>
   </div>
   <section class="collection-banner" id="collectionBanner">
     <div class="collection-banner-photo" id="collectionBannerPhoto"></div>
@@ -253,7 +242,7 @@
 <!-- ============ PRODUCT DETAIL ============ -->
 <main id="route-product" class="route">
   <div class="wrap breadcrumb">
-    <a href="#/shop">Shop</a> <span id="crumbCat"></span> <span id="crumbName"></span>
+    <a href="/shop">Shop</a> <span id="crumbCat"></span> <span id="crumbName"></span>
   </div>
   <div class="wrap pdp" id="pdpRoot"></div>
   <section class="wrap related-section" id="relatedSection" style="display:none;">
@@ -281,7 +270,7 @@
 <!-- ============ SIZE CHART PAGE ============ -->
 <main id="route-chart" class="route">
   <div class="wrap breadcrumb">
-    <a href="#/shop">Shop</a> <span>/ Size Chart</span>
+    <a href="/shop">Shop</a> <span>/ Size Chart</span>
   </div>
   <div class="wrap chart-page">
     <div class="chart-head">
@@ -304,7 +293,7 @@
       <div id="chartTableBottoms"></div>
     </section>
 
-    <p class="chart-note">Still unsure? <a href="#/">Reach out</a> and we'll help you find your size.</p>
+    <p class="chart-note">Still unsure? <a href="/">Reach out</a> and we'll help you find your size.</p>
   </div>
 </main>
 
@@ -498,7 +487,7 @@
           <p><strong>Acceptance of terms.</strong> By using chronique.au or placing an order with us, you agree to these terms.</p>
           <p><strong>Products &amp; pricing.</strong> Prices are listed in Australian dollars. We do our best to keep pricing and product information accurate, but if something's listed incorrectly, we'll contact you before processing your order and you're welcome to cancel.</p>
           <p><strong>Orders &amp; payment.</strong> Placing an order is an offer to purchase, which we're free to decline or cancel — for example if an item turns out to be out of stock, there's a pricing error, or we suspect fraud. If we cancel an order, you'll be refunded in full. Payment is processed securely through Stripe at the time of purchase.</p>
-          <p><strong>Shipping, returns &amp; refunds.</strong> See our <a href="#/client-services">Client Services</a> page for current shipping options and our returns policy. Nothing in these terms limits any rights you have under the Australian Consumer Law.</p>
+          <p><strong>Shipping, returns &amp; refunds.</strong> See our <a href="/client-services">Client Services</a> page for current shipping options and our returns policy. Nothing in these terms limits any rights you have under the Australian Consumer Law.</p>
           <p><strong>Intellectual property.</strong> All content on this site — including designs, photography, product names, and the Chronique name and brandmark — belongs to Maison Chronique Pty Ltd and may not be reproduced without our permission.</p>
           <p><strong>Limitation of liability.</strong> To the extent the law allows, Chronique isn't liable for indirect or consequential losses arising from your use of the site. Nothing here excludes any guarantee or right you have under the Australian Consumer Law that can't lawfully be excluded.</p>
           <p><strong>Governing law.</strong> These terms are governed by the laws of Queensland, Australia.</p>
@@ -522,7 +511,7 @@
 <!-- ============ NEWS POST ============ -->
 <main id="route-newspost" class="route">
   <div class="wrap breadcrumb">
-    <a href="#/news">News</a> <span id="postCrumb"></span>
+    <a href="/news">News</a> <span id="postCrumb"></span>
   </div>
   <div class="wrap news-post" id="newsPostRoot"></div>
 </main>
@@ -563,9 +552,12 @@
   <div class="wrap gathering-rsvp">
     <h2>Reserve a seat</h2>
     <p>Leave your email and we'll send details for the next sitting.</p>
+    <p class="consent-note">Get first access to new drops and Gathering invites. Unsubscribe anytime.</p>
     <div class="subscribe">
       <label for="gatheringEmail" style="position:absolute;left:-9999px;">Email address</label>
       <input id="gatheringEmail" type="email" placeholder="Email address" autocomplete="email">
+      <label for="gatheringEmailWebsite" class="honeypot-field" aria-hidden="true" tabindex="-1">Website</label>
+      <input id="gatheringEmailWebsite" name="website" type="text" class="honeypot-field" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button type="button" id="gatheringSubBtn">Notify me</button>
     </div>
     <div class="note mono" id="gatheringSubNote"></div>

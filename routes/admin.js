@@ -438,6 +438,7 @@ router.post('/products', upload.array('newPhotos', 8), (req, res) => {
     ? req.body.productType
     : 'garment';
   const isNew = req.body.isNew ? 1 : 0;
+  const isCurated = req.body.isCurated ? 1 : 0;
   const photos = (req.files || []).map((f) => toUrl(f.filename));
   const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM products').get().m;
   const colorList = (colors || '').split(',').map((c) => c.trim()).filter(Boolean);
@@ -451,8 +452,8 @@ router.post('/products', upload.array('newPhotos', 8), (req, res) => {
   ensureCategoryExists(category);
 
   db.prepare(`
-    INSERT INTO products (id, name, category, price, icon, colors, is_new, description, photos, sort_order, product_type, info_sections, size_guide_type, size_guide_data, collections)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (id, name, category, price, icon, colors, is_new, is_curated, description, photos, sort_order, product_type, info_sections, size_guide_type, size_guide_data, collections)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     cleanId,
     name,
@@ -461,6 +462,7 @@ router.post('/products', upload.array('newPhotos', 8), (req, res) => {
     icon,
     JSON.stringify(colorList),
     isNew,
+    isCurated,
     description || '',
     JSON.stringify(photos),
     maxOrder + 1,
@@ -513,6 +515,7 @@ router.post('/products/:id', upload.array('newPhotos', 8), (req, res) => {
     ? req.body.productType
     : 'garment';
   const isNew = req.body.isNew ? 1 : 0;
+  const isCurated = req.body.isCurated ? 1 : 0;
   const colorList = (colors || '').split(',').map((c) => c.trim()).filter(Boolean);
   const sizeList = (sizes || '').split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
 
@@ -538,7 +541,7 @@ router.post('/products/:id', upload.array('newPhotos', 8), (req, res) => {
   ensureCategoryExists(category);
 
   db.prepare(`
-    UPDATE products SET name=?, category=?, price=?, icon=?, colors=?, is_new=?, description=?, photos=?, product_type=?, info_sections=?, size_guide_type=?, size_guide_data=?, collections=?
+    UPDATE products SET name=?, category=?, price=?, icon=?, colors=?, is_new=?, is_curated=?, description=?, photos=?, product_type=?, info_sections=?, size_guide_type=?, size_guide_data=?, collections=?
     WHERE id=?
   `).run(
     name,
@@ -547,6 +550,7 @@ router.post('/products/:id', upload.array('newPhotos', 8), (req, res) => {
     icon,
     JSON.stringify(colorList),
     isNew,
+    isCurated,
     description || '',
     JSON.stringify(photos),
     productType,

@@ -3,6 +3,7 @@ const db = require('../db/database');
 const { getStripe } = require('../lib/stripe');
 const { sendOrderConfirmationEmail, sendAdminNewOrderAlert, sendLowStockAlert } = require('../lib/mailer');
 const { getLowStockThreshold } = require('../lib/shipping');
+const { subscribeToKlaviyo } = require('../lib/klaviyo');
 
 const router = express.Router();
 
@@ -103,6 +104,17 @@ async function handleCheckoutCompleted(session) {
   }
 
   console.log(`Order #${order.id} marked as paid (${customerEmail}).`);
+
+  // Only add them to the mailing list now that payment has actually gone
+  // through — not just because they started checkout and ticked the box.
+  if (order.newsletter_optin && customerEmail) {
+    const clean = customerEmail.trim().toLowerCase();
+    const existing = db.prepare('SELECT id FROM newsletter_subscribers WHERE email = ?').get(clean);
+    if (!existing) {
+      db.prepare('INSERT INTO newsletter_subscribers (email, source) VALUES (?, ?)').run(clean, 'checkout');
+      await subscribeToKlaviyo({ email: clean, source: 'checkout' });
+    }
+  }
 
   const updatedOrder = db.prepare('SELECT * FROM orders WHERE id = ?').get(order.id);
   await Promise.all([

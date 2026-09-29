@@ -145,6 +145,19 @@
   .drawer-section--shop a:hover{ color:#FAF8F4; }
   .drawer-section--explore a{ color:#96917F; font-style:italic; }
   .drawer-section--explore a:hover{ color:#C9C5BB; }
+  /* Consent copy under every email sign-up form (Australia's Spam Act
+     requires saying plainly what someone's signing up for) — sized down
+     and de-emphasised relative to whatever heading/body text it sits
+     under, via currentColor + reduced opacity, so it doesn't need its own
+     colour per section (dark drawer vs light coming-soon vs Gathering). */
+  .consent-note{ font-size:11.5px; opacity:.65; margin:6px 0 16px; max-width:420px; line-height:1.4; }
+  /* Honeypot: present in the DOM (so a bot filling every field trips it)
+     but invisible and unreachable to a real visitor — off-screen rather
+     than display:none, since some bots skip display:none fields. */
+  .honeypot-field{
+    position:absolute !important; left:-9999px !important; top:-9999px !important;
+    width:1px; height:1px; overflow:hidden;
+  }
   .drawer-newsletter{ padding:22px 0; }
   .drawer-newsletter h4{ font-size:11px; font-weight:500; color:#8C887E; margin:0 0 12px; }
   .drawer-newsletter .subscribe{ display:flex; border:1px solid #55524A; }
@@ -805,6 +818,8 @@
   .discount-row input{ flex:1; padding:10px 12px; border:1px solid var(--line); font-size:13px; font-family:inherit; }
   .discount-row button{ padding:10px 14px; background:var(--ink); color:var(--paper); border:none; font-family:'JetBrains Mono', monospace; font-size:12px; cursor:pointer; }
   .discount-note{ font-family:'JetBrains Mono', monospace; font-size:11.5px; margin-top:8px; color:var(--ink-faint); }
+  .newsletter-optin{ display:flex; align-items:flex-start; gap:8px; margin-top:16px; font-size:12px; line-height:1.4; color:var(--ink-faint); cursor:pointer; }
+  .newsletter-optin input{ width:auto; margin-top:2px; flex-shrink:0; }
   .checkout-btn{ margin-top:22px; width:100%; padding:16px; background:var(--ink); color:var(--paper); border:none; font-family:'JetBrains Mono', monospace; font-size:13px; cursor:pointer; letter-spacing:.02em; }
   .checkout-btn:hover{ background:var(--ink-soft); }
   .checkout-btn:disabled{ opacity:.5; cursor:not-allowed; }

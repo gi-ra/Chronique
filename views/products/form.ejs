@@ -146,6 +146,11 @@
         Mark as "New"
       </label>
 
+      <label>
+        <input type="checkbox" name="isCurated" value="1" <%= product && product.is_curated ? 'checked' : '' %> style="width:auto; display:inline-block; margin-right:6px;">
+        Include in "Curated" (shown under the nav's Curated filter — independent of "New")
+      </label>
+
       <label for="description">Description</label>
       <textarea id="description" name="description"><%= product ? product.description : '' %></textarea>
 

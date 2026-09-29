@@ -76,6 +76,14 @@ ensureColumn('events', 'video', "TEXT NOT NULL DEFAULT ''");
 // panel at the top of the Gathering page, picked explicitly in admin rather
 // than just "whichever is soonest".
 ensureColumn('events', 'is_featured', 'INTEGER NOT NULL DEFAULT 0');
+// Drives the nav's "Curated" filter (/shop?curated=1) — a separate,
+// admin-picked set from "New", since a piece can be curated without being
+// a brand-new arrival (or vice versa).
+ensureColumn('products', 'is_curated', 'INTEGER NOT NULL DEFAULT 0');
+// True once a paying customer ticks "Keep me updated" at checkout — the
+// webhook adds them to newsletter_subscribers (source 'checkout') only
+// after payment actually succeeds, not just because they started checkout.
+ensureColumn('orders', 'newsletter_optin', 'INTEGER NOT NULL DEFAULT 0');
 
 // Seed the canonical category list once, the first time this table is
 // empty — matches the site's original fixed categories, so the nav's Shop

@@ -306,7 +306,7 @@ function updateBagCount(){
 function money(n){ return "$" + n.toFixed(0) + " AUD"; }
 function cardHTML(p){
   const colourLabel = p.colors.length > 1 ? `${p.colors.length} colours` : p.colors[0];
-  return `<a class="pcard" href="#/product/${p.id}">
+  return `<a class="pcard" href="/shop/${p.id}">
     <div class="frame">
       ${p.isNew && p.inStock !== false ? '<span class="tag-new">New</span>' : ''}
       ${p.inStock === false ? '<span class="tag-new">Sold out</span>' : ''}
@@ -341,26 +341,29 @@ function renderHome(){
 /* ---------------- SHOP ---------------- */
 let activeCat = "All";
 let activeSort = "recommended";
+let activeCurated = false;
 let currentGuide = null;
 
 function renderNavCategories(){
   const row = document.getElementById('navCategoryLinks');
   if (!row) return;
   row.innerHTML = CATEGORIES.filter(c => c !== "All").map(c =>
-    `<a href="#/shop?cat=${encodeURIComponent(c)}">${c}</a>`
+    `<a href="/shop?cat=${encodeURIComponent(c)}">${c}</a>`
   ).join('');
 }
 
 function renderChips(){
   const row = document.getElementById('chipRow');
   row.innerHTML = CATEGORIES.filter(c => c !== "All").map(c =>
-    `<a href="#/shop?cat=${encodeURIComponent(c)}" class="${c===activeCat ? 'active' : ''}">${c}</a>`
+    `<a href="/shop?cat=${encodeURIComponent(c)}" class="${c===activeCat ? 'active' : ''}">${c}</a>`
   ).join('');
 
-  const shopAllActive = activeCat === "All" && activeSort !== "new";
-  const newActive = activeSort === "new" && activeCat === "All";
+  const shopAllActive = activeCat === "All" && activeSort !== "new" && !activeCurated;
+  const newActive = activeSort === "new" && activeCat === "All" && !activeCurated;
   document.getElementById('discShopAll').classList.toggle('active', shopAllActive);
   document.getElementById('discNewArrivals').classList.toggle('active', newActive);
+  const discCurated = document.getElementById('discCurated');
+  if(discCurated) discCurated.classList.toggle('active', activeCurated);
 }
 
 function renderShop(){
@@ -368,6 +371,7 @@ function renderShop(){
   document.getElementById('sortSelect').value = activeSort;
 
   let list = activeCat === "All" ? [...PRODUCTS] : PRODUCTS.filter(p => p.category === activeCat);
+  if(activeCurated) list = list.filter(p => p.isCurated);
 
   if(activeSort === "new"){
     list.sort((a,b) => (b.isNew - a.isNew));
@@ -388,8 +392,9 @@ document.getElementById('sortSelect').addEventListener('change', (e) => {
   const params = new URLSearchParams();
   if(activeCat !== "All") params.set('cat', activeCat);
   if(activeSort !== "recommended") params.set('sort', activeSort);
+  if(activeCurated) params.set('curated', '1');
   const qs = params.toString();
-  location.hash = '#/shop' + (qs ? '?' + qs : '');
+  navigate('/shop' + (qs ? '?' + qs : ''));
 });
 
 const filterToggleBtn = document.getElementById('filterToggleBtn');
@@ -422,7 +427,7 @@ function collectionTileHTML(c){
   const photo = c.coverPhoto
     ? `<img class="collection-tile-photo" src="${c.coverPhoto}" alt="">`
     : `<div class="collection-tile-photo photo-tex" style="position:absolute; inset:0;"></div>`;
-  return `<a class="collection-tile" href="#/collections/${encodeURIComponent(c.id)}">
+  return `<a class="collection-tile" href="/collections/${encodeURIComponent(c.id)}">
     ${photo}
     <div class="collection-tile-text">
       <h2>${c.name}</h2>
@@ -496,7 +501,7 @@ async function renderProduct(id){
     setTitle('Piece not found');
     return;
   }
-  document.getElementById('crumbCat').innerHTML = `/ <a href="#/shop?cat=${encodeURIComponent(p.category)}">${p.category}</a>`;
+  document.getElementById('crumbCat').innerHTML = `/ <a href="/shop?cat=${encodeURIComponent(p.category)}">${p.category}</a>`;
   document.getElementById('crumbName').textContent = `/ ${p.name}`;
   setTitle(p.name);
 
@@ -587,6 +592,7 @@ async function renderProduct(id){
         <p class="flabel" style="margin:0 0 8px;">Get an email when this is back</p>
         <div class="notify-row">
           <input type="email" id="notifyEmail" placeholder="you@email.com">
+          <input type="text" id="notifyWebsite" name="website" class="honeypot-field" tabindex="-1" autocomplete="off" aria-hidden="true">
           <button type="button" id="notifyBtn">Notify me</button>
         </div>
         <div class="notify-note" id="notifyNote"></div>
@@ -709,7 +715,7 @@ async function renderProduct(id){
     // correctly (see the Bag page), so "Buy now" adds the item and takes
     // the shopper straight there instead of skipping to Stripe directly.
     addToCart(p.id, selectedSize, selectedColor, qty);
-    location.hash = '#/cart';
+    navigate('/cart');
   });
   document.getElementById('notifyBtn').addEventListener('click', async () => {
     const email = document.getElementById('notifyEmail').value.trim();
@@ -721,7 +727,10 @@ async function renderProduct(id){
       const res = await fetch('/api/notify-stock', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: p.id, size: selectedSize, color: selectedColor, email }),
+        body: JSON.stringify({
+          productId: p.id, size: selectedSize, color: selectedColor, email,
+          website: document.getElementById('notifyWebsite').value,
+        }),
       });
       if(!res.ok){
         const data = await res.json().catch(() => ({}));
@@ -762,7 +771,7 @@ function renderCartPage(){
   const cart = getCart();
 
   if(!cart.length){
-    root.innerHTML = `<div class="empty-state">Your bag is empty. <a href="#/shop">Continue shopping &rarr;</a></div>`;
+    root.innerHTML = `<div class="empty-state">Your bag is empty. <a href="/shop">Continue shopping &rarr;</a></div>`;
     return;
   }
 
@@ -780,7 +789,7 @@ function renderCartPage(){
       <div class="cart-line" data-index="${i}">
         <img src="${p.photos[0]}" alt="">
         <div>
-          <p class="cl-name"><a href="#/product/${p.id}">${p.name}</a></p>
+          <p class="cl-name"><a href="/shop/${p.id}">${p.name}</a></p>
           <div class="cl-meta">${sizeLabel}</div>
           <div class="cl-qty">
             <button class="cl-qty-minus" aria-label="Decrease quantity">–</button>
@@ -842,6 +851,10 @@ function renderCartPage(){
       <div class="cart-summary-row" id="cartDiscountRow" style="display:none;"><span>Discount</span><span class="mono" id="cartDiscountVal"></span></div>
       <div class="cart-summary-row" id="cartShippingRow"><span>Shipping</span><span class="mono">—</span></div>
       <div class="cart-summary-row total"><span>Total</span><span class="mono" id="cartTotalVal">${money(subtotal)}</span></div>
+      <label class="newsletter-optin">
+        <input type="checkbox" id="newsletterOptin">
+        Keep me updated on new pieces — get first access to new drops and Gathering invites. Unsubscribe anytime.
+      </label>
       <button class="checkout-btn" id="checkoutBtn" disabled>Checkout</button>
       <div class="checkout-error" id="checkoutError"></div>
     </div>
@@ -1018,6 +1031,7 @@ function renderCartPage(){
           items: getCart().map(l => ({ productId: l.productId, size: l.size, color: l.color, quantity: l.qty })),
           shippingAddress: currentAddress(),
           discountCode: appliedDiscount ? appliedDiscount.code : '',
+          newsletterOptin: document.getElementById('newsletterOptin').checked,
         }),
       });
       const data = await res.json();
@@ -1039,7 +1053,7 @@ function renderCartPage(){
 /* ---------------- ORDER CONFIRMATION PAGE ---------------- */
 async function renderOrderConfirmationPage(){
   const root = document.getElementById('orderConfirmationRoot');
-  const params = new URLSearchParams((location.hash.split('?')[1] || ''));
+  const params = new URLSearchParams(location.search || '');
   const sessionId = params.get('session_id');
 
   if(!sessionId){
@@ -1090,7 +1104,7 @@ async function renderOrderConfirmationPage(){
 
 /* ---------------- NEWS ---------------- */
 function newsCardHTML(post){
-  return `<a class="news-card" href="#/news/${post.slug}">
+  return `<a class="news-card" href="/news/${post.slug}">
     <div class="news-photo-wrap"><img src="${(post.photos[0])}" alt=""></div>
     <h3>${post.title}</h3>
     <div class="news-date mono">${post.date}</div>
@@ -1121,8 +1135,8 @@ function renderNewsPost(slug){
       ${post.photos.map((ph,i) => `<button type="button" class="np-essay-photo" data-index="${i}"><img src="${(ph)}" alt=""></button>`).join('')}
     </div>
     <div class="np-nav">
-      ${newer ? `<a href="#/news/${newer.slug}">&larr; Newer post</a>` : `<span></span>`}
-      ${older ? `<a href="#/news/${older.slug}">Older post &rarr;</a>` : `<span></span>`}
+      ${newer ? `<a href="/news/${newer.slug}">&larr; Newer post</a>` : `<span></span>`}
+      ${older ? `<a href="/news/${older.slug}">Older post &rarr;</a>` : `<span></span>`}
     </div>
   `;
   root.querySelectorAll('.np-essay-photo').forEach(btn => {
@@ -1399,9 +1413,8 @@ function showRoute(key){
   window.scrollTo(0,0);
 }
 function handleRoute(){
-  const hash = location.hash || "#/";
-  const [pathPart, queryPart] = hash.replace(/^#/, '').split('?');
-  const params = new URLSearchParams(queryPart || "");
+  const pathPart = location.pathname.replace(/\/+$/, '') || "/";
+  const params = new URLSearchParams(location.search || "");
 
   if(pathPart === "/" || pathPart === ""){
     currentRoute = 'home';
@@ -1414,13 +1427,14 @@ function handleRoute(){
     activeCat = params.get('cat') || "All";
     activeSort = params.get('sort') || "recommended";
     activeQuery = params.get('q') || "";
+    activeCurated = params.get('curated') === '1' || params.get('curated') === 'true';
     renderShop();
     showRoute('shop');
     setActiveNav(activeSort === 'new' ? 'shop-new' : 'shop');
     setTitle(activeCat && activeCat !== 'All' ? `Shop — ${activeCat}` : 'Shop');
-  } else if(pathPart.startsWith("/product/")){
+  } else if(pathPart.startsWith("/shop/")){
     currentRoute = 'product';
-    const id = pathPart.split('/product/')[1];
+    const id = pathPart.split('/shop/')[1];
     renderProduct(decodeURIComponent(id));
     showRoute('product');
     setActiveNav(null);
@@ -1469,7 +1483,7 @@ function handleRoute(){
     renderNewsPost(decodeURIComponent(slug));
     showRoute('newspost');
     setActiveNav(null);
-  } else if(pathPart === "/sound"){
+  } else if(pathPart === "/studio"){
     currentRoute = 'sound';
     renderSoundPage();
     showRoute('sound');
@@ -1510,7 +1524,42 @@ function handleRoute(){
   announcementBar.classList.toggle('show', currentRoute === 'home');
   updateHeaderState();
 }
-window.addEventListener('hashchange', handleRoute);
+// ---- Real address bar routing (History API) ----
+// Navigating within the site updates the actual URL (pushState) instead of
+// a #hash, so every page has its own shareable, indexable address; the
+// browser's back/forward buttons are handled by 'popstate' below.
+function navigate(pathAndQuery, opts){
+  opts = opts || {};
+  if(opts.replace) history.replaceState(null, '', pathAndQuery);
+  else history.pushState(null, '', pathAndQuery);
+  handleRoute();
+}
+window.addEventListener('popstate', handleRoute);
+
+// Old shared/bookmarked links used #/shop, #/about, etc. Since browsers
+// never send the part after # to the server, the only place this can be
+// fixed is here, once the page has loaded: swap the address bar over to
+// the real path immediately, before the first render.
+(function migrateOldHashLink(){
+  if(location.hash && location.hash.startsWith('#/')){
+    const clean = location.hash.slice(1) || '/';
+    history.replaceState(null, '', clean + location.search);
+  }
+})();
+
+// Any click on a same-site link (including ones inside content rendered
+// later, like product cards) navigates through the router instead of
+// triggering a full page reload — the standard pattern for a single-page
+// app using real URLs.
+document.addEventListener('click', (e) => {
+  if(e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = e.target.closest('a');
+  if(!a) return;
+  const href = a.getAttribute('href');
+  if(!href || !href.startsWith('/') || a.target === '_blank' || a.hasAttribute('download')) return;
+  e.preventDefault();
+  navigate(href);
+});
 
 /* ---------------- HEADER STATE (transparent-at-top / solid-on-scroll) ---------------- */
 const header = document.getElementById('siteHeader');
@@ -1568,7 +1617,7 @@ document.getElementById('searchCloseBtn').addEventListener('click', () => {
 searchInput.addEventListener('keydown', (e) => {
   if(e.key === 'Enter' && searchInput.value.trim()){
     searchOverlay.classList.remove('open');
-    location.hash = '#/shop?q=' + encodeURIComponent(searchInput.value.trim());
+    navigate('/shop?q=' + encodeURIComponent(searchInput.value.trim()));
   }
   if(e.key === 'Escape'){ searchOverlay.classList.remove('open'); }
 });
@@ -1694,12 +1743,15 @@ setInterval(updateClock, 1000);
 function wireSubscribe(btnId, inputId, noteId, source){
   const btn = document.getElementById(btnId);
   if(!btn) return;
+  // The honeypot field sits next to each email input, hidden from real
+  // visitors with CSS — a bot filling in every field it finds trips it.
+  const honeypotInput = document.getElementById(inputId + 'Website');
   btn.addEventListener('click', async () => {
     const input = document.getElementById(inputId);
     const note = document.getElementById(noteId);
     const email = (input.value || '').trim();
     if(!email || !email.includes('@')){
-      note.textContent = 'Enter a valid email.';
+      note.textContent = 'Enter a valid email address.';
       return;
     }
     btn.disabled = true;
@@ -1707,13 +1759,14 @@ function wireSubscribe(btnId, inputId, noteId, source){
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source })
+        body: JSON.stringify({ email, source, website: honeypotInput ? honeypotInput.value : '' })
       });
-      if(!res.ok) throw new Error('failed');
-      note.textContent = "You're on the list.";
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || 'failed');
+      note.textContent = data.alreadySubscribed ? "You're already on the list." : "You're on the list.";
       input.value = '';
     }catch(e){
-      note.textContent = "Couldn't save that — please try again.";
+      note.textContent = 'Something went wrong, please try again.';
     }finally{
       btn.disabled = false;
     }

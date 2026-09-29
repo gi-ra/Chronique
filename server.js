@@ -7,6 +7,8 @@ const path = require('path');
 const apiRoutes = require('./routes/api');
 const adminRoutes = require('./routes/admin');
 const webhookRoutes = require('./routes/webhooks');
+const pageRoutes = require('./routes/pages');
+const { renderPage } = require('./lib/seo');
 const { UPLOADS_DIR } = require('./db/paths');
 
 const app = express();
@@ -33,8 +35,15 @@ app.use(
   })
 );
 
-// Public site (static HTML/CSS/JS)
-app.use(express.static(path.join(__dirname, 'public')));
+// A direct request for the raw template file would skip the page routes
+// below and show the unfilled <!--SEO_HEAD--> placeholder — redirect it to
+// "/" instead, which serves the same file properly filled in.
+app.get('/index.html', (req, res) => res.redirect(301, '/'));
+
+// Public site (static CSS/JS/images). index:false so a bare "/" request
+// can't be served straight from this file list either — it needs to go
+// through the page route below instead, same reason as above.
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // Uploaded photos live under DATA_DIR (see db/paths.js) so they survive
 // redeploys when DATA_DIR points at a persistent disk.
@@ -46,10 +55,17 @@ app.use('/api', apiRoutes);
 // Password-protected admin panel
 app.use('/admin', adminRoutes);
 
-// Anything else falls back to the single-page site (client-side router
-// handles the rest via the URL hash, e.g. /#/shop).
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Real, plain addresses for every page (e.g. /shop, /shop/rugby-jumper,
+// /about) — each one injects that page's own title/description/Open
+// Graph/canonical tags (and JSON-LD for products) into the same HTML shell
+// client-side JavaScript then renders into, plus /sitemap.xml and
+// /robots.txt. See routes/pages.js and lib/seo.js.
+app.use('/', pageRoutes);
+
+// Anything else is a genuinely unknown address — a real 404, not a silent
+// fallback to the homepage, so search engines don't index broken links.
+app.use((req, res) => {
+  renderPage(res, { title: 'Page not found', noindex: true, canonicalPath: req.path }, 404);
 });
 
 app.listen(PORT, () => {

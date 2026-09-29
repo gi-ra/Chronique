@@ -2,6 +2,16 @@ const express = require('express');
 const db = require('../db/database');
 const { getStripe } = require('../lib/stripe');
 const { calculateShipping, getShippingSettings } = require('../lib/shipping');
+const { subscribeToKlaviyo } = require('../lib/klaviyo');
+
+// Every email form on the site includes a hidden "website" field that real
+// visitors never see or fill in (see the honeypot CSS in site.css) — a bot
+// that blindly fills every field in a form trips this. Pretending the
+// sign-up succeeded (rather than returning an error) doesn't tip off the
+// bot that it was caught.
+function isHoneypotTripped(req) {
+  return !!(req.body && req.body.website);
+}
 
 const router = express.Router();
 
@@ -15,6 +25,7 @@ function parseProduct(row) {
     icon: row.icon,
     colors: JSON.parse(row.colors || '[]'),
     isNew: !!row.is_new,
+    isCurated: !!row.is_curated,
     desc: row.description,
     photos: JSON.parse(row.photos || '[]'),
     infoSections: JSON.parse(row.info_sections || '[]'),
@@ -204,7 +215,9 @@ router.post('/discount/validate', (req, res) => {
 });
 
 // ---------- Back-in-stock notifications ----------
-router.post('/notify-stock', (req, res) => {
+router.post('/notify-stock', async (req, res) => {
+  if (isHoneypotTripped(req)) return res.json({ ok: true });
+
   const { productId, size, color, email } = req.body;
   if (!productId || !size || !color || !email || !email.includes('@')) {
     return res.status(400).json({ error: 'Please enter a valid email address.' });
@@ -224,6 +237,16 @@ router.post('/notify-stock', (req, res) => {
       'INSERT INTO stock_notifications (product_id, size, color, email) VALUES (?, ?, ?, ?)'
     ).run(productId, size, color, email);
   }
+
+  const product = db.prepare('SELECT name FROM products WHERE id = ?').get(productId);
+  await subscribeToKlaviyo({
+    email,
+    source: 'restock',
+    extraProperties: {
+      'Restock Interest': `${product ? product.name : productId} (${size}, ${color})`,
+    },
+  });
+
   res.json({ ok: true });
 });
 
@@ -231,19 +254,25 @@ router.post('/notify-stock', (req, res) => {
 // Body: { email, source } — source is just a label (e.g. "drawer",
 // "home", "gathering-rsvp") saying which form it came from, for your own
 // context in admin. Every source lands in the same subscriber list.
-router.post('/subscribe', (req, res) => {
+router.post('/subscribe', async (req, res) => {
+  if (isHoneypotTripped(req)) return res.json({ ok: true });
+
   const { email, source } = req.body;
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Please enter a valid email address.' });
   }
   const clean = String(email).trim().toLowerCase();
   const existing = db.prepare('SELECT id FROM newsletter_subscribers WHERE email = ?').get(clean);
-  if (!existing) {
-    db.prepare(
-      'INSERT INTO newsletter_subscribers (email, source) VALUES (?, ?)'
-    ).run(clean, String(source || '').slice(0, 60));
+  if (existing) {
+    return res.json({ ok: true, alreadySubscribed: true });
   }
-  res.json({ ok: true });
+  db.prepare(
+    'INSERT INTO newsletter_subscribers (email, source) VALUES (?, ?)'
+  ).run(clean, String(source || '').slice(0, 60));
+
+  await subscribeToKlaviyo({ email: clean, source: String(source || '') });
+
+  res.json({ ok: true, alreadySubscribed: false });
 });
 
 // ---------- Checkout ----------
@@ -320,13 +349,15 @@ router.post('/checkout/create-session', async (req, res) => {
     country,
   });
 
+  const newsletterOptin = req.body.newsletterOptin ? 1 : 0;
+
   // Create a pending order in our own database first, then hand its id to
   // Stripe as metadata so the webhook can find it again after payment. The
   // shipping address is saved here (not from Stripe's webhook) since we
   // collected it ourselves before Stripe was ever involved.
   const insertOrder = db.prepare(`
-    INSERT INTO orders (status, subtotal_cents, shipping_cents, shipping_method, shipping_address, is_local_delivery, discount_code, discount_cents, total_cents)
-    VALUES ('pending', ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO orders (status, subtotal_cents, shipping_cents, shipping_method, shipping_address, is_local_delivery, discount_code, discount_cents, total_cents, newsletter_optin)
+    VALUES ('pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const orderResult = insertOrder.run(
     subtotalCents,
@@ -336,7 +367,8 @@ router.post('/checkout/create-session', async (req, res) => {
     quote.isLocalDelivery ? 1 : 0,
     discountCode,
     discountCents,
-    totalCents
+    totalCents,
+    newsletterOptin
   );
   const orderId = orderResult.lastInsertRowid;
 
@@ -404,8 +436,8 @@ router.post('/checkout/create-session', async (req, res) => {
       // priced the shipping address ourselves before creating this
       // session (see above), so asking Stripe to collect it again could
       // let a customer enter a different address than the one we priced.
-      success_url: `${siteUrl}/#/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/#/cart`,
+      success_url: `${siteUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/cart`,
       metadata: { order_id: String(orderId) },
     });
 
